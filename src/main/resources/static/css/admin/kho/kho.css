@@ -1,0 +1,26 @@
+#dataTable{
+    td.dt-control::before{
+            content: "\f105";
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 800;
+
+    }
+    .dt-hasChild .dt-control::before{
+
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+            content: "\f107";
+
+    }
+    .dt-hasChild{
+        color: white;
+        font-weight: bold;
+        background-color: #4f70ce;
+    }
+
+}
+tr.active{
+    background-color: #5897fb;
+    color: white;
+    font-weight: bold;
+}

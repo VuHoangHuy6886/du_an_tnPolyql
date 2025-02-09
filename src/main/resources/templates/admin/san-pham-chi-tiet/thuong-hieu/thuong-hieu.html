@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/admin/layout-dashboard/layout.html"
+>
+<head>
+    <!--    Custom link-->
+    <th:block layout:fragment="head_link">
+        <link href="/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+        <script src="/vendor/sweetalert2/sweetalert2.min.js"></script>
+    </th:block>
+
+</head>
+
+
+<!-- Custom styles for this page -->
+
+<body layout:fragment="content">
+
+
+<div class="row">
+    <!--    Table-->
+
+    <div class="card shadow m-2 w-100 ">
+        <div class="card-header py-3">
+<!--            <h6 class="m-0 font-weight-bold text-primary">DataTables Example</h6>-->
+
+            <div class="row">
+                <h1 class="h3 text-gray-800 col-4">Quản lý thương hiệu</h1>
+                <!-- Additional controls -->
+                <div class="col-8 d-flex justify-content-sm-end align-items-center">
+                    <form class="form-inline mr-3 d-flex align-items-center">
+                        <label class="mr-2" for="statusFilter">Trạng thái</label>
+                        <select id="statusFilter" class="form-control-plaintext text-primary" style="width: 100px">
+                            <option  value="">Tất cả</option>
+                            <option selected>Hoạt động</option>
+                            <option>Đã xóa</option>
+                        </select>
+                    </form>
+                    <a id="btn-reload" href="#" class="btn btn-primary btn-icon-split mr-2">
+                                        <span class="icon text-white-50">
+                                            <i class="fas fa-rotate-right"></i>
+                                        </span>
+                        <span class="text">Làm mới</span>
+                    </a>
+                    <a href="#" class="btn btn-primary btn-icon-split mr-2" id="btn-add">
+                                        <span class="icon text-white-50">
+                                            <i class="fas fa-plus"></i>
+                                        </span>
+                        <span class="text">Thêm mới</span>
+                    </a>
+                    <a href="#" class="btn btn-primary btn-icon-split mr-2" id="btn-import">
+                                        <span class="icon text-white-50">
+                                            <i class="fas fa-file-import"></i>
+                                        </span>
+
+
+                        <span class="text">Import</span>
+                    </a>
+                    <input type="file" class="d-none" id="import-file"/>
+                    <a th:href="@{/admin/san-pham-chi-tiet/thuong-hieu/export-excel}" class="btn btn-primary btn-icon-split" id="btn-export">
+                                        <span class="icon text-white-50">
+                                            <i class="fas fa-file-export"></i>
+                                        </span>
+                        <span class="text">Export</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên</th>
+                        <th>Logo</th>
+                        <th>Trạng thái</th>
+                        <th>Chỉnh sửa</th>
+
+                    </tr>
+                    </thead>
+                    <tfoot>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên</th>
+                        <th>Logo</th>
+                        <th>Trạng thái</th>
+                        <th>Chỉnh sửa</th>
+
+                    </tr>
+                    </tfoot>
+                    <tbody>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!--modal edit-->
+<div class="modal fade" id="modal-edit" tabindex="-1" role="dialog" aria-labelledby="EditModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="EditModalLabel">Chỉnh sửa thương hiệu</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <form id="form-edit" class="needs-validation" novalidate>
+                    <div class="form-group">
+                        <label for="edit-id">ID thương hiệu: </label>
+                        <input type="text" class="form-control" name="id" id="edit-id" placeholder="ID" readonly>
+                        <div class="invalid-feedback">ID không được để trống</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-ten">Tên thương hiệu:</label>
+                        <input type="text" class="form-control image-input" name="ten" id="edit-ten" placeholder="Tên thương hiệu" required>
+                        <div class="invalid-feedback">Tên thương hiệu đã tồn tại hoặc không hợp lệ</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-ten">Logo:  <img class="image-preview" id="image-edit-preview" style="width: 100px" src="#" alt="Xem trước logo"></label>
+                        <input type="file" class="form-control image-input" name="thumbnail" id="edit-thumbnail" accept="image/*" placeholder="Logo">
+                        <div class="invalid-feedback">Vui lòng chọn Logo</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit-deleted" class="form-label">Trạng thái</label>
+                        <select class="form-control" name="isDeleted" id="edit-deleted" required>
+                        </select>
+                        <div class="invalid-feedback">
+                            Vui lòng chọn trạng thái
+                        </div>
+                    </div>
+                    <div class="form-group justify-content-end ">
+                        <button type="button" class="btn btn-secondary mr-3" data-dismiss="modal">Hủy</button>
+
+                        <button type="submit" class="btn btn-primary">Cập nhật</button>
+                    </div>
+
+                </form>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+<!--add modal-->
+<div class="modal fade" id="modal-add" tabindex="-1" role="dialog" aria-labelledby="modal-addLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-addLabel">Thêm mới</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <form id="form-add" class="needs-validation" novalidate>
+                    <div class="form-group">
+                        <label for="add-ten">Tên thương hiệu:</label>
+                        <input type="text" class="form-control " name="ten" id="add-ten" placeholder="Tên thương hiệu" required>
+                        <div class="invalid-feedback">Tên đã tồn tại hoặc không hợp lệ</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="add-ten">Thương hiệu:  <img class="image-preview d-none"  style="width: 100px" src="#" alt="Xem trước logo"></label>
+                        <input type="file" class="form-control image-input" id="add-thumbnail" name="thumbnail" accept="image/*" placeholder="Logo" required>
+                        <div class="invalid-feedback">Vui lòng chọn Logo</div>
+                    </div>
+
+                    <div class="form-group justify-content-end ">
+                        <button type="button" class="btn btn-secondary mr-3" data-dismiss="modal">Hủy</button>
+
+                        <button type="submit" class="btn btn-primary">Xác nhận</button>
+                    </div>
+
+                </form>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+</body>
+
+<th:block layout:fragment="bottom_link">
+    <!-- Page level plugins -->
+    <script src="/vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+
+    <!-- Page level custom scripts -->
+    <script type="module" src="/js/admin/san-pham-chi-tiet/thuong-hieu/thuong-hieu.js"></script>
+</th:block>
+</html>
