@@ -7,12 +7,18 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.List;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "tai_khoan")
-public class TaiKhoan {
+public class TaiKhoan implements UserDetails {
     @Id
     @Column(name = "ID", nullable = false)
     private Integer id;
@@ -49,4 +55,13 @@ public class TaiKhoan {
     @Column(name = "IS_DELETED", nullable = false)
     private Boolean isDeleted = false;
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(role==null?"ROLE_GUEST":"ROLE_ADMIN"));
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
 }
