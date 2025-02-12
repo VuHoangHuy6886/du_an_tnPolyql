@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/admin/layout-dashboard/layout.html"
+>
+<head>
+    <th:block layout:fragment="head_link">
+    <!--        Nội dung các scrpit, style sheet ở đây-->
+    </th:block>
+
+</head>
+
+
+<body layout:fragment="content">
+<div class="row">
+    <!--    Table-->
+
+    <div class="card shadow m-2 w-100 ">
+        <div class="card-header py-3">
+           Nội dung header ở đây
+        </div>
+        <div class="card-body">
+            Nội dung body
+        </div>
+    </div>
+</div>
+
+</body>
+
+<th:block layout:fragment="bottom_link">
+<!--    Nội dung các srcipt ngoài-->
+</th:block>
+</html>

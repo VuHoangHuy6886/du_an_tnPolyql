@@ -67,19 +67,19 @@ INSERT INTO PHIEU_GIAM_GIA (MA, TEN, SO_LUONG, HOA_DON_TOI_THIEU, LOAI_HINH_GIAM
                                                                                                                                                                                       ('PGG002', 'Phiếu giảm giá 10%', 50, 1000000, 'Phần trăm', 10, 100000, '2024-02-01 00:00:00', '2024-02-29 23:59:59', 'Khách hàng thân thiết', 'Sắp diễn ra', b'0');
 
 -- Dữ liệu mẫu cho bảng PHIEU_GIAM_GIA_KHACH_HANG
-INSERT INTO PHIEU_GIAM_GIA_KHACH_HANG (ID_KHACH_HANG, ID_PHIEU_GIAM_GIA, IS_DELETED) VALUES
+INSERT INTO PHIEU_GIAM_GIA_KHACH_HANG (KHACH_HANG_ID, PHIEU_GIAM_GIA_ID, IS_DELETED) VALUES
                                                                                          ((SELECT ID FROM KHACH_HANG WHERE TEN= 'John Doe'), (SELECT ID FROM PHIEU_GIAM_GIA WHERE MA = 'PGG001'), b'0'),
                                                                                          ((SELECT ID FROM KHACH_HANG WHERE TEN= 'Alice Brown'), (SELECT ID FROM PHIEU_GIAM_GIA WHERE MA = 'PGG002'), b'0');
 
 -- Dữ liệu mẫu cho bảng SAN_PHAM
-INSERT INTO SAN_PHAM (ID_THUONG_HIEU, ID_CHAT_LIEU, ID_KIEU_DANG, MA_SAN_PHAM, TEN, TRANG_THAI, MO_TA, ANH_URL, IS_DELETED) VALUES
+INSERT INTO SAN_PHAM (THUONG_HIEU_ID, CHAT_LIEU_ID, KIEU_DANG_ID, MA_SAN_PHAM, TEN, TRANG_THAI, MO_TA, ANH_URL, IS_DELETED) VALUES
                                                                                                                                          (1, 1, 1, 'SP001', 'Áo thun nam', 'Còn hàng', 'Áo thun cotton 100%', 'ao_thun.jpg', b'0'),
                                                                                                                                          (2, 2, 2, 'SP002', 'Quần jean nữ', 'Hết hàng', 'Quần jean ống đứng', 'quan_jean.jpg', b'0'),
                                                                                                                                          (1, 1, 3, 'SP003', 'Áo sơ mi nam', 'Còn hàng', 'Áo sơ mi linen', 'ao_somi.jpg', b'0'),
                                                                                                                                          (2, 3, 4, 'SP004', 'Váy hoa nữ', 'Còn hàng', 'Váy hoa voan', 'vay_hoa.jpg', b'0');
 
 -- Dữ liệu mẫu cho bảng SAN_PHAM_CHI_TIET
-INSERT INTO SAN_PHAM_CHI_TIET (ID_SAN_PHAM, ID_KICH_THUOC, ID_MAU_SAC, ID_DOT_GIAM_GIA, GIA_BAN, SO_LUONG, BARCODE, IS_DELETED) VALUES
+INSERT INTO SAN_PHAM_CHI_TIET (SAN_PHAM_ID, KICH_THUOC_ID, MAU_SAC_ID, DOT_GIAM_GIA_ID, GIA_BAN, SO_LUONG, BARCODE, IS_DELETED) VALUES
                                                                                                                                     ((SELECT ID FROM SAN_PHAM WHERE MA_SAN_PHAM = 'SP001'), 1, 1, NULL, 150000, 50, 'barcode_1', b'0'),
                                                                                                                                     ((SELECT ID FROM SAN_PHAM WHERE MA_SAN_PHAM = 'SP002'), 2, 2, NULL, 250000, 0, 'barcode_2', b'0'),
                                                                                                                                     ((SELECT ID FROM SAN_PHAM WHERE MA_SAN_PHAM = 'SP003'), 1, 3, NULL, 300000, 25, 'barcode_3', b'0'),
@@ -93,22 +93,22 @@ INSERT INTO DANH_MUC (TEN, TRANG_THAI, IS_DELETED) VALUES
 
 
 -- Dữ liệu mẫu cho bảng GIO_HANG_CHI_TIET
-INSERT INTO GIO_HANG_CHI_TIET (ID_KHACH_HANG, ID_SAN_PHAM_CHI_TIET, SO_LUONG, NGAY_THEM_VAO, IS_DELETED) VALUES
+INSERT INTO GIO_HANG_CHI_TIET (KHACH_HANG_ID, SAN_PHAM_CHI_TIET_ID, SO_LUONG, NGAY_THEM_VAO, IS_DELETED) VALUES
                                                                                                              ((SELECT ID FROM KHACH_HANG WHERE TEN= 'John Doe'), (SELECT ID FROM SAN_PHAM_CHI_TIET WHERE BARCODE = 'barcode_1'), 2, '2024-01-03 00:00:00', b'0'),
                                                                                                              ((SELECT ID FROM KHACH_HANG WHERE TEN= 'Alice Brown'), (SELECT ID FROM SAN_PHAM_CHI_TIET WHERE BARCODE = 'barcode_4'), 1, '2024-01-03 00:00:00', b'0');
 
 -- Dữ liệu mẫu cho bảng THONG_BAO
-INSERT INTO THONG_BAO (ID_TAI_KHOAN, URL, NOI_DUNG, THOI_GIAN, TRANG_THAI, IS_DELETED) VALUES
+INSERT INTO THONG_BAO (TAI_KHOAN_ID, URL, NOI_DUNG, THOI_GIAN, TRANG_THAI, IS_DELETED) VALUES
                                                                                            ((SELECT ID FROM TAI_KHOAN WHERE USER_NAME = 'john_doe'), '/thong-bao/1', 'Bạn có một thông báo mới', '2024-01-03 00:00:00', 'Chưa đọc', b'0'),
                                                                                            ((SELECT ID FROM TAI_KHOAN WHERE USER_NAME = 'alice_brown'), '/thong-bao/2', 'Có sản phẩm mới', '2024-01-03 00:00:00', 'Đã đọc', b'0');
 
 -- Dữ liệu mẫu cho bảng DIA_CHI
-INSERT INTO DIA_CHI (ID_KHACH_HANG, HO_TEN_NGUOI_NHAN, SO_DIEN_THOAI, PROVINCE_ID, DISTRICT_ID, WARD_CODE, ADDRESS, IS_DEFAULT, IS_DELETED) VALUES
+INSERT INTO DIA_CHI (KHACH_HANG_ID, HO_TEN_NGUOI_NHAN, SO_DIEN_THOAI, PROVINCE_ID, DISTRICT_ID, WARD_CODE, ADDRESS, IS_DEFAULT, IS_DELETED) VALUES
                                                                                                                                                 ((SELECT ID FROM KHACH_HANG WHERE TEN= 'John Doe'), 'John Doe', '1234567890', 1, 1, '00001', '123 Main Street', b'1', b'0'),
                                                                                                                                                 ((SELECT ID FROM KHACH_HANG WHERE TEN= 'Alice Brown'), 'Alice Brown', '5551234567', 2, 2, '00002', '456 Oak Avenue', b'1', b'0');
 
 -- Dữ liệu mẫu cho bảng REVIEWS
-INSERT INTO REVIEWS (ID_SAN_PHAM, ID_KHACH_HANG, THOI_GIAN, NOI_DUNG, ANH, STATUS, IS_DELETED, UP_VOTE, DOWN_VOTE) VALUES
+INSERT INTO REVIEWS (SAN_PHAM_ID, KHACH_HANG_ID, THOI_GIAN, NOI_DUNG, ANH, STATUS, IS_DELETED, UP_VOTE, DOWN_VOTE) VALUES
                                                                                                                        ((SELECT ID FROM SAN_PHAM WHERE MA_SAN_PHAM = 'SP001'), (SELECT ID FROM KHACH_HANG WHERE TEN= 'John Doe'), '2024-01-03 00:00:00', 'Sản phẩm tốt', 'review.jpg', 'Đã duyệt', b'0', 5, 1),
                                                                                                                        ((SELECT ID FROM SAN_PHAM WHERE MA_SAN_PHAM = 'SP004'), (SELECT ID FROM KHACH_HANG WHERE TEN= 'Alice Brown'), '2024-01-03 00:00:00', 'Váy rất đẹp', 'review2.jpg', 'Chờ duyệt', b'0', 2, 0);
 
@@ -118,27 +118,27 @@ INSERT INTO REPLIES (REVIEW_ID, NHAN_VIEN_ID, NOI_DUNG, THOI_GIAN, IS_DELETED) V
                                                                                    ((SELECT ID FROM REVIEWS WHERE NOI_DUNG = 'Váy rất đẹp'), (SELECT ID FROM NHAN_VIEN WHERE TEN= 'Bob Wilson'), 'Cảm ơn bạn đã ủng hộ', '2024-01-03 00:00:00', b'0');
 
 -- Dữ liệu mẫu cho bảng SAN_PHAM_UA_THICH
-INSERT INTO SAN_PHAM_UA_THICH (ID_KHACH_HANG, SAN_PHAM_ID, IS_DELETED) VALUES
+INSERT INTO SAN_PHAM_UA_THICH (KHACH_HANG_ID, SAN_PHAM_ID, IS_DELETED) VALUES
                                                                            ((SELECT ID FROM KHACH_HANG WHERE TEN= 'John Doe'), (SELECT ID FROM SAN_PHAM WHERE MA_SAN_PHAM = 'SP001'), b'0'),
                                                                            ((SELECT ID FROM KHACH_HANG WHERE TEN= 'Alice Brown'), (SELECT ID FROM SAN_PHAM WHERE MA_SAN_PHAM = 'SP004'), b'0');
 
 -- Dữ liệu mẫu cho bảng HOA_DON
-INSERT INTO HOA_DON (ID_KHACH_HANG, ID_PHIEU_GIAM_GIA, PHUONG_THUC_THANH_TOAN, PHI_VAN_CHUYEN, TONG_TIEN, SO_DIEN_THOAI, DIA_CHI, TEN_NGUOI_NHAN, NGAY_NHAN_HANG, TRANG_THAI, IS_DELETED) VALUES
+INSERT INTO HOA_DON (KHACH_HANG_ID, PHIEU_GIAM_GIA_ID, PHUONG_THUC_THANH_TOAN, PHI_VAN_CHUYEN, TONG_TIEN, SO_DIEN_THOAI, DIA_CHI, TEN_NGUOI_NHAN, NGAY_NHAN_HANG, TRANG_THAI, IS_DELETED) VALUES
                                                                                                                                                                                               ((SELECT ID FROM KHACH_HANG WHERE TEN= 'John Doe'), NULL, 'COD', 30000, 180000, '1234567890', '123 Main Street', 'John Doe', '2024-01-06', 'Đang giao hàng', b'0'),
                                                                                                                                                                                               ((SELECT ID FROM KHACH_HANG WHERE TEN= 'Alice Brown'), NULL, 'Credit Card', 0, 350000, '5551234567', '456 Oak Avenue', 'Alice Brown', '2024-01-05', 'Đã giao hàng', b'0');
 
 -- Dữ liệu mẫu cho bảng HOA_DON_CHI_TIET
-INSERT INTO HOA_DON_CHI_TIET (ID_HOA_DON, ID_SAN_PHAM_CHI_TIET, ID_DOT_GIAM_GIA, GIA_GOC, GIA_KHUYEN_MAI, SO_LUONG, IS_DELETED) VALUES
+INSERT INTO HOA_DON_CHI_TIET (HOA_DON_ID, SAN_PHAM_CHI_TIET_ID, DOT_GIAM_GIA_ID, GIA_GOC, GIA_KHUYEN_MAI, SO_LUONG, IS_DELETED) VALUES
                                                                                                                                     ((SELECT ID FROM HOA_DON WHERE TEN_NGUOI_NHAN = 'John Doe'), (SELECT ID FROM SAN_PHAM_CHI_TIET WHERE BARCODE = 'barcode_1'), NULL, 150000, 150000, 1, b'0'),
                                                                                                                                     ((SELECT ID FROM HOA_DON WHERE TEN_NGUOI_NHAN = 'Alice Brown'), (SELECT ID FROM SAN_PHAM_CHI_TIET WHERE BARCODE = 'barcode_4'), NULL, 350000, 350000, 1, b'0');
 
 -- Dữ liệu mẫu cho bảng LICH_SU_HOA_DON
-INSERT INTO LICH_SU_HOA_DON (ID_HOA_DON, ID_TAI_KHOAN, TIEU_DE, MO_TA, THOI_GIAN, IS_DELETED) VALUES
+INSERT INTO LICH_SU_HOA_DON (HOA_DON_ID, TAI_KHOAN_ID, TIEU_DE, MO_TA, THOI_GIAN, IS_DELETED) VALUES
                                                                                                   ((SELECT ID FROM HOA_DON WHERE TEN_NGUOI_NHAN = 'John Doe'), (SELECT ID FROM TAI_KHOAN WHERE USER_NAME = 'jane_smith'), 'Đơn hàng mới', 'Đơn hàng đã được tạo', '2024-01-03 00:00:00', b'0'),
                                                                                                   ((SELECT ID FROM HOA_DON WHERE TEN_NGUOI_NHAN = 'Alice Brown'), (SELECT ID FROM TAI_KHOAN WHERE USER_NAME = 'jane_smith'), 'Đơn hàng đã giao', 'Đơn hàng đã được giao thành công', '2024-01-03 00:00:00', b'0');
 
 -- Dữ liệu mẫu cho bảng ANH
-INSERT INTO ANH (ID_SAN_PHAM, ID_MAU_SAC, URL, IS_DEFAULT, IS_DELETED) VALUES
+INSERT INTO ANH (SAN_PHAM_ID, MAU_SAC_ID, URL, IS_DEFAULT, IS_DELETED) VALUES
                                                                            ((SELECT ID FROM SAN_PHAM WHERE MA_SAN_PHAM = 'SP001'), (SELECT ID FROM MAU_SAC WHERE TEN= 'Đỏ'), 'anh_ao_do.jpg', b'1', b'0'),
                                                                            ((SELECT ID FROM SAN_PHAM WHERE MA_SAN_PHAM = 'SP001'), (SELECT ID FROM MAU_SAC WHERE TEN= 'Xanh'), 'anh_ao_xanh.jpg', b'0', b'0'),
                                                                            ((SELECT ID FROM SAN_PHAM WHERE MA_SAN_PHAM = 'SP004'), (SELECT ID FROM MAU_SAC WHERE TEN= 'Trắng'), 'anh_vay_trang.jpg', b'1', b'0');

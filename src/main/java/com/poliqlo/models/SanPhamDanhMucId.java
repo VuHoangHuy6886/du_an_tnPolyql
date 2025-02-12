@@ -2,36 +2,41 @@ package com.poliqlo.models;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 import org.hibernate.Hibernate;
 
 import java.io.Serializable;
 import java.util.Objects;
 
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 @Embeddable
 public class SanPhamDanhMucId implements Serializable {
-    private static final long serialVersionUID = -1769916383069947599L;
-    @Column(name = "ID_SAN_PHAM", nullable = false)
-    private Integer idSanPham;
+    private static final long serialVersionUID = 592997867485441534L;
+    @NotNull
+    @Column(name = "SAN_PHAM_ID", nullable = false)
+    private Integer sanPhamId;
 
-    @Column(name = "ID_DANH_MUC", nullable = false)
-    private Integer idDanhMuc;
+    @NotNull
+    @Column(name = "DANH_MUC_ID", nullable = false)
+    private Integer danhMucId;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         SanPhamDanhMucId entity = (SanPhamDanhMucId) o;
-        return Objects.equals(this.idDanhMuc, entity.idDanhMuc) &&
-                Objects.equals(this.idSanPham, entity.idSanPham);
+        return Objects.equals(this.sanPhamId, entity.sanPhamId) &&
+                Objects.equals(this.danhMucId, entity.danhMucId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(idDanhMuc, idSanPham);
+        return Objects.hash(sanPhamId, danhMucId);
     }
 
 }

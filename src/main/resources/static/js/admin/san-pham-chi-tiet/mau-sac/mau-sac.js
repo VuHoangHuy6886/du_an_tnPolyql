@@ -4,7 +4,7 @@
 // <script src="/vendor/sweetalert2/sweetalert2.min.js"></script>
 // Bottom
 // <script src="/vendor/datatables/jquery.dataTables.min.js"></script>
-// <script src="/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+//
 
 const apiURL = "/api/v1/san-pham-chi-tiet/mau-sac";
 let _existingNames;

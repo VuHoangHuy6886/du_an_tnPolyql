@@ -8,11 +8,11 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/admin")
+@RequestMapping("")
 
 public class HomeController {
-    @GetMapping("")
+    @GetMapping(path = {"","/admin"})
     public String index() {
-        return "redirect:/admin/san-pham-chi-tiet/danh-muc";
+        return "admin/test";
     }
 }

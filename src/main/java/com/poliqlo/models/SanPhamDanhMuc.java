@@ -1,9 +1,11 @@
 package com.poliqlo.models;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 @Entity
@@ -12,14 +14,14 @@ public class SanPhamDanhMuc {
     @EmbeddedId
     private SanPhamDanhMucId id;
 
-    @MapsId("idSanPham")
+    @MapsId("sanPhamId")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "ID_SAN_PHAM", nullable = false)
-    private SanPham idSanPham;
+    @JoinColumn(name = "SAN_PHAM_ID", nullable = false)
+    private SanPham sanPham;
 
-    @MapsId("idDanhMuc")
+    @MapsId("danhMucId")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "ID_DANH_MUC", nullable = false)
-    private DanhMuc idDanhMuc;
+    @JoinColumn(name = "DANH_MUC_ID", nullable = false)
+    private DanhMuc danhMuc;
 
 }

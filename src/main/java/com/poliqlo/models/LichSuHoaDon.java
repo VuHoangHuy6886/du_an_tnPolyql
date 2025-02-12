@@ -1,40 +1,48 @@
 package com.poliqlo.models;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
 
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 @Entity
 @Table(name = "lich_su_hoa_don")
 public class LichSuHoaDon {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID", nullable = false)
     private Integer id;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "ID_HOA_DON", nullable = false)
-    private HoaDon idHoaDon;
+    @JoinColumn(name = "HOA_DON_ID", nullable = false)
+    private HoaDon hoaDon;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ID_TAI_KHOAN")
-    private TaiKhoan idTaiKhoan;
+    @JoinColumn(name = "TAI_KHOAN_ID")
+    private TaiKhoan taiKhoan;
 
+    @Size(max = 255)
+    @NotNull
     @Column(name = "TIEU_DE", nullable = false)
     private String tieuDe;
 
-    @Lob
-    @Column(name = "MO_TA",length = 500)
+    
+    @Column(name = "MO_TA",columnDefinition = "TEXT")
     private String moTa;
 
+    @NotNull
     @Column(name = "THOI_GIAN", nullable = false)
     private Instant thoiGian;
 
+    @NotNull
     @ColumnDefault("b'0'")
     @Column(name = "IS_DELETED", nullable = false)
     private Boolean isDeleted = false;

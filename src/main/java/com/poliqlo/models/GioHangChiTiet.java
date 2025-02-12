@@ -1,12 +1,15 @@
 package com.poliqlo.models;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
 
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 @Entity
@@ -17,20 +20,25 @@ public class GioHangChiTiet {
     @Column(name = "ID", nullable = false)
     private Integer id;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "ID_KHACH_HANG", nullable = false)
-    private KhachHang idKhachHang;
+    @JoinColumn(name = "KHACH_HANG_ID", nullable = false)
+    private KhachHang khachHang;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "ID_SAN_PHAM_CHI_TIET", nullable = false)
-    private SanPhamChiTiet idSanPhamChiTiet;
+    @JoinColumn(name = "SAN_PHAM_CHI_TIET_ID", nullable = false)
+    private SanPhamChiTiet sanPhamChiTiet;
 
+    @NotNull
     @Column(name = "SO_LUONG", nullable = false)
     private Integer soLuong;
 
+    @NotNull
     @Column(name = "NGAY_THEM_VAO", nullable = false)
     private Instant ngayThemVao;
 
+    @NotNull
     @ColumnDefault("b'0'")
     @Column(name = "IS_DELETED", nullable = false)
     private Boolean isDeleted = false;

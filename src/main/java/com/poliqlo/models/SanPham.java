@@ -1,10 +1,14 @@
 package com.poliqlo.models;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 @Entity
@@ -16,33 +20,40 @@ public class SanPham {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ID_THUONG_HIEU")
-    private ThuongHieu idThuongHieu;
+    @JoinColumn(name = "THUONG_HIEU_ID")
+    private ThuongHieu thuongHieu;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ID_CHAT_LIEU")
-    private MauSac idMauSac;
+    @JoinColumn(name = "CHAT_LIEU_ID")
+    private ChatLieu chatLieu;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ID_KIEU_DANG")
-    private KieuDang idKieuDang;
+    @JoinColumn(name = "KIEU_DANG_ID")
+    private KieuDang kieuDang;
 
+    @Size(max = 50)
+    @NotNull
     @Column(name = "MA_SAN_PHAM", nullable = false, length = 50)
     private String maSanPham;
 
+    @Size(max = 255)
+    @NotNull
     @Column(name = "TEN", nullable = false)
     private String ten;
 
+    @Size(max = 50)
     @Column(name = "TRANG_THAI", length = 50)
     private String trangThai;
 
-    @Lob
-    @Column(name = "MO_TA",length = 500)
+    
+    @Column(name = "MO_TA",columnDefinition = "TEXT")
     private String moTa;
 
+    @Size(max = 255)
     @Column(name = "ANH_URL")
     private String anhUrl;
 
+    @NotNull
     @ColumnDefault("b'0'")
     @Column(name = "IS_DELETED", nullable = false)
     private Boolean isDeleted = false;

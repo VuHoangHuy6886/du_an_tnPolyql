@@ -2,9 +2,7 @@ package com.poliqlo.repositories;
 
 import com.poliqlo.models.KichThuoc;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-import java.util.Collection;
-
-public interface KichThuocRepository extends JpaRepository<KichThuoc, Integer> {
-    Collection<KichThuoc> findAllByIsDeletedIsFalseOrderByIdDesc();
+public interface KichThuocRepository extends JpaRepository<KichThuoc, Integer>, JpaSpecificationExecutor<KichThuoc> {
 }

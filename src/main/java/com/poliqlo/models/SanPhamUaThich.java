@@ -1,10 +1,13 @@
 package com.poliqlo.models;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 @Entity
@@ -15,14 +18,17 @@ public class SanPhamUaThich {
     @Column(name = "ID", nullable = false)
     private Integer id;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "ID_KHACH_HANG", nullable = false)
-    private KhachHang idKhachHang;
+    @JoinColumn(name = "KHACH_HANG_ID", nullable = false)
+    private KhachHang khachHang;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "SAN_PHAM_ID", nullable = false)
     private SanPham sanPham;
 
+    @NotNull
     @ColumnDefault("b'0'")
     @Column(name = "IS_DELETED", nullable = false)
     private Boolean isDeleted = false;
