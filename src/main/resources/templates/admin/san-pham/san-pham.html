@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/admin/layout-dashboard/layout.html">
+<head>
+    <th:block layout:fragment="head_link">
+        <link href="/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+        <script src="/vendor/sweetalert2/sweetalert2.min.js"></script>
+    </th:block>
+
+</head>
+<body layout:fragment="content">
+<div class="row">
+    <div class="card shadow m-2 w-100">
+        <div class="card-header py-3">
+            <div class="row">
+                <h1 class="h3 text-gray-800 col-4">Quản lý sản phẩm</h1>
+                <div class="col-8 d-flex justify-content-sm-end align-items-center">
+                    <a id="btn-reload" href="#" class="btn btn-primary btn-icon-split mr-2">
+                        <span class="icon text-white-50">
+                            <i class="fas fa-rotate-right"></i>
+                        </span>
+                        <span class="text">Làm mới</span>
+                    </a>
+                    <a href="#" class="btn btn-primary btn-icon-split mr-2" id="btn-add">
+                        <span class="icon text-white-50">
+                            <i class="fas fa-plus"></i>
+                        </span>
+                        <span class="text">Thêm mới</span>
+                    </a>
+                    <a href="#" class="btn btn-primary btn-icon-split mr-2" id="btn-import">
+                        <span class="icon text-white-50">
+                            <i class="fas fa-file-import"></i>
+                        </span>
+                        <span class="text">Import</span>
+                    </a>
+                    <input type="file" class="d-none" id="import-file"/>
+                    <a th:href="@{/admin/san-pham/export-excel}" class="btn btn-primary btn-icon-split" id="btn-export">
+                        <span class="icon text-white-50">
+                            <i class="fas fa-file-export"></i>
+                        </span>
+                        <span class="text">Export</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- Form lọc sản phẩm -->
+            <div class="row mb-3">
+                <!-- Ô tìm kiếm chung -->
+<!--                <div class="col-md-2">-->
+<!--                    <label for="search-column">Tìm kiếm chung:</label>-->
+<!--                    <input type="text" id="search-column" class="form-control" placeholder="Nhập nội dung...">-->
+<!--                </div>-->
+
+                <!-- Bộ lọc Trạng thái -->
+                <div class="col-md-2">
+                    <label for="statusFilter">Trạng thái:</label>
+                    <select id="statusFilter" class="form-control filter-input" data-column="8">
+                        <option value="">Tất cả</option>
+                        <option>Còn hàng</option>
+                        <option>Hết hàng</option>
+                    </select>
+                </div>
+
+                <!-- Bộ lọc Thương hiệu -->
+                <div class="col-md-2">
+                    <label for="filter-thuong-hieu">Thương hiệu:</label>
+                    <select id="filter-thuong-hieu" class="form-control filter-input" data-column="3">
+                        <option value="">Tất cả</option>
+                        <th:block th:each="thuongHieu : ${listThuongHieu}">
+                            <option th:value="${thuongHieu.ten}" th:text="${thuongHieu.ten}"></option>
+                        </th:block>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="filter-kieu-dang">Kiểu dáng:</label>
+                    <select id="filter-kieu-dang" class="form-control filter-input" data-column="5">
+                        <option value="">Tất cả</option>
+                        <th:block th:each="kieuDang : ${listKieuDang}">
+                            <option th:value="${kieuDang.ten}" th:text="${kieuDang.ten}"></option>
+                        </th:block>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="filter-chat-lieu">Chất liệu:</label>
+                    <select id="filter-chat-lieu" class="form-control filter-input" data-column="4">
+                        <option value="">Tất cả</option>
+                        <th:block th:each="chatLieu : ${listChatLieu}">
+                            <option th:value="${chatLieu.ten}" th:text="${chatLieu.ten}"></option>
+                        </th:block>
+                    </select>
+                </div>
+                <!-- Bộ lọc Danh mục -->
+                <div class="col-md-2">
+                    <label for="filter-danh-muc">Danh mục:</label>
+                    <select id="filter-danh-muc" class="form-control filter-input" data-column="6">
+                        <option value="">Tất cả</option>
+                        <th:block th:each="danhMuc : ${listDanhMuc}">
+                            <option th:value="${danhMuc.ten}" th:text="${danhMuc.ten}"></option>
+                        </th:block>
+                    </select>
+                </div>
+
+
+                <!-- Nút Đặt lại -->
+                <div class="col-md-2 d-flex align-items-end justify-content-center">
+                    <button id="reset-filters" class="btn btn-secondary">
+                        <span class="icon text-white-50">
+                            <i class="fas fa-rotate-right"></i>
+                        </span>Đặt lại</button>
+                </div>
+            </div>
+
+
+
+
+            <div class="table-responsive">
+                <!-- Bảng DataTable hiển thị sản phẩm -->
+                <table class="table table-bordered" id="dataTable">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Mã sản phẩm</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Thương hiệu</th>
+                        <th>Chất liệu</th>
+                        <th>Kiểu dáng</th>
+                        <th>Danh mục</th>
+                        <th>Số lương</th>
+                        <th>Trạng thái</th>
+                        <th>Ảnh</th>
+                        <th>Chỉnh sửa</th>
+
+                    </tr>
+                    </thead>
+                    <tfoot>
+                    <tr>
+                        <th>ID</th>
+                        <th>Mã sản phẩm</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Thương hiệu</th>
+                        <th>Chất liệu</th>
+                        <th>Kiểu dáng</th>
+                        <th>Danh mục</th>
+                        <th>Số lương</th>
+                        <th>Trạng thái</th>
+                        <th>Ảnh</th>
+                        <th>Chỉnh sửa</th>
+
+                    </tr>
+                    </tfoot>
+                    <tbody>
+                    <!-- DataTables sẽ load dữ liệu -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Edit -->
+<div class="modal fade" id="modal-edit" tabindex="-1" role="dialog" aria-labelledby="EditModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">  <!-- Sử dụng modal-lg cho không gian rộng hơn -->
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="EditModalLabel">
+                    <i class="fas fa-edit"></i> Chỉnh sửa nhanh sản phẩm
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Đóng">
+                    <span aria-hidden="true"><i class="fas fa-times"></i></span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="form-edit" class="needs-validation" novalidate>
+                    <!-- Hàng 1: ID, Mã sản phẩm, Tên sản phẩm -->
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="edit-id"><i class="fas fa-hashtag"></i> ID</label>
+                            <input type="text" class="form-control" id="edit-id" placeholder="ID" readonly>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="edit-ma-san-pham"><i class="fas fa-barcode"></i> Mã sản phẩm</label>
+                            <input type="text" class="form-control" id="edit-ma-san-pham" required>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="edit-ten"><i class="fas fa-tag"></i> Tên sản phẩm</label>
+                            <input type="text" class="form-control" id="edit-ten" required>
+                        </div>
+                    </div>
+                    <!-- Hàng 2: Thương hiệu, Chất liệu, Kiểu dáng, Danh mục -->
+                    <div class="form-row">
+                        <div class="form-group col-md-3">
+                            <label for="edit-thuong-hieu"><i class="fas fa-industry"></i> Thương hiệu</label>
+                            <select class="form-control" id="edit-thuong-hieu" required>
+                                <option value="">Chọn thương hiệu</option>
+                                <th:block th:each="thuongHieu : ${listThuongHieu}">
+                                    <option th:value="${thuongHieu.id}" th:text="${thuongHieu.ten}"></option>
+                                </th:block>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="edit-chat-lieu"><i class="fas fa-cubes"></i> Chất liệu</label>
+                            <select class="form-control" id="edit-chat-lieu" required>
+                                <option value="">Chọn chất liệu</option>
+                                <th:block th:each="chatLieu : ${listChatLieu}">
+                                    <option th:value="${chatLieu.id}" th:text="${chatLieu.ten}"></option>
+                                </th:block>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="edit-kieu-dang"><i class="fas fa-shapes"></i> Kiểu dáng</label>
+                            <select class="form-control" id="edit-kieu-dang" required>
+                                <option value="">Chọn kiểu dáng</option>
+                                <th:block th:each="kieuDang : ${listKieuDang}">
+                                    <option th:value="${kieuDang.id}" th:text="${kieuDang.ten}"></option>
+                                </th:block>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="edit-danh-muc"><i class="fas fa-list"></i> Danh mục</label>
+                            <select class="form-control" id="edit-danh-muc" required>
+                                <option value="">Chọn danh mục</option>
+                                <th:block th:each="danhMuc : ${listDanhMuc}">
+                                    <option th:value="${danhMuc.id}" th:text="${danhMuc.ten}"></option>
+                                </th:block>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Hàng 3: Chọn ảnh với preview -->
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="edit-anh-file"><i class="fas fa-image"></i> Chọn ảnh</label>
+                            <input type="file" class="form-control-file" id="edit-anh-file" accept="image/*">
+                            <div class="mt-2 text-center">
+                                <img id="edit-anh-preview" src="" alt="Ảnh preview" class="img-fluid" style="max-height: 150px;">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Nút hành động -->
+                    <div class="form-group d-flex justify-content-center">
+                        <button type="button" class="btn btn-secondary mr-3" data-dismiss="modal">
+                            <i class="fas fa-times"></i> Hủy
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Cập nhật
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Chi tiết sản phẩm -->
+<div class="modal fade" id="modal-product-detail" tabindex="-1" role="dialog" aria-labelledby="ProductDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document"> <!-- modal-lg cho không gian rộng -->
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="ProductDetailModalLabel">
+                    <i class="fas fa-info-circle"></i> Chi tiết sản phẩm
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Đóng">
+                    <span aria-hidden="true"><i class="fas fa-times"></i></span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="detailTable">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Kích thước</th>
+                            <th>Giá bán</th>
+                            <th>Số lượng</th>
+                            <th>Màu sắc</th>
+                            <th>Ảnh</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!-- Dữ liệu chi tiết sẽ được load qua AJAX -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times"></i> Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Add -->
+<div class="modal fade" id="modal-add" tabindex="-1" role="dialog" aria-labelledby="modal-addLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-addLabel">Thêm sản phẩm mới</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Đóng">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="form-add" class="needs-validation" novalidate>
+                    <div class="form-group">
+                        <label for="add-ma-san-pham">Mã sản phẩm:</label>
+                        <input type="text" class="form-control" id="add-ma-san-pham" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="add-ten">Tên:</label>
+                        <input type="text" class="form-control" id="add-ten" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="add-trang-thai">Trạng thái:</label>
+                        <select class="form-control" id="add-trang-thai">
+                            <option value="IN_STOCK">Còn hàng</option>
+                            <option value="OUT_OF_STOCK">Hết hàng</option>
+                            <option value="TEMPORARILY_OUT_OF_STOCK">Hết hàng tạm thời</option>
+                            <option value="COMING_SOON">Sắp ra mắt</option>
+                            <option value="DISCONTINUED">Không kinh doanh</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="add-mo-ta">Mô tả:</label>
+                        <textarea class="form-control" id="add-mo-ta" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="add-anh-url">Ảnh URL:</label>
+                        <input type="text" class="form-control" id="add-anh-url">
+                    </div>
+                    <div class="form-group d-flex justify-content-end">
+                        <button type="button" class="btn btn-secondary mr-3" data-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Xác nhận</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+<th:block layout:fragment="bottom_link">
+    <script src="/vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+    <script type="module" src="/js/admin/san-pham/san-pham.js"></script>
+
+
+</th:block>
+
+</html>

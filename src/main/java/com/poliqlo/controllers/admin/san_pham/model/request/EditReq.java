@@ -1,4 +1,4 @@
-package com.poliqlo.controllers.admin.san_pham_chi_tiet.chat_lieu.model.response;
+package com.poliqlo.controllers.admin.san_pham.model.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -11,20 +11,17 @@ import lombok.Setter;
 
 import java.io.Serializable;
 
-/**
- * DTO for {@link com.poliqlo.models.ChatLieu}
- */
 @AllArgsConstructor
 @Getter
 @Setter
 @NoArgsConstructor
-public class Response implements Serializable {
-    @Positive
+public class EditReq implements Serializable {
     private Integer id;
-    private String tenSanPham;
-    private String kichThuoc;
-    private Double giaBan;
-    private Integer soLuong;
-    private String anhSanPham;
-    private String tenMau;
+    private String maSanPham;
+    private String ten;
+    private String trangThai;
+    private Integer idThuongHieu;
+    private Integer idChatLieu;
+    private Integer idKieuDang;
+    private String anhUrl;
 }

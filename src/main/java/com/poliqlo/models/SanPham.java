@@ -21,7 +21,7 @@ public class SanPham {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_CHAT_LIEU")
-    private MauSac idMauSac;
+    private ChatLieu idChatLieu;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_KIEU_DANG")
