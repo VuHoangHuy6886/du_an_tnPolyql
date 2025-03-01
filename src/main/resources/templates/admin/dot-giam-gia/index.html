@@ -37,36 +37,48 @@
                 <!-- Additional controls -->
                 <!--form fillter-->
                 <form class="bg-white shadow w-100 h-auto mt-3 my-3 p-3 d-flex justify-content-lg-around">
+                    <div class="d-flex justify-content-center align-items-center">
+                        <button type="button" class="btn btn-sm btn-warning p-2" id="ClearForm">
+                            <i class="fa-solid fa-broom"></i> clear
+                        </button>
+                    </div>
                     <div class="form-group d-flex flex-column justify-content-start align-items-start">
-                        <label for="nameOrCode" class="form-label font-weight-bold">Mã Hoặc Tên</label>
+                        <label for="name" class="form-label font-weight-bold">Tên</label>
                         <input
-                                id="nameOrCode"
+                                id="name"
                                 type="text"
-                                name="nameOrCode"
+                                name="name"
                                 class="form-control"
-                                value=""
-                                placeholder="Tìm theo Mã hoặc tên"
+                                th:value="${name}"
+                                placeholder="tên"
                         />
                     </div>
 
                     <div class="form-group d-flex flex-column justify-content-start align-items-start">
                         <label for="startTime" class="form-label font-weight-bold">Ngày Bắt Đầu</label>
-                        <input type="date" class="form-control" id="startTime" name="startTime" value=""/>
+                        <input type="date" class="form-control" id="startTime" name="startTime"
+                               th:value="${#temporals.format(startTime, 'yyyy-MM-dd')}"/>
                     </div>
 
                     <div class="form-group d-flex flex-column justify-content-start align-items-start">
                         <label for="endTime" class="form-label font-weight-bold">Ngày Kết Thúc</label>
-                        <input type="date" class="form-control" id="endTime" name="endTime" value=""/>
+                        <input type="date" class="form-control" id="endTime" name="endTime"
+                               th:value="${#temporals.format(endTime, 'yyyy-MM-dd')}"/>
                     </div>
 
                     <div class="form-group d-flex flex-column justify-content-start align-items-start">
-                        <label for="status" class="form-label font-weight-bold">Trạng Thái</label>
-                        <select id="status" class="form-control" name="status">
-                            <option value="">Select</option>
-                            <option value="Chưa diễn ra">Chưa diễn ra</option>
-                            <option value="Đang diễn ra">Đang diễn ra</option>
-                            <option value="Đã kết thúc">Đã kết thúc</option>
-                        </select>
+                        <div class="form-group d-flex flex-column justify-content-start align-items-start">
+                            <label for="status" class="form-label font-weight-bold">Trạng Thái</label>
+                            <select id="status" class="form-control" name="status">
+                                <option value="">Select</option>
+                                <option value="Chưa diễn ra" th:selected="${status == 'Chưa diễn ra'}">Chưa diễn ra
+                                </option>
+                                <option value="Đang diễn ra" th:selected="${status == 'Đang diễn ra'}">Đang diễn ra
+                                </option>
+                                <option value="Đã kết thúc" th:selected="${status == 'Đã kết thúc'}">Đã kết thúc
+                                </option>
+                            </select>
+                        </div>
                     </div>
                     <div class="d-flex justify-content-center align-items-center">
                         <button class="btn btn-sm bg-success text-white font-weight-bold p-2">
@@ -108,13 +120,17 @@
                         <td th:text="${#temporals.format(dotGiamGia.thoiGianKetThuc, 'dd/MM/yyyy')}"></td>
                         <td id="DGGstatus" th:text="${dotGiamGia.trangThai}"></td>
                         <td class="d-flex justify-content-around">
-                            <a th:href="@{'/admin/dot-giam-gia/form-update/' + ${dotGiamGia.id}}"
+                            <a th:href="@{'/admin/dot-giam-gia/view/' + ${dotGiamGia.id}}"
                                class="btn btn-primary btn-sm">
                                 <i class="fa-solid fa-eye"></i>
                             </a>
                             <a th:href="@{'/admin/dot-giam-gia/form-update/' + ${dotGiamGia.id}}"
                                class="btn btn-warning btn-sm">
                                 <i class="fa-solid fa-pen"></i>
+                            </a>
+                            <a th:href="@{'/admin/dot-giam-gia/toggle-status/' + ${dotGiamGia.id}}"
+                               class="btn btn-success btn-sm">
+                                <i class="fa-solid fa-clock-rotate-left"></i>
                             </a>
                             <a th:href="@{'/admin/dot-giam-gia/delete/' + ${dotGiamGia.id}}"
                                class="btn btn-danger btn-sm"
@@ -128,7 +144,7 @@
                 </table>
             </div>
             <!--        Phân Trang        -->
-            <nav aria-label="Page navigation example bg-danger">
+            <nav th:if="${pages.totalPages > 0}" aria-label="Page navigation example bg-danger">
                 <ul class="pagination justify-content-center">
                     <!-- Previous page link -->
                     <li class="page-item" th:classappend="${pages.hasPrevious()} ? '' : 'disabled'">
@@ -173,7 +189,7 @@
                             <table class="table table-bordered table-hover text-center">
                                 <thead>
                                 <tr>
-                                    <th >STT</th>
+                                    <th>STT</th>
                                     <th>Mã</th>
                                     <th>Tên</th>
                                     <th>Ngày bắt đầu</th>
@@ -212,6 +228,14 @@
     </div>
 </div>
 <script>
+    document.getElementById("ClearForm").addEventListener("click", function () {
+        document.getElementById("name").value = "";
+        document.getElementById("status").value = "";
+        document.getElementById("startTime").value = "";
+        document.getElementById("endTime").value = "";
+    });
+
+
     document.addEventListener("DOMContentLoaded", function () {
         let statusElements = document.querySelectorAll("#DGGstatus"); // Lấy tất cả các phần tử có id là DGGstatus
         statusElements.forEach(function (statusElement) {

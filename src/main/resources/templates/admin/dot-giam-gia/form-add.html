@@ -13,8 +13,9 @@
 <div class="row">
     <div class="card shadow m-2 w-100">
         <div class="card-header py-3">
-            <div class="row">
+            <div class="row d-flex justify-content-between align-items-center">
                 <h1 class="h3 text-gray-800 col-4">Thêm mới đợt giảm giá</h1>
+                <a th:href="@{/admin/dot-giam-gia/all}" class="btn bg-success font-weight-bold text-white"><i class="fa-solid fa-reply"></i> Quay lại</a>
             </div>
         </div>
         <div class="card-body d-flex justify-content-between">
@@ -90,10 +91,10 @@
                     <div class="w-100 p-3 d-flex justify-content-around align-items-center">
 
                         <div class="w-25">
-                            <h6>Lọc theo mã hoặc tên</h6>
+                            <h6>Lọc theo tên</h6>
                         </div>
                         <div class="w-50">
-                            <input type="text" class="form-control" placeholder="nhập mã hoặc tên">
+                            <input type="text" class="form-control" placeholder="nhập tên">
                         </div>
                         <div class="w-25 d-flex justify-content-center align-items-center">
                             <button class="btn btn-outline-info">Search</button>

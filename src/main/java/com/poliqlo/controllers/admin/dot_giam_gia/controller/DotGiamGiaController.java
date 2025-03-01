@@ -30,7 +30,7 @@ public class DotGiamGiaController {
     @GetMapping("/admin/dot-giam-gia/all")
     public String showData(@RequestParam(value = "page", defaultValue = "0", required = false) String pageStr,
                            @RequestParam(value = "size", defaultValue = "5", required = false) String sizeStr,
-                           @RequestParam(value = "nameOrCode", required = false) String nameOrCode,
+                           @RequestParam(value = "name", required = false) String name,
                            @RequestParam(value = "status", required = false) String status,
                            @RequestParam(value = "startTime", required = false) String startTimeStr,
                            @RequestParam(value = "endTime", required = false) String endTimeStr,
@@ -64,7 +64,7 @@ public class DotGiamGiaController {
         }
 
         // Kiểm tra nếu tất cả các điều kiện lọc đều trống thì hiển thị tất cả dữ liệu
-        if ((nameOrCode == null || nameOrCode.isEmpty()) &&
+        if ((name == null || name.isEmpty()) &&
                 (status == null || status.isEmpty()) &&
                 startTime == null &&
                 endTime == null) {
@@ -74,7 +74,17 @@ public class DotGiamGiaController {
             model.addAttribute("totalPages", pages.getTotalPages());
             return "admin/dot-giam-gia/index";
         }
-        Page<DotGiamGia> pages = service.findAll(page, size, nameOrCode, status, startTime, endTime);
+        if (name.equals("")) {
+            name = null;
+        }
+        if (status.equals("")) {
+            status = null;
+        }
+        Page<DotGiamGia> pages = service.findAll(page, size, name, status, startTime, endTime);
+        model.addAttribute("name", name);
+        model.addAttribute("status", status);
+        model.addAttribute("startTime", startTime);
+        model.addAttribute("endTime", endTime);
         model.addAttribute("pages", pages);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", pages.getTotalPages());
@@ -118,6 +128,13 @@ public class DotGiamGiaController {
         EditDotGiamGiaRequest request = service.findByIdForUpdate(id);
         model.addAttribute("DotGiamGiaUpdate", request);
         return "admin/dot-giam-gia/form-update";
+    }
+
+    @GetMapping("/admin/dot-giam-gia/view/{id}")
+    public String viewForm(@PathVariable("id") Integer id, Model model) {
+        EditDotGiamGiaRequest request = service.findByIdForUpdate(id);
+        model.addAttribute("DotGiamGiaUpdate", request);
+        return "admin/dot-giam-gia/view";
     }
 
     @PostMapping("/admin/dot-giam-gia/update")
@@ -173,9 +190,16 @@ public class DotGiamGiaController {
         service.deleteById(id);
         return "redirect:/admin/dot-giam-gia/all";
     }
+
     @GetMapping("/admin/dot-giam-gia/restore/{id}")
     public String restore(@PathVariable("id") Integer id) {
         service.restoreById(id);
+        return "redirect:/admin/dot-giam-gia/all";
+    }
+
+    @GetMapping("/admin/dot-giam-gia/toggle-status/{id}")
+    public String toggle(@PathVariable("id") Integer id) {
+        service.toggleStatus(id);
         return "redirect:/admin/dot-giam-gia/all";
     }
 }

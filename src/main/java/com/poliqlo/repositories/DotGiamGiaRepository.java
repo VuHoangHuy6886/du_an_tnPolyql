@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public interface DotGiamGiaRepository extends JpaRepository<DotGiamGia, Integer>, JpaSpecificationExecutor<DotGiamGia> {
@@ -26,17 +25,16 @@ public interface DotGiamGiaRepository extends JpaRepository<DotGiamGia, Integer>
         return String.format("DGG%03d", number + 1); // Tăng số và format lại thành dạng DGGxxx
     }
 
-    @Query("SELECT d FROM DotGiamGia d WHERE "
-            + "(:tenOrMa IS NULL OR (LOWER(d.ten) LIKE LOWER(CONCAT('%', :tenOrMa, '%')) OR LOWER(d.ma) LIKE LOWER(CONCAT('%', :tenOrMa, '%')))) "
+    @Query(value = "SELECT d FROM DotGiamGia d WHERE "
+            + "(:name IS NULL OR d.ten like %:name% ) "
             + "AND (:trangThai IS NULL OR d.trangThai = :trangThai) "
             + "AND (:thoiGianBatDau IS NULL OR d.thoiGianBatDau >= :thoiGianBatDau) "
             + "AND (:thoiGianKetThuc IS NULL OR d.thoiGianKetThuc <= :thoiGianKetThuc) "
             + "ORDER BY d.thoiGianBatDau DESC")
     Page<DotGiamGia> filterAllDiscount(Pageable pageable,
-                                       @Param("tenOrMa") String tenOrMa,
+                                       @Param("name") String name,
                                        @Param("trangThai") String trangThai,
                                        @Param("thoiGianBatDau") LocalDateTime thoiGianBatDau,
                                        @Param("thoiGianKetThuc") LocalDateTime thoiGianKetThuc);
-
-
 }
+

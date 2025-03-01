@@ -18,9 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -39,10 +37,9 @@ public class DotGiamGiaService {
         return dotGiamGiaPage;
     }
 
-    public Page<DotGiamGia> findAll(Integer pageNo, Integer pageSize, String tenOrMa, String trangThai, LocalDateTime thoiGianBatDau, LocalDateTime thoiGianKetThuc) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize);
-        Page<DotGiamGia> dotGiamGiaPage = dotGiamGiaRepository.filterAllDiscount(pageable, tenOrMa, trangThai, thoiGianBatDau, thoiGianKetThuc);
-        return dotGiamGiaPage;
+    public Page<DotGiamGia> findAll(int page, int size, String name, String status, LocalDateTime startTime, LocalDateTime endTime) {
+        Pageable pageable = PageRequest.of(page, size);
+        return dotGiamGiaRepository.filterAllDiscount(pageable, name, status, startTime, endTime);
     }
 
     public String add(AddDotGiamGiaRequest request, List<Integer> ids) {
@@ -182,6 +179,18 @@ public class DotGiamGiaService {
         DotGiamGia dotGiamGia = findById(id);
         dotGiamGia.setIsDeleted(false);
         dotGiamGiaRepository.save(dotGiamGia);
+    }
+
+    // chuyên trạng thái thành hủy
+    public void toggleStatus(Integer id) {
+        DotGiamGia dotGiamGia = findById(id);
+        if (dotGiamGia.getTrangThai().equals(DiscountStatusUtil.DA_KET_THUC)) {
+            dotGiamGia.setTrangThai(DiscountStatusUtil.DANG_DIEN_RA);
+            dotGiamGiaRepository.save(dotGiamGia);
+        } else {
+            dotGiamGia.setTrangThai(DiscountStatusUtil.DA_KET_THUC);
+            dotGiamGiaRepository.save(dotGiamGia);
+        }
     }
 
 
