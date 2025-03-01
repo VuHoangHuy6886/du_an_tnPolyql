@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/admin/layout-dashboard/layout.html">
+<head>
+    <!-- Custom link -->
+    <th:block layout:fragment="head_link">
+        <!-- Các link CSS nếu cần -->
+    </th:block>
+</head>
+<body layout:fragment="content">
+<div class="row">
+    <div class="card shadow m-2 w-100">
+        <div class="card-header py-3">
+            <div class="row">
+                <h1 class="h3 text-gray-800 col-4">Thêm mới đợt giảm giá</h1>
+            </div>
+        </div>
+        <div class="card-body d-flex justify-content-between">
+            <!--start Form-->
+            <section>
+                <h5>Thông tin đợt giảm giá</h5>
+                <form th:action="@{/admin/dot-giam-gia/save}" th:object="${DotGiamGiaNew}" method="post" id="formAdd"
+                      class="p-4 border rounded shadow-sm bg-light">
+                    <input type="hidden" id="productDetailIds" name="productDetailIds" value="">
+                    <div class="mb-3">
+                        <label for="ten" class="form-label">Tên</label>
+                        <input type="text" id="ten" th:field="*{ten}" class="form-control" placeholder="Nhập tên"/>
+                        <span th:if="${#fields.hasErrors('ten')}" th:errors="*{ten}" style="color: red;"></span>
+                        <span th:if="${message}" th:text="${message}" style="color: red;"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label for="ipValues">Nhập giá trị</label>
+                        <div class="w-100 d-flex justify-content-around">
+                            <div class="w-auto">
+                                <input class="form-control" type="text" id="ipValues" th:field="*{giaTriGiam}"
+                                       style="width: 150px;">
+                                <span id="showEr" style="color: red;"></span>
+                            </div>
+                            <div class="w-50 d-flex justify-content-around align-items-center">
+                                <div class="mt-2">
+                                    <label for="ckPercent">%</label>
+                                    <input type="radio" name="loaiChietKhau" value="Phần trăm" id="ckPercent" checked>
+                                </div>
+                                <div class="mt-2">
+                                    <label for="ckDollar">$</label>
+                                    <input type="radio" name="loaiChietKhau" value="Số tiền" id="ckDollar">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="giamToiDa" class="form-label">Giảm tối đa</label>
+                        <input type="text" id="giamToiDa" step="0.01" th:field="*{giamToiDa}" class="form-control"
+                               placeholder="Nhập giảm tối đa"/>
+                        <span th:if="${#fields.hasErrors('giamToiDa')}" th:errors="*{giamToiDa}"
+                              style="color: red;"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label for="thoiGianBatDau" class="form-label">Thời gian bắt đầu</label>
+                        <input type="datetime-local" id="thoiGianBatDau" th:field="*{thoiGianBatDau}"
+                               class="form-control"/>
+                        <p id="showErStartDate" style="color: red"></p>
+                    </div>
+                    <div class="mb-3">
+                        <label for="thoiGianKetThuc" class="form-label">Thời gian kết thúc</label>
+                        <input type="datetime-local" id="thoiGianKetThuc" th:field="*{thoiGianKetThuc}"
+                               class="form-control"/>
+                        <p id="showErEndDate" style="color: red"></p>
+                    </div>
+                    <div class="mb-3">
+                        <label for="moTa" class="form-label">Mô tả</label>
+                        <textarea id="moTa" th:field="*{moTa}" class="form-control" placeholder="Nhập mô tả"></textarea>
+                        <span th:if="${#fields.hasErrors('moTa')}" th:errors="*{moTa}" style="color: red;"></span>
+                    </div>
+                    <div class="d-grid">
+                        <button id="btnAdd" type="submit" class="btn btn-primary">Thêm mới</button>
+                    </div>
+                </form>
+            </section>
+            <!--End form-->
+            <!-- Start Table sản phẩm -->
+            <section class="w-75 ">
+                <div class="w-100">
+                    <h5>Danh sách sản phẩm</h5>
+                </div>
+                <div class="p-4 border rounded shadow-sm bg-light">
+                    <!--form filter sản phẩm-->
+                    <div class="w-100 p-3 d-flex justify-content-around align-items-center">
+
+                        <div class="w-25">
+                            <h6>Lọc theo mã hoặc tên</h6>
+                        </div>
+                        <div class="w-50">
+                            <input type="text" class="form-control" placeholder="nhập mã hoặc tên">
+                        </div>
+                        <div class="w-25 d-flex justify-content-center align-items-center">
+                            <button class="btn btn-outline-info">Search</button>
+                        </div>
+                    </div>
+                    <!-- Start Nội dung danh sách sản phẩm -->
+                    <table class="table table-bordered table-hover text-center" id="dataTable">
+                        <thead>
+                        <tr>
+                            <th style="width: 10%;">STT</th>
+                            <th style="width: 20%;">Mã</th>
+                            <th style="width: 20%;">Tên</th>
+                            <th style="width: 20%;">Mô Tả</th>
+                            <th style="width: 20%;">Trạng Thái</th>
+                            <th style="width: 10%;">
+                                <label class="mr-2">All</label>
+                                <input type="checkbox" id="checkAll">
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="product, i : ${products}">
+                            <td th:text="${i.index + 1}"></td>
+                            <td th:text="${product.maSanPham}"></td>
+                            <td th:text="${product.ten}"></td>
+                            <td th:text="${product.moTa}"></td>
+                            <td>
+                            <span th:if="${product.trangThai} == 'hoatDong'"
+                                  class="badge badge-success">Hoạt Động</span>
+                                <span th:if="${product.trangThai} == 'khongHoatDong'" class="badge badge-danger">Không Hoạt Động</span>
+                            </td>
+                            <td>
+                                <input type="checkbox" name="selectedProducts" th:value="${product.id}"
+                                       th:id="${product.id}" onclick="handlerClick(this)">
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div class="w-100">
+                        <h5 class="d-flex justify-content-start">Danh sách biến thể sản phẩm</h5>
+                        <table class="w-100 table table-bordered" id="tableProductDetail">
+                            <thead>
+                            <th>Chọn</th>
+                            <th>Tên Sản Phẩm</th>
+                            <th>Kích Thước</th>
+                            <th>Màu Sắc</th>
+                            <th>Giá Bán</th>
+                            </thead>
+                            <tbody id="tableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- End Nội dung danh sách sản phẩm -->
+            </section>
+            <!-- End Table sản phẩm -->
+        </div>
+    </div>
+</div>
+<script>
+    let listIdProducts = [];
+    let listProductDetail = [];
+    let inputListIds = document.getElementById("productDetailIds");
+    document.getElementById("checkAll").addEventListener("click", function () {
+        let checkboxes = document.querySelectorAll("input[name='selectedProducts']");
+        checkboxes.forEach((checkbox) => {
+            checkbox.checked = this.checked;
+            handlerClick(checkbox);
+        });
+    });
+
+    function handlerClick(checkbox) {
+        if (checkbox.checked) {
+            console.log("Checked:", checkbox.value);
+            listIdProducts.push(checkbox.value);
+        } else {
+            console.log("Unchecked:", checkbox.value);
+            listIdProducts = listIdProducts.filter((item) => item !== checkbox.value);
+        }
+        console.log("list id products:", listIdProducts);
+        sendListIdProducts(listIdProducts);
+    }
+
+    function sendListIdProducts(listIdProducts) {
+        let tablebodys = document.getElementById("tableBody");
+        fetch("/admin/dot-giam-gia/listIdProducts", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(listIdProducts),
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Lỗi: ${response.status} - ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Danh sách sản phẩm chi tiết:", data)
+                tablebodys.innerHTML = '';
+                data.map(item => {
+                    let row = `<tr scope="row">
+                            <td><input type="checkbox" value="${item.id}" onclick="handlerGetIdProductDetail(this)"></td>
+                            <td>${item.sanPham.ten}</td>
+                            <td>${item.kichThuoc.ten}</td>
+                            <td>${item.mauSac.ten}</td>
+                            <td>${item.giaBan}</td></tr>`;
+                    tablebodys.innerHTML += row;
+                })
+            })
+            .catch(error => {
+                console.error("Lỗi:", error);
+            });
+    }
+
+    // function get id product detail
+    function handlerGetIdProductDetail(checkbox) {
+        if (checkbox.checked) {
+            if (!listProductDetail.includes(checkbox.value)) {
+                listProductDetail.push(checkbox.value);
+            }
+        } else {
+            listProductDetail = listProductDetail.filter(item => item !== checkbox.value);
+        }
+        console.log("product detail: ", listProductDetail);
+        let productDetailIds = listProductDetail.join(",");
+        inputListIds.value = productDetailIds;
+    }
+
+
+    // start  validated
+    document.addEventListener("DOMContentLoaded", function () {
+        const radioButtons = document.querySelectorAll('input[name="loaiChietKhau"]');
+        const ipValues = document.getElementById("ipValues");
+        const discountForm = document.getElementById("discountForm");
+
+        // Xử lý thay đổi radio
+        function handleRadioChange() {
+            const selectedValue = document.querySelector('input[name="loaiChietKhau"]:checked').value;
+            ipValues.value = ""; // Reset giá trị khi chuyển đổi
+            if (selectedValue === "Phần trăm") {
+                ipValues.placeholder = "phần trăm giảm";
+                ipValues.removeEventListener("input", validateDollar);
+                ipValues.addEventListener("input", validatePercentage);
+            } else {
+                ipValues.placeholder = "số tiền giảm";
+                ipValues.removeEventListener("input", validatePercentage);
+                ipValues.addEventListener("input", validateDollar);
+            }
+        }
+
+        // Validate %: chỉ cho phép nhập số từ 1 đến 100
+        function validatePercentage() {
+            let value = ipValues.value.trim().replace(/\D/g, '');
+            let numericValue = Number(value);
+            if (numericValue > 100) {
+                value = "100";
+            } else if (numericValue < 1 && value !== "") {
+                value = "1";
+            }
+            ipValues.value = value;
+        }
+
+        // Validate $: chỉ cho phép nhập số
+        function validateDollar() {
+            ipValues.value = ipValues.value.trim().replace(/\D/g, '');
+        }
+
+        // Gán sự kiện cho radio buttons
+        radioButtons.forEach(radio => {
+            radio.addEventListener("click", handleRadioChange);
+        });
+        // Thiết lập trạng thái mặc định khi tải trang
+        handleRadioChange();
+    });
+    document.getElementById("formAdd").addEventListener("submit", function (event) {
+        let isValid = true
+        let giaTriGiam = document.getElementById("ipValues").value;
+        let thoiGianBatDau = document.getElementById("thoiGianBatDau").value;
+        let thoiGianKetThuc = document.getElementById("thoiGianKetThuc").value;
+        let listIdSanPhamChiTiet = document.getElementById("productDetailIds").value;
+        if (giaTriGiam == "") {
+            document.getElementById("showEr").innerText = "giá trị giảm không được để trống !";
+            isValid = false;
+        } else {
+            document.getElementById("showEr").innerText = "";
+        }
+        // Kiểm tra trường thời gian bắt đầu không được để trống
+        if (thoiGianBatDau == "") {
+            document.getElementById("showErStartDate").innerText = "Thời gian bắt đầu không được để trống";
+            isValid = false;
+        } else {
+            document.getElementById("showErStartDate").innerText = "";
+        }
+
+        // Kiểm tra trường thời gian kết thúc không được để trống
+        if (thoiGianKetThuc == "") {
+            document.getElementById("showErEndDate").innerText = "Thời gian kết thúc không được để trống";
+            isValid = false;
+        } else {
+            document.getElementById("showErEndDate").innerText = "";
+        }
+
+        // So sánh thời gian: Ngày bắt đầu phải nhỏ hơn ngày kết thúc
+        let dateBatDau = new Date(thoiGianBatDau);
+        let dateKetThuc = new Date(thoiGianKetThuc);
+
+        if (dateBatDau >= dateKetThuc) {
+            document.getElementById("showErStartDate").innerText = "Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc";
+            isValid = false;
+        }
+        if (listIdSanPhamChiTiet == "") {
+            alert("vui lòng chọn sản phẩm chi tiết");
+            isValid = false;
+        }
+        if (!isValid) {
+            event.preventDefault();
+        }
+    })
+</script>
+</body>
+<th:block layout:fragment="bottom_link">
+    <!-- Page level plugins -->
+    <script src="/vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+
+</th:block>
+</html>

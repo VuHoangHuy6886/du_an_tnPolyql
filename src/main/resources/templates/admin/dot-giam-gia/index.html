@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/admin/layout-dashboard/layout.html"
+>
+<head>
+    <!--    Custom link-->
+    <th:block layout:fragment="head_link">
+
+    </th:block>
+
+</head>
+
+<!-- Custom styles for this page -->
+
+<body layout:fragment="content">
+
+
+<div class="row">
+    <div class="card shadow m-2 w-100 ">
+        <div class="card-header py-3">
+            <div class="row">
+                <h1 class="h3 text-gray-800 col-4">Quản lý Đợt Giảm Giá</h1>
+                <!-- Additional controls -->
+                <div class="col-8 d-flex justify-content-sm-end align-items-center">
+                    <div class="col-8 d-flex justify-content-sm-end align-items-center">
+                        <a th:href="@{/admin/dot-giam-gia/form-add}" class="btn btn-primary btn-icon-split mr-2"
+                           id="btn-add">
+                                        <span class="icon text-white-50">
+                                            <i class="fas fa-plus"></i>
+                                        </span>
+                            <span class="text">Thêm mới</span>
+                        </a>
+                    </div>
+                </div>
+                <!-- Additional controls -->
+                <!--form fillter-->
+                <form class="bg-white shadow w-100 h-auto mt-3 my-3 p-3 d-flex justify-content-lg-around">
+                    <div class="form-group d-flex flex-column justify-content-start align-items-start">
+                        <label for="nameOrCode" class="form-label font-weight-bold">Mã Hoặc Tên</label>
+                        <input
+                                id="nameOrCode"
+                                type="text"
+                                name="nameOrCode"
+                                class="form-control"
+                                value=""
+                                placeholder="Tìm theo Mã hoặc tên"
+                        />
+                    </div>
+
+                    <div class="form-group d-flex flex-column justify-content-start align-items-start">
+                        <label for="startTime" class="form-label font-weight-bold">Ngày Bắt Đầu</label>
+                        <input type="date" class="form-control" id="startTime" name="startTime" value=""/>
+                    </div>
+
+                    <div class="form-group d-flex flex-column justify-content-start align-items-start">
+                        <label for="endTime" class="form-label font-weight-bold">Ngày Kết Thúc</label>
+                        <input type="date" class="form-control" id="endTime" name="endTime" value=""/>
+                    </div>
+
+                    <div class="form-group d-flex flex-column justify-content-start align-items-start">
+                        <label for="status" class="form-label font-weight-bold">Trạng Thái</label>
+                        <select id="status" class="form-control" name="status">
+                            <option value="">Select</option>
+                            <option value="Chưa diễn ra">Chưa diễn ra</option>
+                            <option value="Đang diễn ra">Đang diễn ra</option>
+                            <option value="Đã kết thúc">Đã kết thúc</option>
+                        </select>
+                    </div>
+                    <div class="d-flex justify-content-center align-items-center">
+                        <button class="btn btn-sm bg-success text-white font-weight-bold p-2">
+                            <i class="fa-solid fa-magnifying-glass"></i> Tìm Kiếm
+                        </button>
+                    </div>
+                    <!-- Nút mở Modal -->
+                    <div class="d-flex justify-content-center align-items-center">
+                        <button type="button" class="btn btn-sm btn-danger p-2" data-bs-toggle="modal"
+                                data-bs-target="#modalDotGiamGia">
+                            <i class="fa-solid fa-box"></i> đã xóa
+                        </button>
+                    </div>
+                </form>
+                <!--form fillter-->
+            </div>
+        </div>
+        <!--Table đợt giảm giá -->
+        <div class="card-body d-flex flex-column justify-content-between " style="height: 500px">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover text-center" id="dataTable">
+                    <thead>
+                    <tr>
+                        <th style="width: 5%;">STT</th>
+                        <th style="width: 10%;">Mã</th>
+                        <th style="width: 15%;">Tên</th>
+                        <th style="width: 15%;">Ngày bắt đầu</th>
+                        <th style="width: 15%;">Ngày kết thúc</th>
+                        <th style="width: 10%;">Trạng thái</th>
+                        <th style="width: 10%;">Hành Động</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="dotGiamGia : ${pages.content}" th:if="${!dotGiamGia.isDeleted}">
+                        <td th:text="${dotGiamGia.id}"></td>
+                        <td th:text="${dotGiamGia.ma}"></td>
+                        <td th:text="${dotGiamGia.ten}"></td>
+                        <td th:text="${#temporals.format(dotGiamGia.thoiGianBatDau, 'dd/MM/yyyy')}"></td>
+                        <td th:text="${#temporals.format(dotGiamGia.thoiGianKetThuc, 'dd/MM/yyyy')}"></td>
+                        <td id="DGGstatus" th:text="${dotGiamGia.trangThai}"></td>
+                        <td class="d-flex justify-content-around">
+                            <a th:href="@{'/admin/dot-giam-gia/form-update/' + ${dotGiamGia.id}}"
+                               class="btn btn-primary btn-sm">
+                                <i class="fa-solid fa-eye"></i>
+                            </a>
+                            <a th:href="@{'/admin/dot-giam-gia/form-update/' + ${dotGiamGia.id}}"
+                               class="btn btn-warning btn-sm">
+                                <i class="fa-solid fa-pen"></i>
+                            </a>
+                            <a th:href="@{'/admin/dot-giam-gia/delete/' + ${dotGiamGia.id}}"
+                               class="btn btn-danger btn-sm"
+                               onclick="return confirm('Bạn có chắc chắn muốn xóa đợt giảm giá này?');">
+                                <i class="fa-solid fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!--        Phân Trang        -->
+            <nav aria-label="Page navigation example bg-danger">
+                <ul class="pagination justify-content-center">
+                    <!-- Previous page link -->
+                    <li class="page-item" th:classappend="${pages.hasPrevious()} ? '' : 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/admin/dot-giam-gia/all(page=${pages.number - 1}, size=${pages.size})}"
+                           aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    <!-- Page number links -->
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, pages.totalPages - 1)}"
+                        th:classappend="${pages.number == i} ? 'active' : ''">
+                        <a class="page-link" th:href="@{/admin/dot-giam-gia/all(page=${i}, size=${pages.size})}"
+                           th:text="${i + 1}">1</a>
+                    </li>
+                    <!-- Next page link -->
+                    <li class="page-item" th:classappend="${pages.hasNext()} ? '' : 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/admin/dot-giam-gia/all(page=${pages.number + 1}, size=${pages.size})}"
+                           aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <!--        Phân Trang        -->
+        </div>
+        <!--Table đợt giảm giá -->
+
+
+        <!-- Modal -->
+        <div class="modal fade" id="modalDotGiamGia" tabindex="-1" aria-labelledby="modalDotGiamGiaLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalDotGiamGiaLabel">Danh Sách Đợt Giảm Giá Đã Xóa</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover text-center">
+                                <thead>
+                                <tr>
+                                    <th >STT</th>
+                                    <th>Mã</th>
+                                    <th>Tên</th>
+                                    <th>Ngày bắt đầu</th>
+                                    <th>Ngày kết thúc</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="dotGiamGia : ${pages.content}" th:if="${dotGiamGia.isDeleted}">
+                                    <td th:text="${dotGiamGia.id}"></td>
+                                    <td th:text="${dotGiamGia.ma}"></td>
+                                    <td th:text="${dotGiamGia.ten}"></td>
+                                    <td th:text="${#temporals.format(dotGiamGia.thoiGianBatDau, 'dd/MM/yyyy')}"></td>
+                                    <td th:text="${#temporals.format(dotGiamGia.thoiGianKetThuc, 'dd/MM/yyyy')}"></td>
+                                    <td th:text="${dotGiamGia.trangThai}"></td>
+                                    <td>
+                                        <a th:href="@{'/admin/dot-giam-gia/restore/' + ${dotGiamGia.id}}"
+                                           class="btn btn-success btn-sm"
+                                           onclick="return confirm('Bạn có chắc chắn muốn khôi phục đợt giảm giá này?');">
+                                            <i class="fa-solid fa-down-long"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal -->
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let statusElements = document.querySelectorAll("#DGGstatus"); // Lấy tất cả các phần tử có id là DGGstatus
+        statusElements.forEach(function (statusElement) {
+            let statusText = statusElement.textContent.trim(); // Lấy nội dung văn bản và loại bỏ khoảng trắng thừa
+            if (statusText === "Đã kết thúc") {
+                statusElement.style.color = "black";
+                statusElement.style.fontWeight = "bold";
+            } else if (statusText === "Đang diễn ra") {
+                statusElement.style.color = "red";
+                statusElement.style.fontWeight = "bold";
+            } else {
+                statusElement.style.color = "orange";
+                statusElement.style.fontWeight = "bold";
+            }
+        });
+    });
+
+</script>
+</body>
+<th:block layout:fragment="bottom_link">
+    <!-- Page level plugins -->
+    <script src="/vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</th:block>
+</html>

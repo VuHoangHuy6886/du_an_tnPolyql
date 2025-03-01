@@ -7,7 +7,7 @@ import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Builder
 @AllArgsConstructor
@@ -19,6 +19,7 @@ import java.time.Instant;
 public class DotGiamGia {
     @Id
     @Column(name = "ID", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Size(max = 50)
@@ -32,16 +33,16 @@ public class DotGiamGia {
     private String ten;
 
 
-    @Column(name = "MO_TA",columnDefinition = "TEXT")
+    @Column(name = "MO_TA", columnDefinition = "TEXT")
     private String moTa;
 
     @NotNull
     @Column(name = "THOI_GIAN_BAT_DAU", nullable = false)
-    private Instant thoiGianBatDau;
+    private LocalDateTime thoiGianBatDau;
 
     @NotNull
     @Column(name = "THOI_GIAN_KET_THUC", nullable = false)
-    private Instant thoiGianKetThuc;
+    private LocalDateTime thoiGianKetThuc;
 
     @Size(max = 50)
     @Column(name = "LOAI_CHIET_KHAU", length = 50)
