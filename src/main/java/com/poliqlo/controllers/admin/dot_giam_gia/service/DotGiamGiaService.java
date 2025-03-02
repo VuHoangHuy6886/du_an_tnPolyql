@@ -33,7 +33,12 @@ public class DotGiamGiaService {
 
     public Page<DotGiamGia> findAll(Integer pageNo, Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNo, pageSize);
-        Page<DotGiamGia> dotGiamGiaPage = dotGiamGiaRepository.findAll(pageable);
+        Page<DotGiamGia> dotGiamGiaPage = dotGiamGiaRepository.findAllByIsDeletedFalse(pageable);
+        return dotGiamGiaPage;
+    }
+
+    public List<DotGiamGia> findAllIsDeleteTrue() {
+        List<DotGiamGia> dotGiamGiaPage = dotGiamGiaRepository.findAllByIsDeletedTrue();
         return dotGiamGiaPage;
     }
 
@@ -127,9 +132,7 @@ public class DotGiamGiaService {
             System.out.println("Thời gian kết thúc: " + endTime.format(formatter));
 
             // set trạng thái
-
-
-            if (timeNow.isBefore(startTime)) {
+            if (timeNow.isBefore(startTime) && !dgg.getTrangThai().equals(DiscountStatusUtil.DA_KET_THUC)) {
                 // check trạng thái
                 String status = DiscountStatusUtil.getStatus(startTime, endTime, false);
                 if (!status.equals(dgg.getTrangThai())) {
@@ -142,7 +145,7 @@ public class DotGiamGiaService {
                 // check trạng thái
                 String status = DiscountStatusUtil.getStatus(startTime, endTime, false);
                 if (!status.equals(dgg.getTrangThai())) {
-                    dgg.setTrangThai(DiscountStatusUtil.getStatus(startTime, endTime, false));
+                    dgg.setTrangThai(DiscountStatusUtil.DA_KET_THUC);
                     dotGiamGiaRepository.save(dgg);
                 } else {
                     System.out.println("đã kết thúc ra ko có j thay đổi");
@@ -150,7 +153,7 @@ public class DotGiamGiaService {
             } else {
                 // check trạng thái
                 String status = DiscountStatusUtil.getStatus(startTime, endTime, false);
-                if (!status.equals(dgg.getTrangThai())) {
+                if (!status.equals(dgg.getTrangThai()) && !dgg.getTrangThai().equals(DiscountStatusUtil.DA_KET_THUC)) {
                     dgg.setTrangThai(DiscountStatusUtil.getStatus(startTime, endTime, false));
                     dotGiamGiaRepository.save(dgg);
                 } else {

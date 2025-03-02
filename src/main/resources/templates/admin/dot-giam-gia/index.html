@@ -43,14 +43,14 @@
                         </button>
                     </div>
                     <div class="form-group d-flex flex-column justify-content-start align-items-start">
-                        <label for="name" class="form-label font-weight-bold">Tên</label>
+                        <label for="name" class="form-label font-weight-bold">Tên Hoặc Mã</label>
                         <input
                                 id="name"
                                 type="text"
                                 name="name"
                                 class="form-control"
                                 th:value="${name}"
-                                placeholder="tên"
+                                placeholder="Tên Hoặc Mã"
                         />
                     </div>
 
@@ -112,8 +112,8 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="dotGiamGia : ${pages.content}" th:if="${!dotGiamGia.isDeleted}">
-                        <td th:text="${dotGiamGia.id}"></td>
+                    <tr th:each="dotGiamGia , i : ${pages.content}">
+                        <td th:text="${i.index +1}"></td>
                         <td th:text="${dotGiamGia.ma}"></td>
                         <td th:text="${dotGiamGia.ten}"></td>
                         <td th:text="${#temporals.format(dotGiamGia.thoiGianBatDau, 'dd/MM/yyyy')}"></td>
@@ -199,7 +199,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr th:each="dotGiamGia : ${pages.content}" th:if="${dotGiamGia.isDeleted}">
+                                <tr th:each="dotGiamGia : ${listProductIsDelete}">
                                     <td th:text="${dotGiamGia.id}"></td>
                                     <td th:text="${dotGiamGia.ma}"></td>
                                     <td th:text="${dotGiamGia.ten}"></td>

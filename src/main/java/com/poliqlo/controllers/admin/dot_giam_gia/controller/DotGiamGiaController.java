@@ -69,6 +69,7 @@ public class DotGiamGiaController {
                 startTime == null &&
                 endTime == null) {
             Page<DotGiamGia> pages = service.findAll(page, size);
+            model.addAttribute("listProductIsDelete", service.findAllIsDeleteTrue());
             model.addAttribute("pages", pages);
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", pages.getTotalPages());
@@ -81,6 +82,7 @@ public class DotGiamGiaController {
             status = null;
         }
         Page<DotGiamGia> pages = service.findAll(page, size, name, status, startTime, endTime);
+        model.addAttribute("listProductIsDelete", service.findAllIsDeleteTrue());
         model.addAttribute("name", name);
         model.addAttribute("status", status);
         model.addAttribute("startTime", startTime);
