@@ -14035,7 +14035,7 @@ function getMax(options) {
  * @param {number[]} timestamps - timestamps sorted from lowest to highest.
  * @param {string} distribution - If 'linear', timestamps will be spread linearly along the min
  * and max range, so basically, the table will contains only two items: {min, 0} and {max, 1}.
- * If 'series', timestamps will be positioned at the same distance from each other. In this
+ * If 'thuongHieu', timestamps will be positioned at the same distance from each other. In this
  * case, only timestamps that break the time linearity are registered, meaning that in the
  * best case, all timestamps are linear, the table contains only min and max.
  */
@@ -14330,7 +14330,7 @@ var defaultConfig$4 = {
 	/**
 	 * Data distribution along the scale:
 	 * - 'linear': data are spread according to their time (distances can vary),
-	 * - 'series': data are spread at the same distance from each other.
+	 * - 'thuongHieu': data are spread at the same distance from each other.
 	 * @see https://github.com/chartjs/Chart.js/pull/4507
 	 * @since 2.7.0
 	 */
@@ -14498,7 +14498,7 @@ var scale_time = core_scale.extend({
 		var distribution = options.distribution;
 		var i, ilen, timestamp;
 
-		if (source === 'data' || (source === 'auto' && distribution === 'series')) {
+		if (source === 'data' || (source === 'auto' && distribution === 'thuongHieu')) {
 			timestamps = timestamps.data;
 		} else if (source === 'labels') {
 			timestamps = timestamps.labels;

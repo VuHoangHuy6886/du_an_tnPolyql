@@ -6,6 +6,11 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -57,5 +62,17 @@ public class SanPham {
     @ColumnDefault("b'0'")
     @Column(name = "IS_DELETED", nullable = false)
     private Boolean isDeleted = false;
+
+    @OneToMany(mappedBy = "sanPham", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<SanPhamChiTiet> sanPhamChiTiets = new LinkedHashSet<>();
+
+    @ManyToMany
+    @JoinTable(name = "san_pham_danh_muc",
+            joinColumns = @JoinColumn(name = "SAN_PHAM_ID"),
+            inverseJoinColumns = @JoinColumn(name = "DANH_MUC_ID"))
+    private Set<DanhMuc> danhMucs = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "sanPham", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Anh> anhs = new ArrayList<>();
 
 }

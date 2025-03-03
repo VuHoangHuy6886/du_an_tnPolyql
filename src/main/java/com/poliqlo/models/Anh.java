@@ -1,5 +1,6 @@
 package com.poliqlo.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -21,6 +22,7 @@ public class Anh {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SAN_PHAM_ID")
+    @JsonIgnore
     private SanPham sanPham;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -37,7 +39,6 @@ public class Anh {
     @Column(name = "URL", nullable = false)
     private String url;
 
-    @NotNull
     @ColumnDefault("b'0'")
     @Column(name = "IS_DELETED", nullable = false)
     private Boolean isDeleted = false;
