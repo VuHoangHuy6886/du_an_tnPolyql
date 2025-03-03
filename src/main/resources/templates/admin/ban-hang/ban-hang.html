@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+          integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+
+    <link href="/vendor/select2/select2.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/admin/ban-hang/ban-hang.css">
+</head>
+
+<!-- Custom styles for this page -->
+
+<body>
+
+<div class="container-fluid" style="background-color: #F0F1F3">
+
+    <nav class="navbar navbar-light bg-primary row">
+
+        <form class="form-inline col-4 d-flex">
+            <input class="form-control me-sm-2 flex-grow-1" type="search" placeholder="Tìm hàng hóa (F3)"
+                   aria-label="Search">
+
+            <a check="true" class="btn btn-outline-light my-2 my-sm-0" onclick="chuyenCheDoNhap(this)"
+               data-bs-toggle="collapse" href="#collapseExample" role="button"
+               aria-expanded="false" aria-controls="collapseExample"><i class="fa-solid fa-barcode"></i></a>
+        </form>
+        <div class="nav nav-tabs col-4" id="nav-invoice" role="tablist">
+            <button class="nav-link active" id="invoice-tab" data-toggle="tab" type="button"
+                    role="tab" aria-controls="invoice" aria-selected="true">Hóa đơn <span>1</span> <i
+                    class="fa fa-x ms-2 p-1 rounded-circle" style="font-size: 10px"></i>
+            </button>
+            <button class="nav-link" id="add-new-invoice"><i
+                    class="fa fa-plus text-dark bg-light p-1 rounded-circle"></i>
+            </button>
+        </div>
+        <div class="col-4 d-flex justify-content-end text-light">
+            <a class="text-light icon-btn me-4" href="/admin" data-bs-toggle="tooltip" data-bs-placement="bottom"
+               title="Quay về trang chủ">
+                <i class="fa-solid fa-reply "></i>
+            </a>
+            <span class="align-middle" style="line-height: 46px" th:text="${username}"></span>
+            <a class="text-light icon-btn" href="/logout" data-bs-toggle="tooltip" data-bs-placement="bottom"
+               title="Đăng xuất">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            </a>
+        </div>
+
+    </nav>
+
+    <div class="content m-2 d-flex  flex-wrap" style="height: 84vh">
+        <div class="flex-grow-1 me-2">
+            <div class="table-responsive" style="height: 75vh">
+                <table class="table table-bordered table-borderless table-data" id="tbl-invoice">
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+            <div class="">
+                <div class="form-group">
+                    <textarea type="text" placeholder="✎ Ghi chú đơn hàng" class="form-control "
+                              id="hd-ghi-chu"></textarea>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="tab-pane fade ms-2 rounded-lg bg-white" style="width: 45%; height: 80vh;"
+             id="nav-qick-sale" role="tabpanel"
+             aria-labelledby="nav-qick-sale-tab">
+
+        </div>
+        <div class="tab-pane fade show active p-2 ms-2 rounded-lg bg-white" id="nav-nomal-sale" style="width: 40%;"
+             role="tabpanel"
+             aria-labelledby="nav-nomal-sale-tab">
+            <div class="row">
+
+            </div>
+            <div class="row">
+                <form class="form-inline col-12 d-flex justify-content-between">
+                    <input class="form-control me-sm-2 flex-grow-1" id="input-search" type="search"
+                           placeholder="Tìm hàng hóa (F3)"
+                           aria-label="Search">
+                    <div class="w-25 d-flex justify-content-around">
+
+                        <a class="position-relative" data-bs-toggle="offcanvas" href="#offcanvasFilter" role="button"
+                           aria-controls="offcanvasFilter">
+                            <i class="fa fa-list" aria-hidden="true">
+
+                            </i>
+                            <span id="filter-badge" class="d-none position-absolute top-0 ms-1 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+                                    <span class="visually-hidden">New alerts</span>
+                            </span>
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <div style="height: 500px; overflow-y: auto;">
+                <div class="row m-2" id="tbl-san-pham"></div>
+                <div class="w-100 text-center">
+                    <button class="text-center show-more">Xem thêm <span></span></button>
+                </div>
+            </div>
+
+            <div>
+                <button type="button" class="btn btn-primary btn-xl w-100 mt-2 py-2" id="check-out" tabindex="3071">
+                    Thanh toán
+                </button>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="nav-deli-sale" style="width: 50%;" role="tabpanel"
+             aria-labelledby="nav-deli-sale-tab">..s.
+        </div>
+
+    </div>
+    <div class="bottom">
+        <nav>
+            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                <button class="nav-link active" id="nav-nomal-sale-tab" data-toggle="tab" data-target="#nav-nomal-sale"
+                        type="button" role="tab" aria-controls="nav-nomal-sale" aria-selected="true"><i
+                        class="fa-solid fa-bolt"></i> Bán nhanh</i> Bán thường
+                </button>
+                <button class="nav-link" id="nav-deli-sale-tab" data-toggle="tab" data-target="#nav-deli-sale"
+                        type="button" role="tab" aria-controls="nav-deli-sale" aria-selected="false"><i
+                        class="fa-solid fa-truck-fast"></i> Bán giao hàng
+                </button>
+            </div>
+        </nav>
+    </div>
+
+
+</div>
+
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="sp-add-to-cart"
+     aria-labelledby="sp-add-to-cartLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="sp-add-to-cartLabel"></h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+
+        <h5 name="so-luong">Tổng số lượng : <span></span></h5>
+        <div>
+            <div class="spinner-grow" style="width: 0.7rem; height: 0.7rem;" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="spinner-grow" style="width: 0.7rem; height: 0.7rem;" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="spinner-grow" style="width: 0.7rem; height: 0.7rem;" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="spinner-grow" style="width: 0.7rem; height: 0.7rem;" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+        <div id="detail-sp">
+            <div id="sp-gia"></div>
+            <div class="form-group">
+                <label for="container-btn-rom">Dung lượng</label>
+                <div class="" id="container-btn-rom">
+                    <div class="btn-group" role="group">
+                        <label class="btn btn-secondary active">
+                            <input type="radio" name="options" checked> Active
+                        </label>
+                        <label class="btn btn-secondary">
+                            <input type="radio" name="options"> Radio
+                        </label>
+                        <label class="btn btn-secondary">
+                            <input type="radio" name="options"> Radio
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <!--                btn mau sac-->
+            <div class="form-group">
+                <label for="container-btn-mau-sac">Màu sắc: <span id="ten-mau-sac">Tên màu sắc</span></label>
+                <div class="flex-wrap my-3" style="width: 400px" id="container-btn-mau-sac">
+                    <div class="btn-group" role="group">
+                    </div>
+                </div>
+            </div>
+
+            <!--                Khuyen mai-->
+            <div class="container p-4"
+                 style="border-radius: 20px; background-color: #2F3033; height: 40vh; overflow-y: auto">
+                <h5 class="font-weight-bold text-light h5">Khuyến mãi</h5>
+                <hr class="border-light">
+                <ul class="khuyen-mai-ap-dung ml-4"></ul>
+                <hr>
+
+            </div>
+
+            <a check="true" class="btn btn-primary my-4 w-100" id="add-to-cart">
+                Thêm vào giỏ hàng
+            </a>
+        </div>
+
+
+    </div>
+</div>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvas-check-out"
+     aria-labelledby="check-outLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="check-outLabel">Thanh toán</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form class="needs-validation" id="form-check-out" novalidate>
+            <div class="row">
+                <!--                <div class="form-group position-relative col-12">-->
+                <!--                    <select class="form-control position-relative" id="hd-khach-hang" multiple="multiple">-->
+                <!--                        <option></option>-->
+                <!--                    </select>-->
+                <!--                    <a class="position-absolute" id="btn-add-khuyen-mai" style="right: 25px;top: 8px"><i-->
+                <!--                            class="fa fa-plus"-->
+                <!--                            aria-hidden="true"></i></a>-->
+                <!--                    <div class="invalid-feedback">-->
+                <!--                        Vui lòng chọn khuyến mại-->
+                <!--                    </div>-->
+                <!--                </div>-->
+                <!--                <div class="form-group col-12">-->
+                <!--                    <div class="my-3">-->
+                <!--                        <input type="email" class="form-control" placeholder="Địa chỉ email" id="hd-kh-email" aria-describedby="emailHelp">-->
+                <!--                    </div>-->
+                <!--                    <div class="mb-3">-->
+                <!--                        <input type="text" class="form-control" placeholder="Số điện thoại" id="hd-kh-sdt">-->
+                <!--                    </div>-->
+                <!--                </div>-->
+
+                <div class="row my-2" id="tbl-imei" style="height: 45vh; overflow-y: auto;">
+
+                </div>
+                <div class="table-responsive" style="height: 18vh">
+                    <table class="table table-borderless table-data w-100" id="tbl-hoa-don">
+                        <tbody>
+                        <tr>
+                            <td>Tổng tiền hàng</td>
+                            <td id="hd-tong-so-luong"></td>
+                            <td id="hd-tong-so-tien"></td>
+                        </tr>
+                        <tr>
+                            <td>Giảm giá</td>
+                            <td></td>
+                            <td id="hd-giam-gia">0</td>
+                        </tr>
+                        <tr>
+                            <td>Khách cần trả</td>
+                            <td></td>
+                            <td id="hd-khach-tra"></td>
+                        </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="form-group position-relative col-12">
+                    <select class="form-control js-data-example-ajax" id="hd-voucher" multiple="multiple">
+                        <option></option>
+                    </select>
+                    <a class="position-absolute" id="add-hd-voucher" style="right: 25px;top: 8px"><i
+                            class="fa fa-plus"
+                            aria-hidden="true"></i></a>
+                    <div class="invalid-feedback">
+                        Vui lòng chọn khuyến mại
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-xl w-100 mt-2 py-2" id="check-out-finish"
+                        tabindex="3071">Thanh toán
+                </button>
+            </div>
+        </form>
+
+
+    </div>
+</div>
+
+<!--Canvas fillter-->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasFilter" aria-labelledby="offcanvasFilterLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasFilterLabel">Lọc sản phẩm</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+
+
+        <div class="mb-3">
+            <label for="filter-series" class="form-label">Series</label>
+            <select class="form-control position-relative" id="filter-series" multiple="multiple">
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="filter-order" class="form-label">Sắp xếp theo</label>
+            <select class="form-control position-relative" id="filter-order">
+                <option value="id:desc">Mới ra mắt</option>
+                <option value="banChay:desc">Bán chạy</option>
+                <option value="soLuong:asc">Số lượng nhiều nhất</option>
+                <option value="soLuong:desc">Số lượng thấp nhất</option>
+            </select>
+        </div>
+
+    </div>
+</div>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvas-check-out-step-2"
+     aria-labelledby="check-outLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">Thanh toán</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form id="form-check-out-step-2" novalidate>
+            <div class="row">
+                <div class="form-group position-relative col-12">
+                    <select class="form-control position-relative" id="hd-khach-hang" multiple="multiple">
+                        <option></option>
+                    </select>
+                    <div class="form-text">Bạn có thể cập nhật thông tin đối với khách hàng này hoặc tạo mới</div>
+
+
+                </div>
+                <div class="form-group mt-4 col-12">
+                    <fieldset>
+                        <legend>Khách hàng</legend>
+                        <div class="mb-3">
+                            <input type="text" class="form-control" required placeholder="Tên khách hàng"
+                                   id="hd-kh-ten">
+                            <div class="invalid-feedback">
+                                Vui lòng nhập tên khách hàng
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <input type="email" class="form-control" required placeholder="Địa chỉ email"
+                                   id="hd-kh-email">
+                            <div class="invalid-feedback">
+                                Vui lòng nhập địa chỉ email khách hàng
+                            </div>
+                        </div>
+                        <div class="">
+                            <input type="tel" class="form-control" required placeholder="Số điện thoại" id="hd-kh-sdt">
+                            <div class="invalid-feedback">
+                                Vui lòng nhập số điện thoại khách hàng
+                            </div>
+                        </div>
+                    </fieldset>
+                    <fieldset>
+                        <legend>Thanh toán</legend>
+                        <nav>
+                            <div class="nav nav-tabs" id="hinhThucTT" role="tablist">
+                                <a class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" href="#httt-tien-mat"
+                                   role="tab" aria-controls="httt-tien-mat" aria-selected="true">Tiền mặt</a>
+                                <a class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" href="#httt-chuyen-khoan"
+                                   role="tab" aria-controls="httt-chuyen-khoan" aria-selected="false">Chuyển Khoản</a>
+                            </div>
+                        </nav>
+                        <div class="tab-content" id="hinhThucTTContent">
+                            <div class="tab-pane fade show active" id="httt-tien-mat" role="tabpanel"
+                                 aria-labelledby="httt-tien-mat-tab">
+                                <span class="h3 ps-1"><span>Số tiền:</span>  <span></span></span>
+                            </div>
+                            <div class="tab-pane qrcode-container fade" id="httt-chuyen-khoan" role="tabpanel"
+                                 aria-labelledby="httt-chuyen-khoan-tab">
+                                <img class="qrcode" alt="">
+                            </div>
+
+                        </div>
+
+                    </fieldset>
+                </div>
+
+                <div class="ms-3 form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="invalidCheck" required>
+                    <label class="form-check-label" for="invalidCheck">
+                        Đã nhận đủ
+                    </label>
+                    <div class="invalid-feedback">
+                        Bạn cần xác nhận nhận đủ tiền trước khi kết thúc
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-xl w-100 mt-2 py-2" id="check-out-finish-2"
+                        tabindex="3071">Hoàn tất
+                </button>
+            </div>
+        </form>
+
+
+    </div>
+</div>
+
+
+<div class="toast-container position-fixed bottom-0 left-0 p-3" style="z-index: 99999; bottom: 0;">
+    <div id="liveToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true" data-delay="2000">
+        <div class="toast-header">
+            <img src="..." class="rounded me-2" alt="...">
+            <strong class="me-auto">Bootstrap</strong>
+            <small>11 mins ago</small>
+            <button type="button" class="ms-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="toast-body">
+            Hello, world! This is a toast message.
+        </div>
+    </div>
+</div>
+
+</body>
+<script src="/vendor/jquery/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
+        integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
+        integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
+
+<script src="/vendor/select2/select2.min.js"></script>
+<script src="/js/admin/ban-hang/ban-hang.js"></script>
+<script>
+    $("#liveToastBtn").click(function () {
+        $(".toast").toast("show")
+    })
+</script>
+</html>
+
+
+
+

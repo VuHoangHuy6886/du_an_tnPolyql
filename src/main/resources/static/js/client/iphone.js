@@ -20,11 +20,11 @@ $(document).ready(function(){
         lstProduct=response;
         fillData(lstProduct)
     });
-    lstProduct=cloneData('/api/v1/admin/data-list-add-san-pham/series').then(function(response){
+    lstProduct=cloneData('/api/v1/admin/data-list-add-san-pham/thuongHieu').then(function(response){
 
-        let rowSeries='<span class="selected" series="all">Tất cả</span>';
+        let rowSeries='<span class="selected" thuongHieu="all">Tất cả</span>';
         response.results.forEach(rp=>{
-            rowSeries+=`<span series-id="${rp.id}">${rp.text}</span>`
+            rowSeries+=`<span thuongHieu-id="${rp.id}">${rp.text}</span>`
         })
         $('.fillter').html(rowSeries)
     });
@@ -44,7 +44,7 @@ function toCurrency(Num){
 
 function fillData(response){
     let productContainer="";
-    let seriesMap=new Map();
+    let thuongHieuMap=new Map();
     let mapProduct=new Map();
 
     response.forEach(sp=>{

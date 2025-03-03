@@ -4,7 +4,7 @@
 // <script src="/vendor/sweetalert2/sweetalert2.min.js"></script>
 // Bottom
 // <script src="/vendor/datatables/jquery.dataTables.min.js"></script>
-//
+// <script src="/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 
 const apiURL = "/api/v1/san-pham";
 let _existingNames;
@@ -40,10 +40,10 @@ function loadFilter() {
     )
     //Series
     $.ajax({
-            url: "/api/v1/admin/data-list-add-san-pham/series",
+            url: "/api/v1/admin/data-list-add-san-pham/thuongHieu",
             success: function (response) {
                 lstSeries = response.results;
-                $('#filter-series').select2({
+                $('#filter-thuongHieu').select2({
                     data: lstSeries.map(s => {
                         return {id: s.text, text: s.text}
                     })
@@ -106,7 +106,7 @@ function loadData() {
                 },
             },
             {"data": "tenSanPham", "name": "tenSanPham"},
-            {"data": "series", "name": "series", "visible": false},
+            {"data": "thuongHieu", "name": "thuongHieu", "visible": false},
             {
 
                 "data": "danhSachMauSac",
@@ -226,7 +226,7 @@ $(document).ready(function () {
     let filterCount = 1;
 
     let filterTrangThai = $('#filter-trang-thai').val();
-    let filterSeries = $('#filter-series').val();
+    let filterSeries = $('#filter-thuongHieu').val();
     let filterMauSac = $('#filter-mau-sac').val();
     let filterRom = $('#filter-rom').val();
     let filterSoLuong = $('#rangeSlider').val();
@@ -255,7 +255,7 @@ $(document).ready(function () {
         $('#filter-confirm').text(`Xác nhận`)
 
         filterTrangThai = $('#filter-trang-thai').val();
-        filterSeries = $('#filter-series').val();
+        filterSeries = $('#filter-thuongHieu').val();
         filterMauSac = $('#filter-mau-sac').val();
         filterRom = $('#filter-rom').val();
         filterSoLuong = $('#rangeSlider').val();
@@ -266,7 +266,7 @@ $(document).ready(function () {
     function applyFilterField() {
         debugger
         let filterTrangThai = $('#filter-trang-thai').val();
-        let filterSeries = $('#filter-series').val();
+        let filterSeries = $('#filter-thuongHieu').val();
         let filterMauSac = $('#filter-mau-sac').val();
         let filterRom = $('#filter-rom').val();
         let filterSoLuong = $('#rangeSlider').val();
@@ -275,11 +275,11 @@ $(document).ready(function () {
         if (filterSeries.length > 0) {
             let regex = "(" + filterSeries.join("|") + ")"
             console.log(regex)
-            table.column('series:name').search(regex, true, false);
+            table.column('thuongHieu:name').search(regex, true, false);
             filterCount++;
         } else {
             // Xóa bộ lọc nếu không có gì được chọn
-            table.column('series:name').search('');
+            table.column('thuongHieu:name').search('');
         }
         if (filterRom.length > 0) {
             let regex = "(" + filterRom.join("|") + ")"
@@ -392,7 +392,7 @@ $(document).ready(function () {
         if (flagEventClose) {
             console.log("default-filter")
             $('#filter-trang-thai').val(filterTrangThai).trigger('change');
-            $('#filter-series').val(filterSeries).trigger('change');
+            $('#filter-thuongHieu').val(filterSeries).trigger('change');
             $('#filter-mau-sac').val(filterMauSac).trigger('change');
             $('#filter-rom').val(filterRom).trigger('change');
             console.log(filterSoLuong + "filterSoLuong");
