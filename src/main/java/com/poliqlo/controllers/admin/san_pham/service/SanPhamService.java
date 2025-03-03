@@ -4,11 +4,8 @@ import com.poliqlo.controllers.admin.san_pham.model.request.AddRequest;
 import com.poliqlo.controllers.admin.san_pham.model.request.EditReq;
 import com.poliqlo.controllers.admin.san_pham.model.request.ImportReq;
 import com.poliqlo.controllers.admin.san_pham.model.response.Response;
-import com.poliqlo.models.SanPham;
-import com.poliqlo.repositories.ChatLieuRepository;
-import com.poliqlo.repositories.KieuDangRepository;
-import com.poliqlo.repositories.SanPhamRepository;
-import com.poliqlo.repositories.ThuongHieuRepository;
+import com.poliqlo.models.*;
+import com.poliqlo.repositories.*;
 import com.poliqlo.utils.ExportExcel;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -39,47 +36,32 @@ public class SanPhamService {
 
     @Autowired
     private ChatLieuRepository chatLieuRepository;
+    @Autowired
+    private DanhMucRepository DanhMucRepository;
 
     @Autowired
     private KieuDangRepository kieuDangRepository;
 
-    public SanPham updateSanPham(EditReq dto) {
-        // Tìm sản phẩm trong DB
-        Optional<SanPham> optional = sanPhamRepository.findById(dto.getId());
-        if (optional.isPresent()) {
-            SanPham sp = optional.get();
-
-            sp.setMaSanPham(dto.getMaSanPham());
-            sp.setTen(dto.getTen());
-            sp.setTrangThai(dto.getTrangThai());
-            sp.setAnhUrl(dto.getAnhUrl());
-            // sp.setMoTa(dto.getMoTa()); // nếu bạn muốn cập nhật mô tả
-
-            sp.setIdThuongHieu(
-                    thuongHieuRepository.findById(dto.getIdThuongHieu())
-                            .orElseThrow(() -> new RuntimeException("Không tìm thấy thương hiệu!"))
-            );
-            sp.setIdChatLieu(chatLieuRepository.findById(dto.getIdChatLieu())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy chất liệu!")));
-            sp.setIdKieuDang(kieuDangRepository.findById(dto.getIdKieuDang())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy kiểu dáng!")));
-
-            // Lưu lại
-            return sanPhamRepository.save(sp);
-        }
-        return null; // Hoặc throw exception
+    public boolean updateSanPham(EditReq dto) {
+        int updatedCount = sanPhamRepository.updateSanPham(
+                dto.getId(),
+                dto.getMaSanPham(),
+                dto.getTen(),
+                dto.getIdThuongHieu(),
+                dto.getIdChatLieu(),
+                dto.getIdKieuDang()
+        );
+        return updatedCount > 0;
     }
+
+
     public ResponseEntity<Response> save(@Valid AddRequest req) {
         SanPham chatLieu = modelMapper.map(req, SanPham.class);
         Response sanPhamResponse = modelMapper.map(sanPhamRepository.save(chatLieu), Response.class);
         return new ResponseEntity<>(sanPhamResponse, HttpStatus.CREATED);
     }
 
-    public ResponseEntity<Response> update(@Valid EditReq editReq) {
-        sanPhamRepository.save(modelMapper.map(editReq, SanPham.class));
-        var resp= sanPhamRepository.findById(editReq.getId()).map((element) -> modelMapper.map(element, Response.class)).get();
-        return ResponseEntity.accepted().body(resp);
-    }
+
 
     public ResponseEntity<SanPham> delete(Integer id) {
         if (id == null || !sanPhamRepository.existsById(id)) {

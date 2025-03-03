@@ -19,9 +19,9 @@ public class EditReq implements Serializable {
     private Integer id;
     private String maSanPham;
     private String ten;
-    private String trangThai;
     private Integer idThuongHieu;
     private Integer idChatLieu;
     private Integer idKieuDang;
-    private String anhUrl;
+//    private Integer idDanhMuc;
+//    private String anhUrl;
 }

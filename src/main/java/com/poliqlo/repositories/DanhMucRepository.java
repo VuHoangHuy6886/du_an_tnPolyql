@@ -7,4 +7,5 @@ import java.util.Collection;
 
 public interface DanhMucRepository extends JpaRepository<DanhMuc, Integer> {
     Collection<DanhMuc> findAllByIsDeletedIsFalseOrderByIdDesc();
+
 }

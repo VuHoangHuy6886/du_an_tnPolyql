@@ -22,6 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,6 +36,16 @@ public class SanPhamChiTietService {
         SanPhamChiTiet chatLieu = modelMapper.map(req, SanPhamChiTiet.class);
         Response chatLieuResponse = modelMapper.map(sanPhamChiTietRepository.save(chatLieu), Response.class);
         return new ResponseEntity<>(chatLieuResponse, HttpStatus.CREATED);
+    }
+    public SanPhamChiTiet updateSanPhamChiTiet(SanPhamChiTiet spctUpdate) {
+        Optional<SanPhamChiTiet> optional = sanPhamChiTietRepository.findById(spctUpdate.getId());
+        if (optional.isEmpty()) {
+            return null;
+        }
+        SanPhamChiTiet spct = optional.get();
+        spct.setGiaBan(spctUpdate.getGiaBan());
+        spct.setSoLuong(spctUpdate.getSoLuong());
+        return sanPhamChiTietRepository.save(spct);
     }
 
 //    public ResponseEntity<Response> update(@Valid EditReq editReq) {

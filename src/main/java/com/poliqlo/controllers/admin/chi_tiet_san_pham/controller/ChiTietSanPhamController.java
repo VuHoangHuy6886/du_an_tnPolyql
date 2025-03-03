@@ -70,7 +70,16 @@ public class ChiTietSanPhamController {
     public ResponseEntity<?> revert(@RequestParam(name = "id") Integer id) {
         return sanPhamChiTietService.revert(id);
     }
-
+    //edit
+    @ResponseBody
+    @PostMapping("/api/v1/san-pham-detail/update")
+    public ResponseEntity<?> updateProductDetail(@Valid @RequestBody SanPhamChiTiet spctUpdate) {
+        SanPhamChiTiet updated = sanPhamChiTietService.updateSanPhamChiTiet(spctUpdate);
+        if (updated == null) {
+            return ResponseEntity.badRequest().body("Sản phẩm chi tiết không tồn tại!");
+        }
+        return ResponseEntity.ok(updated);
+    }
 
     @ResponseBody
     @PostMapping("/api/v1/san-pham-chi-tiet/san-pham-chi-tiet/import-excel")

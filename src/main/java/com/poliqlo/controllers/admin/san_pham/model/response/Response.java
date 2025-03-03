@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * DTO for {@link com.poliqlo.models.ChatLieu}
@@ -26,8 +27,9 @@ public class Response implements Serializable {
     private String chatLieu;
     private String kieuDang;
     private String danhMuc;
+//    private List<String> danhMuc;
     private String anhUrl;
-    private Integer soLuong;
+    private Long soLuong;
     private String trangThai;
 
 }

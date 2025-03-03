@@ -99,41 +99,115 @@ const reloadDataTable = () => {
     $('#dataTable').DataTable().ajax.reload();
 };
 //model detail
+// Biến toàn cục lưu ID sản phẩm hiện tại (để reload bảng chi tiết)
+let currentProductId = null;
+
+// Hàm load danh sách chi tiết sản phẩm cho sản phẩm có id = productId
+function loadProductDetails(productId) {
+    currentProductId = productId;
+    $.ajax({
+        url: `/api/v1/san-pham/${productId}/details`,
+        type: 'GET',
+        success: function (data) {
+            let tbody = $('#detailTable tbody');
+            tbody.empty();
+            if (data && data.length > 0) {
+                data.forEach(function(detail) {
+                    let formattedPrice = detail.giaBan
+                        ? new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(detail.giaBan)
+                        : '';
+                    let row = `<tr data-detail-id="${detail.id}">
+                        <td>${detail.id}</td>
+                        <td>${detail.tenSanPham || ''}</td>
+                        <td>${detail.kichThuoc || ''}</td>
+                        <td>${formattedPrice}</td>
+                        <td>${detail.soLuong || ''}</td>
+                        <td>${detail.tenMau || ''}</td>
+                        <td>${detail.anhUrlDetail ? `<img src="${detail.anhUrlDetail}" style="width:70px; height:100px;" alt="Ảnh">` : ''}</td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-warning btn-edit-detail" data-id="${detail.id}">
+                                <i class="fas fa-edit"></i> Sửa
+                            </button>
+                        </td>
+                    </tr>`;
+                    tbody.append(row);
+                });
+            } else {
+                tbody.append('<tr><td colspan="8" class="text-center">Không có dữ liệu chi tiết</td></tr>');
+            }
+            $('#modal-product-detail').modal('show');
+        },
+        error: function (xhr, status, error) {
+            console.error(xhr.responseText);
+            Swal.fire('Lỗi', 'Không thể tải chi tiết sản phẩm', 'error');
+        }
+    });
+}
+
+// Xử lý khi nhấn nút "Chi tiết" trên DataTable (chứa ID sản phẩm)
 $(document).ready(() => {
-    // Sự kiện khi click nút "Chi tiết" trong DataTable (đã được thêm vào cột hành động)
     $('#dataTable tbody').on('click', '.btn-detail', function () {
         let productId = $(this).data('id');
-        $.ajax({
-            url: `/api/v1/san-pham/${productId}/details`,
-            type: 'GET',
-            success: function (data) {
-                let tbody = $('#detailTable tbody');
-                tbody.empty();
-                if (data && data.length > 0) {
-                    data.forEach(function(detail) {
-                        let formattedPrice = detail.giaBan
-                            ? new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(detail.giaBan)
-                            : '';
-                        let row = `<tr>
-                            <td>${detail.id}</td>
-                            <td>${detail.kichThuoc || ''}</td>
-                            <td>${formattedPrice}</td>
-                            <td>${detail.soLuong || ''}</td>
-                            <td>${detail.tenMau || ''}</td>
-                            <td>${detail.anhUrlDetail ? `<img src="${detail.anhUrlDetail}" style="width:70px; height:100px;" alt="Ảnh">` : ''}</td>
-                        </tr>`;
-                        tbody.append(row);
-                    });
-                } else {
-                    tbody.append('<tr><td colspan="6" class="text-center">Không có dữ liệu chi tiết</td></tr>');
-                }
-                $('#modal-product-detail').modal('show');
-            },
-            error: function (xhr, status, error) {
-                console.error(xhr.responseText);
-                Swal.fire('Lỗi', 'Không thể tải chi tiết sản phẩm', 'error');
+        loadProductDetails(productId);
+    });
+});
+
+// Khi nhấn nút "Sửa" trong bảng chi tiết, mở modal chỉnh sửa chi tiết
+$(document).on('click', '.btn-edit-detail', function () {
+    let tr = $(this).closest('tr');
+    let detailId = tr.data('detail-id');
+
+    // Lấy dữ liệu từ các cột
+    let tenSanPham = tr.find('td').eq(1).text().trim();
+    let mauSanPham = tr.find('td').eq(5).text().trim();
+    let kichThuoc = tr.find('td').eq(2).text().trim();
+
+    // Lấy giá bán (cột thứ 4, index 3): Loại bỏ dấu phân cách và ký tự không phải số
+    let giaBanText = tr.find('td').eq(3).text().trim();
+    let giaBanStr = giaBanText.replace(/\./g, '').replace(/,/g, '.').replace(/[^0-9.]/g, '');
+    let giaBan = parseFloat(giaBanStr) || 0;
+
+    // Lấy số lượng (cột thứ 5, index 4)
+    let soLuong = parseInt(tr.find('td').eq(4).text().trim()) || 0;
+
+    // Gán dữ liệu vào form chỉnh sửa chi tiết
+    $('#detail-id').val(detailId);
+    // Nối chuỗi cho trường "Tên sản phẩm": hiển thị tên, màu, kích thước
+    $('#detail-ten-san-pham').val(tenSanPham + " Màu " + mauSanPham + " ( Size: " + kichThuoc + " )");
+    $('#detail-gia-ban').val(giaBan);
+    $('#detail-so-luong').val(soLuong);
+
+    $('#modal-edit-detail').modal('show');
+});
+
+// Xử lý submit form chỉnh sửa chi tiết sản phẩm
+$('#form-edit-detail').on('submit', function (e) {
+    e.preventDefault();
+    let detailId = $('#detail-id').val();
+    let newGiaBan = $('#detail-gia-ban').val();
+    let newSoLuong = $('#detail-so-luong').val();
+
+    $.ajax({
+        url: `/api/v1/san-pham-detail/update`, // Endpoint cập nhật chi tiết sản phẩm trên server
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            id: detailId,
+            giaBan: newGiaBan,
+            soLuong: newSoLuong
+        }),
+        success: function (response) {
+            Swal.fire("Thành công", "Cập nhật chi tiết sản phẩm thành công", "success");
+            $('#modal-edit-detail').modal('hide');
+            if (currentProductId) {
+                loadProductDetails(currentProductId);
+                reloadDataTable();
             }
-        });
+        },
+        error: function (xhr, status, error) {
+            Swal.fire("Lỗi", "Cập nhật chi tiết sản phẩm thất bại", "error");
+            console.error(xhr.responseText);
+        }
     });
 });
 
@@ -202,7 +276,7 @@ $(document).ready(function () {
     });
 
     // Xử lý sự kiện "Chỉnh sửa" khi nhấn nút btn-edit trong DataTable
-    const apiURL = "/api/v1/san-pham";
+
 
     $(document).ready(() => {
         let existingNames;
@@ -213,25 +287,9 @@ $(document).ready(function () {
             $('#form-edit')[0].reset();
             $('#form-edit').removeClass('was-validated');
             $('#edit-ten').removeClass('is-invalid is-valid');
-            $('#edit-anh-preview').attr('src', '');
         }
 
-        // Cập nhật preview ảnh khi chọn file mới
-        $('#edit-anh-file').on('change', function () {
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    $('#edit-anh-preview').attr('src', e.target.result);
-                };
-                reader.readAsDataURL(file);
-            } else {
-                $('#edit-anh-preview').attr('src', '');
-            }
-        });
-
-        // Hàm hỗ trợ binding giá trị cho select dựa trên text hiển thị;
-        // Nếu không tìm thấy option khớp, chọn option đầu tiên.
+        // Hàm hỗ trợ binding giá trị cho select theo text hiển thị
         const setSelectValue = (selectId, displayText) => {
             let text = displayText ? displayText.toString().trim() : "";
             let option = $(selectId + " option").filter(function () {
@@ -249,37 +307,26 @@ $(document).ready(function () {
             clearForm();
             let rowData = table.row($(this).closest('tr')).data();
             if (rowData) {
-                // Binding các trường cơ bản
+                // Gán các trường cơ bản
                 $('#edit-id').val(rowData.id);
                 $('#edit-ma-san-pham').val(rowData.maSanPham);
                 $('#edit-ten').val(rowData.tenSanPham);
-                $('#edit-trang-thai').val(rowData.trangThai);
-                $('#edit-anh-url').val(rowData.anhUrl);
 
-                // Binding các trường select dựa trên tên hiển thị (nếu không có dữ liệu, chọn option đầu tiên)
+                // Binding các trường select: Thương hiệu, Chất liệu, Kiểu dáng
                 setSelectValue("#edit-thuong-hieu", rowData.thuongHieu || "");
                 setSelectValue("#edit-chat-lieu", rowData.chatLieu || "");
                 setSelectValue("#edit-kieu-dang", rowData.kieuDang || "");
-                setSelectValue("#edit-danh-muc", rowData.danhMuc || "");
 
-                // Nếu có ảnh, hiển thị preview
-                if (rowData.anhUrl) {
-                    $('#edit-anh-preview').attr('src', rowData.anhUrl);
-                } else {
-                    $('#edit-anh-preview').attr('src', '');
-                }
-
-                // Hiển thị modal chỉnh sửa
                 $('#modal-edit').modal('show');
 
-                // Lấy danh sách tên sản phẩm (ngoại trừ tên hiện tại) để dùng cho validate (nếu cần)
+                // Lấy danh sách tên sản phẩm (ngoại trừ tên hiện tại) để validate
                 existingNames = table.column(2).data().toArray()
                     .filter(name => name !== rowData.tenSanPham)
                     .map(name => name.toLowerCase().trim());
             }
         });
 
-        // Validate tên sản phẩm khi nhập (không trùng và không rỗng)
+        // Validate tên sản phẩm
         $('#edit-ten').off('input paste').on('input paste', function () {
             let tenVal = $(this).val().toLowerCase().trim();
             if ((existingNames && existingNames.includes(tenVal)) || tenVal === "") {
@@ -289,68 +336,55 @@ $(document).ready(function () {
             }
         });
 
-        // Submit form chỉnh sửa với FormData (hỗ trợ file upload)
+        // Submit form chỉnh sửa, gửi JSON
         $('#form-edit').submit(function (event) {
             event.preventDefault();
             const form = $(this);
-
-            // Chỉ validate Mã sản phẩm và Tên sản phẩm
             let maSanPhamVal = $('#edit-ma-san-pham').val().trim();
             let tenVal = $('#edit-ten').val().trim();
+
+            // Validate cơ bản
             if (maSanPhamVal === "" || tenVal === "") {
                 form.addClass('was-validated');
                 return;
             }
 
-            let formData = new FormData();
-            formData.append('id', $('#edit-id').val());
-            formData.append('maSanPham', maSanPhamVal);
-            formData.append('ten', tenVal);
-            formData.append('trangThai', $('#edit-trang-thai').val());
-            formData.append('anhUrl', $('#edit-anh-url').val());
-
-            // Ép sang số nếu có giá trị, hoặc gửi rỗng
-            let thuongHieuVal = $('#edit-thuong-hieu').val();
-            formData.append('thuongHieu', thuongHieuVal ? parseInt(thuongHieuVal) : null);
-            let chatLieuVal = $('#edit-chat-lieu').val();
-            formData.append('chatLieu', chatLieuVal ? parseInt(chatLieuVal) : null);
-            let kieuDangVal = $('#edit-kieu-dang').val();
-            formData.append('kieuDang', kieuDangVal ? parseInt(kieuDangVal) : null);
-            let danhMucVal = $('#edit-danh-muc').val();
-            formData.append('danhMuc', danhMucVal ? parseInt(danhMucVal) : null);
-
-            // Nếu có file ảnh mới được chọn, thêm file vào FormData
-            let fileInput = $('#edit-anh-file')[0].files;
-            if (fileInput.length > 0) {
-                formData.append('anh', fileInput[0]);
-            }
-
-
+            // Tạo payload JSON
+            let payload = {
+                id: $('#edit-id').val(),
+                maSanPham: maSanPhamVal,
+                ten: tenVal,
+                idThuongHieu: $('#edit-thuong-hieu').val() ? parseInt($('#edit-thuong-hieu').val()) : null,
+                idChatLieu: $('#edit-chat-lieu').val() ? parseInt($('#edit-chat-lieu').val()) : null,
+                idKieuDang: $('#edit-kieu-dang').val() ? parseInt($('#edit-kieu-dang').val()) : null
+            };
+            console.log(payload)
             $.ajax({
-                url: apiURL, // API của bạn phải hỗ trợ multipart/form-data
-                method: 'POST', // hoặc PUT
-                data: formData,
-                processData: false,
-                contentType: false,
+                url: apiURL + "/update",
+                method: 'POST',
+                contentType: "application/json",
+                data: JSON.stringify(payload),
                 success: function (response) {
-                    Toast.fire({
+                    Swal.fire({
                         icon: "success",
-                        title: "Cập nhật thành công"
+                        title: "Cập nhật sản phẩm thành công"
                     });
                     $('#modal-edit').modal('hide');
-                    reloadDataTable();
+                    reloadDataTable(); // Hàm reload bảng DataTable
                 },
                 error: function (xhr, status, error) {
-                    Toast.fire({
+                    Swal.fire({
                         icon: "error",
-                        title: "Cập nhật thất bại"
+                        title: "Cập nhật sản phẩm thất bại"
                     });
                     reloadDataTable();
-
+                    console.error(xhr.responseText);
                 }
             });
         });
     });
+
+
 
 
 
