@@ -52,69 +52,13 @@ public class SanPhamController {
     private final SanPhamChiTietRepository sanPhamChiTietRepository;
 
     // Các phương thức khác...
-//    @ResponseBody
-//    @PostMapping("/san-pham/update")
-//    public ResponseEntity<?> updateSanPham(@RequestBody EditReq dto) {
-//        SanPham updated = sanPhamService.updateSanPham(dto);
-//        if (updated != null) {
-//            return ResponseEntity.ok(updated);
-//        } else {
-//            return ResponseEntity.badRequest().body("Sản phẩm không tồn tại!");
-//        }
-//    }
     // API trả về danh sách sản phẩm chi tiết cho 1 sản phẩm
     @GetMapping("/api/v1/san-pham/{id}/details")
     public ResponseEntity<List<ProductDetailDTO>> getProductDetails(@PathVariable("id") Integer id) {
         List<ProductDetailDTO> details = sanPhamChiTietRepository.findProductDetailsBySanPhamId(id);
         return ResponseEntity.ok(details);
     }
-    // GET: Hiển thị trang thêm mới sản phẩm
-    @GetMapping("admin/san-pham/add")
-    public String showAddForm(Model model) {
-        List<ThuongHieu> listThuongHieu = thuongHieuRepository.findAll();
-        List<ChatLieu> listChatLieu = chatLieuRepository.findAll();
-        List<KieuDang> listKieuDang = kieuDangRepository.findAll();
 
-        model.addAttribute("listThuongHieu", listThuongHieu);
-        model.addAttribute("listChatLieu", listChatLieu);
-        model.addAttribute("listKieuDang", listKieuDang);
-        return "admin/san-pham/add-san-pham";
-    }
-
-    // POST: Xử lý thêm mới sản phẩm
-
-    @PostMapping("admin/san-pham/add")
-    public String addSanPham(String maSanPham, String tenSanPham,
-                             String trangThai, String moTa,
-                             String anhUrl, // sau khi upload file, tên ảnh được lưu qua hidden input
-                             List<Integer> thuongHieu, List<Integer> mauSac, List<Integer> kieuDang,
-                             RedirectAttributes redirectAttributes) {
-        SanPham sp = new SanPham();
-        sp.setMaSanPham(maSanPham);
-        sp.setTen(tenSanPham);
-        sp.setTrangThai(trangThai);
-        sp.setMoTa(moTa);
-        sp.setAnhUrl(anhUrl);
-        sp.setIsDeleted(false);
-
-        // Vì entity SanPham định nghĩa quan hệ ManyToOne nên chỉ lưu giá trị đầu tiên từ danh sách select
-        if (thuongHieu != null && !thuongHieu.isEmpty()) {
-            ThuongHieu th = thuongHieuRepository.findById(thuongHieu.get(0)).orElse(null);
-            sp.setIdThuongHieu(th);
-        }
-        if (mauSac != null && !mauSac.isEmpty()) {
-            ChatLieu ms = chatLieuRepository.findById(mauSac.get(0)).orElse(null);
-            sp.setIdChatLieu(ms);
-        }
-        if (kieuDang != null && !kieuDang.isEmpty()) {
-            KieuDang kd = kieuDangRepository.findById(kieuDang.get(0)).orElse(null);
-            sp.setIdKieuDang(kd);
-        }
-
-        sanPhamRepository.save(sp);
-        redirectAttributes.addFlashAttribute("successMessage", "Thêm sản phẩm thành công!");
-        return "redirect:/admin/san-pham/add";
-    }
     // Hiển thị giao diện quản lý sản phẩm
     @GetMapping("/admin/san-pham")
     public String ui(Model model) {
@@ -148,18 +92,7 @@ public class SanPhamController {
             respone.setAnhUrl((String) row[7]);
             respone.setSoLuong((Long) row[8]);
             respone.setTrangThai((String) row[9]);
-//            Response response = new Response(
-//                    ((Long) row[0]).intValue(),         // sp.id (Long to Integer)
-//                    (String) row[1],          // sp.maSanPham
-//                    (String) row[2],          // sp.ten
-//                    (String) row[3],          // th.ten
-//                    (String) row[4],          // cl.ten
-//                    (String) row[5],          // kd.ten
-//                    (String) row[6],          // dm.ten (GROUP_CONCAT)
-//                    (String) row[7],          // sp.anhUrl
-//                    ((Long) row[8]).intValue(),         // soLuong (Long to Integer)
-//                    (String) row[9]          // sp.trangThai
-//            );
+
             responses.add(respone);
         }
 
