@@ -80,7 +80,7 @@ public class DotGiamGiaService {
 
     public Page<SanPham> findAllProduct(Integer pageNo, Integer pageSize, String name) {
         Pageable pageable = PageRequest.of(pageNo, pageSize);
-        return sanPhamRepository.findAll(pageable);
+        return dotGiamGiaRepository.findSanPhamByName(name, pageable);
     }
 
     public Page<SanPham> findAllPages(Integer pageNo, Integer pageSize) {
@@ -184,7 +184,7 @@ public class DotGiamGiaService {
         dotGiamGiaRepository.save(dotGiamGia);
     }
 
-    // chuyên trạng thái thành hủy
+    // chuyên trạng thái
     public void toggleStatus(Integer id) {
         DotGiamGia dotGiamGia = findById(id);
         if (dotGiamGia.getTrangThai().equals(DiscountStatusUtil.DA_KET_THUC)) {
@@ -199,5 +199,9 @@ public class DotGiamGiaService {
 
     public List<DotGiamGia> listDiscountsUpdateStatus() {
         return dotGiamGiaRepository.findAll();
+    }
+
+    public List<SanPhamChiTiet> productDetailListByIdDGG(Integer id) {
+        return dotGiamGiaRepository.findByDotGiamGiaId(id);
     }
 }

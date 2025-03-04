@@ -37,11 +37,6 @@
                 <!-- Additional controls -->
                 <!--form fillter-->
                 <form class="bg-white shadow w-100 h-auto mt-3 my-3 p-3 d-flex justify-content-lg-around">
-                    <div class="d-flex justify-content-center align-items-center">
-                        <button type="button" class="btn btn-sm btn-warning p-2" id="ClearForm">
-                            <i class="fa-solid fa-broom"></i> clear
-                        </button>
-                    </div>
                     <div class="form-group d-flex flex-column justify-content-start align-items-start">
                         <label for="name" class="form-label font-weight-bold">Tên Hoặc Mã</label>
                         <input
@@ -79,6 +74,11 @@
                                 </option>
                             </select>
                         </div>
+                    </div>
+                    <div class="d-flex justify-content-center align-items-center">
+                        <button type="button" class="btn btn-sm btn-warning p-2" id="ClearForm">
+                            <i class="fa-solid fa-broom"></i> clear
+                        </button>
                     </div>
                     <div class="d-flex justify-content-center align-items-center">
                         <button class="btn btn-sm bg-success text-white font-weight-bold p-2">
@@ -227,39 +227,13 @@
         <!-- Modal -->
     </div>
 </div>
-<script>
-    document.getElementById("ClearForm").addEventListener("click", function () {
-        document.getElementById("name").value = "";
-        document.getElementById("status").value = "";
-        document.getElementById("startTime").value = "";
-        document.getElementById("endTime").value = "";
-    });
-
-
-    document.addEventListener("DOMContentLoaded", function () {
-        let statusElements = document.querySelectorAll("#DGGstatus"); // Lấy tất cả các phần tử có id là DGGstatus
-        statusElements.forEach(function (statusElement) {
-            let statusText = statusElement.textContent.trim(); // Lấy nội dung văn bản và loại bỏ khoảng trắng thừa
-            if (statusText === "Đã kết thúc") {
-                statusElement.style.color = "black";
-                statusElement.style.fontWeight = "bold";
-            } else if (statusText === "Đang diễn ra") {
-                statusElement.style.color = "red";
-                statusElement.style.fontWeight = "bold";
-            } else {
-                statusElement.style.color = "orange";
-                statusElement.style.fontWeight = "bold";
-            }
-        });
-    });
-
-</script>
 </body>
 <th:block layout:fragment="bottom_link">
     <!-- Page level plugins -->
     <script src="/vendor/datatables/jquery.dataTables.min.js"></script>
     <script src="/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 
+    <script src="/js/admin/dot-giam-gia/index.js"></script>
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </th:block>

@@ -95,9 +95,24 @@ public class DotGiamGiaController {
 
 
     @GetMapping("/admin/dot-giam-gia/form-add")
-    public String formAdd(Model model) {
+    public String formAdd(
+            @RequestParam(value = "page", defaultValue = "0", required = false) String pageStr,
+            @RequestParam(value = "size", defaultValue = "2", required = false) String sizeStr,
+            @RequestParam(value = "name", defaultValue = "", required = false) String name,
+            Model model) {
+        int page, size;
+        try {
+            page = Integer.parseInt(pageStr);
+            size = Integer.parseInt(sizeStr);
+        } catch (NumberFormatException e) {
+            page = 0;
+            size = 2;
+        }
+        if (name.equals("")) {
+            name = null;
+        }
         model.addAttribute("DotGiamGiaNew", new AddDotGiamGiaRequest());
-        model.addAttribute("products", service.productlist());
+        model.addAttribute("products", service.findAllProduct(page, size, name));
         return "admin/dot-giam-gia/form-add";
     }
 
@@ -129,6 +144,7 @@ public class DotGiamGiaController {
     public String formUpdate(@PathVariable("id") Integer id, Model model) {
         EditDotGiamGiaRequest request = service.findByIdForUpdate(id);
         model.addAttribute("DotGiamGiaUpdate", request);
+        model.addAttribute("listProducts", service.productDetailListByIdDGG(id));
         return "admin/dot-giam-gia/form-update";
     }
 

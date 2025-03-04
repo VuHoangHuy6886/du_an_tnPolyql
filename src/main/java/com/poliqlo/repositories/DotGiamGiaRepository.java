@@ -1,6 +1,8 @@
 package com.poliqlo.repositories;
 
 import com.poliqlo.models.DotGiamGia;
+import com.poliqlo.models.SanPham;
+import com.poliqlo.models.SanPhamChiTiet;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -48,5 +50,22 @@ public interface DotGiamGiaRepository extends JpaRepository<DotGiamGia, Integer>
             + "d.isDeleted = true "
             + "ORDER BY d.thoiGianBatDau ASC")
     List<DotGiamGia> findAllByIsDeletedTrue();
+
+    // query sản phẩm
+    @Query(value = "SELECT * FROM san_pham sp WHERE (:name IS NULL OR sp.TEN LIKE %:name%) AND sp.IS_DELETED = 0",
+            countQuery = "SELECT COUNT(*) FROM san_pham sp WHERE (:name IS NULL OR sp.TEN LIKE %:name%) AND sp.IS_DELETED = 0",
+            nativeQuery = true)
+    Page<SanPham> findSanPhamByName(@Param("name") String name, Pageable pageable);
+
+    // query sản phẩm chi tiết theo id đợt giảm giá
+    @Query(value = "SELECT ct.* " +
+            "FROM san_pham_chi_tiet ct " +
+            "INNER JOIN san_pham_chi_tiet_dot_giam_gia ctdgg ON ct.ID = ctdgg.san_pham_chi_tiet_id " +
+            "INNER JOIN dot_giam_gia dgg ON dgg.id = ctdgg.dot_giam_gia_id " +
+            "WHERE ctdgg.dot_giam_gia_id = :dotGiamGiaId AND dgg.IS_DELETED = false",
+            nativeQuery = true)
+    List<SanPhamChiTiet> findByDotGiamGiaId(@Param("dotGiamGiaId") Integer dotGiamGiaId);
+
+
 }
 

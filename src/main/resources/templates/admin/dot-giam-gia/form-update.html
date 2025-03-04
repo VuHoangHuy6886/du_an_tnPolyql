@@ -15,11 +15,11 @@
         <div class="card-header py-3">
             <div class="row d-flex justify-content-between align-items-center">
                 <h1 class="h3 text-gray-800 col-4">Cập nhập đợt giảm giá</h1>
-                <a th:href="@{/admin/dot-giam-gia/all}" class="btn bg-success font-weight-bold text-white"><i class="fa-solid fa-reply"></i> Quay lại</a>
+                <a th:href="@{/admin/dot-giam-gia/all}" class="btn bg-success font-weight-bold text-white"><i
+                        class="fa-solid fa-reply"></i> Quay lại</a>
             </div>
         </div>
         <div class="card-body d-flex justify-content-between">
-
             <!-- Form thêm đợt giảm giá -->
             <section>
                 <h5>Thông tin đợt giảm giá</h5>
@@ -97,9 +97,40 @@
             <!-- Form thêm đợt giảm giá -->
 
             <!-- List sản phẩm -->
-            <section class="w-75 border rounded">
-                <div class="w-100 mt-2 rounded" style="border-bottom: 1px solid grey;">
-                    <h5>Danh sách sản phẩm</h5>
+            <section class="w-75">
+                <div class="w-100">
+                    <h5>Danh sách sản phẩm Chi Tiết Của Đợt Giảm Giá này</h5>
+                </div>
+                <div class="p-4 border rounded shadow-sm bg-light">
+                    <table class="table table-bordered table-hover text-center">
+                        <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Tên</th>
+                            <th>Màu</th>
+                            <th>Kích Thước</th>
+                            <th>Số Lượng</th>
+                            <th>Giá Bán</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <th:block th:if="${#lists.isEmpty(listProducts) or listProducts == null}">
+                            <tr>
+                                <td colspan="6" class="text-center text-danger">Không có sản phẩm nào!</td>
+                            </tr>
+                        </th:block>
+                        <th:block th:unless="${#lists.isEmpty(listProducts) or listProducts == null}">
+                            <tr th:each="spct, i : ${listProducts}">
+                                <td th:text="${i.index + 1}"></td>
+                                <td th:text="${spct.sanPham.ten}"></td>
+                                <td th:text="${spct.mauSac.ten}"></td>
+                                <td th:text="${spct.kichThuoc.ten}"></td>
+                                <td th:text="${spct.soLuong}"></td>
+                                <td th:text="${#numbers.formatDecimal(spct.giaBan, 0, 'COMMA', 0, 'POINT') + ' VND'}"></td>
+                            </tr>
+                        </th:block>
+                        </tbody>
+                    </table>
                 </div>
                 <!-- Nội dung danh sách sản phẩm -->
             </section>
@@ -107,86 +138,11 @@
         </div>
     </div>
 </div>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const form = document.getElementById("formAdd");
-        const inputGiaTri = document.getElementById("ipValues");
-        const errorGiaTri = document.getElementById("errorGiaTri");
-        const thoiGianBatDau = document.getElementById("thoiGianBatDau");
-        const thoiGianKetThuc = document.getElementById("thoiGianKetThuc");
-        const percentRadio = document.getElementById("ckPercent");
-        const dollarRadio = document.getElementById("ckDollar");
-
-        function resetInput() {
-            inputGiaTri.value = "";
-            errorGiaTri.textContent = "";
-            inputGiaTri.classList.remove("is-invalid");
-        }
-
-        function showError(element, message) {
-            element.textContent = message;
-            inputGiaTri.classList.add("is-invalid");
-        }
-
-        function hideError(element) {
-            element.textContent = "";
-            inputGiaTri.classList.remove("is-invalid");
-        }
-
-        function validateInput() {
-            let value = inputGiaTri.value.trim();
-            inputGiaTri.value = value.replace(/[^0-9]/g, '');
-
-            if (value === "" || parseInt(value) < 1) {
-                showError(errorGiaTri, "Giá trị phải là số nguyên dương từ 1 trở lên");
-            } else if (percentRadio.checked && parseInt(value) > 100) {
-                inputGiaTri.value = "100";
-                hideError(errorGiaTri);
-            } else {
-                hideError(errorGiaTri);
-            }
-        }
-
-        function validateDates() {
-            const startDate = new Date(thoiGianBatDau.value);
-            const endDate = new Date(thoiGianKetThuc.value);
-            const now = new Date();
-
-            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-                alert("Vui lòng nhập thời gian hợp lệ");
-                return false;
-            }
-
-            if (startDate <= now) {
-                alert("Thời gian bắt đầu phải sau thời gian hiện tại");
-                return false;
-            }
-
-            if (startDate >= endDate) {
-                alert("Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc");
-                return false;
-            }
-            return true;
-        }
-
-        function validateForm(event) {
-            validateInput();
-            if (errorGiaTri.textContent !== "" || !validateDates()) {
-                event.preventDefault();
-                alert("Vui lòng kiểm tra lại các trường dữ liệu!");
-            }
-        }
-
-        inputGiaTri.addEventListener("input", validateInput);
-        percentRadio.addEventListener("click", resetInput);
-        dollarRadio.addEventListener("click", resetInput);
-        form.addEventListener("submit", validateForm);
-    });
-</script>
 </body>
 <th:block layout:fragment="bottom_link">
     <!-- Page level plugins -->
     <script src="/vendor/datatables/jquery.dataTables.min.js"></script>
     <script src="/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+    <script src="/js/admin/dot-giam-gia/form-update.js"></script>
 </th:block>
 </html>
