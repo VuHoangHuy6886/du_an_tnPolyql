@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/admin/layout-dashboard/layout.html"
+>
+<head>
+    <!--    Custom link-->
+    <th:block layout:fragment="head_link">
+        <link href="/vendor/select2/select2.min.css" rel="stylesheet">
+        <link href="/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+        <script src="/vendor/sweetalert2/sweetalert2.min.js"></script>
+        <link href="/css/admin/san-pham/san-pham-add.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/ion-rangeslider@2.3.1/css/ion.rangeSlider.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+        <script src="https://cdn.tiny.cloud/1/4ogf01p4hflwub9p3xmhz9huutzjkt0ozayzp33ypp7ps7he/tinymce/7/tinymce.min.js"
+                referrerpolicy="origin"></script>
+        <script src="/js/admin/san-pham-chi-tiet/add_spct.js"></script>
+    </th:block>
+
+
+</head>
+
+<!-- Custom styles for this page -->
+
+<body layout:fragment="content">
+
+
+<div class="row">
+    <!--    Table-->
+
+
+    <div class="card shadow my-0 mx-3 w-100 ">
+        <div class="card-header pb-0">
+            <!--            <h6 class="m-0 font-weight-bold text-primary">DataTables Example</h6>-->
+
+            <div class="row">
+                <!-- Additional controls -->
+                <div class="stepwizard">
+                    <div class="stepwizard-row setup-panel">
+                        <div class="stepwizard-step">
+                            <a href="#step-1" type="button" class="btn btn-primary btn-circle">1</a>
+                            <p>Thông tin cơ bản</p>
+                        </div>
+                        <div class="stepwizard-step">
+                            <a href="#step-2" type="button" class="btn btn-default btn-circle" disabled="disabled">2</a>
+                            <p>Sản phẩm chi tiết</p>
+                        </div>
+                        <div class="stepwizard-step">
+                            <a href="#step-3" type="button" class="btn btn-default btn-circle" disabled="disabled">3</a>
+                            <p>Step 3</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body" style="position: relative">
+            <!-- Spinner và Overlay HTML -->
+            <div id="overlay" style="position: relative">
+                <div class="spinner-border text-primary" style="position: fixed; top:350px" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+            </div>
+            <div>
+                <form id="form-sp" class="container-fluid">
+                    <div class="setup-content" id="step-1">
+                        <!--                        Thông tin cơ bản-->
+                        <fieldset class="row">
+                            <div class="col-2">
+                                <div class="avatar-upload">
+                                    <div class="avatar-edit">
+                                        <input type='file' id="imageUpload" accept=".png, .jpg, .jpeg"/>
+                                        <input type='text' id="sp-img" name="img" class="form-control d-none" required/>
+
+                                        <label for="imageUpload"></label>
+                                        <div class="invalid-feedback"
+                                             style="position: absolute; top: 50px;left: -100px;width: fit-content">
+                                            Vui lòng chọn ảnh sản phẩm
+                                        </div>
+                                    </div>
+                                    <div class="avatar-preview">
+                                        <div id="imagePreview"
+                                             style="background-image: url(https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg);">
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="col-10 row m-0">
+                                <div class="form-group col-3">
+                                    <label for="sp-ma" class="form-label">Mã sản phẩm</label>
+                                    <input type="text" class="form-control" id="sp-ma" required>
+                                    <div class="invalid-feedback">
+                                        Mã không hợp lệ hoặc đã tồn tại
+                                    </div>
+                                </div>
+                                <div class="form-group col-3">
+                                    <label for="sp-ten" class="form-label">Tên sản phẩm</label>
+                                    <input type="text" class="form-control" id="sp-ten" required>
+                                    <div class="invalid-feedback">
+                                        Vui lòng không để trống tên
+                                    </div>
+                                </div>
+
+
+
+                                <div class="form-group col-6">
+                                    <label for="sp-trangThai" class="form-label">Trạng thái</label>
+                                    <select class="form-control w-100 sm" id="sp-trangThai" required>
+                                        <option selected value="IN_STOCK">Có sẵn</option>
+                                        <option value="OUT_OF_STOCK">Hết hàng</option>
+
+                                    </select>
+
+                                    <div class="invalid-feedback">
+                                        Vui lòng trạng thái
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group col-6">
+                                    <label for="sp-kichThuoc" class="form-label">Kích thước</label>
+                                    <select class="form-control w-100" id="sp-kichThuoc" multiple="multiple" required>
+                                        <option></option>
+                                    </select>
+
+                                    <a class="position-absolute" id="btn-add-kich-thuoc" data-toggle="modal" data-target="#modal-add-chatLieu" style="right: 25px;top: 40px"><i
+                                            class="fa fa-plus"
+                                            aria-hidden="true"></i></a>
+                                    <div class="invalid-feedback">
+                                        Vui lòng chọn kích thước
+                                    </div>
+
+                                </div>
+                                <div class="form-group col-6">
+                                    <label for="sp-mauSac" class="form-label">Màu sắc</label>
+                                    <select class="form-control w-100" id="sp-mauSac" multiple="multiple" required>
+                                        <option></option>
+                                    </select>
+
+                                    <a class="position-absolute" id="btn-add-mau-sac" data-toggle="modal" data-target="#modal-add-mauSac" style="right: 25px;top: 40px"><i
+                                            class="fa fa-plus"
+                                            aria-hidden="true"></i></a>
+                                    <div class="invalid-feedback">
+                                        Vui lòng chọn màu sắc
+                                    </div>
+
+                                </div>
+                            </div>
+                        </fieldset>
+
+
+                        <fieldset class="row mt-4">
+                            <legend>Thương hiệu, danh mục</legend>
+                            <div class="form-group col-6">
+                                <label class="form-label">Thương hiệu</label>
+                                <select class="form-control" id="sp-thuongHieu" required>
+                                    <option selected disabled value="">Chọn thương hiệu</option>
+                                </select>
+                                <a class="position-absolute" id="btn-add-thuongHieu" data-toggle="modal" data-target="#modal-add-thuongHieu" style="right: 25px;top: 40px"><i
+                                        class="fa fa-plus"
+                                        aria-hidden="true"></i></a>
+                                <div class="invalid-feedback">
+                                    Vui lòng chọn thương hiệu
+                                </div>
+                            </div>
+
+                            <div class="form-group col-6">
+                                <label for="sp-danhMuc" class="form-label">Danh mục</label>
+                                <select class="form-control w-100" id="sp-danhMuc" multiple="multiple" required>
+                                    <option></option>
+                                </select>
+
+                                <a class="position-absolute" id="btn-add-danh-muc" data-toggle="modal" data-target="#modal-add-danhMuc" style="right: 25px;top: 40px"><i
+                                        class="fa fa-plus"
+                                        aria-hidden="true"></i></a>
+                                <div class="invalid-feedback">
+                                    Vui lòng chọn danh mục
+                                </div>
+
+                            </div>
+
+
+                        </fieldset>
+                        <fieldset class="row mt-4">
+                            <legend>Chất liệu, kiểu dáng</legend>
+                            <div class="form-group col-6">
+                                <label class="form-label">Chất liệu</label>
+                                <select class="form-control" id="sp-chatLieu" required>
+                                    <option selected disabled value="">Chọn chất liệu</option>
+                                </select>
+                                <a class="position-absolute" id="btn-add-chat-lieu" data-toggle="modal" data-target="#modal-add-chatLieu" style="right: 25px;top: 40px"><i
+                                        class="fa fa-plus"
+                                        aria-hidden="true"></i></a>
+                                <div class="invalid-feedback">
+                                    Vui lòng chọn kiểu dáng
+                                </div>
+                            </div>
+                            <div class="form-group col-6">
+                                <label class="form-label">Kiểu dáng</label>
+                                <select class="form-control" id="sp-kieuDang" required>
+                                    <option selected disabled value="">Chọn kiểu dáng</option>
+                                </select>
+                                <a class="position-absolute" id="btn-add-kieuDang" data-toggle="modal" data-target="#modal-add-kieuDang" style="right: 25px;top: 40px"><i
+                                        class="fa fa-plus"
+                                        aria-hidden="true"></i></a>
+                                <div class="invalid-feedback">
+                                    Vui lòng chọn kiểu dáng
+                                </div>
+                            </div>
+
+
+                        </fieldset>
+
+
+
+                        <!--                            <div class="form-group col-4">-->
+                        <!--                                <label for="input-text" class="form-label">Mô tả sản phẩm</label>-->
+                        <!--                                <div class="custom-file">-->
+                        <!--                                    <input type="file" class="custom-file-input" accept="image/*" id="customFile">-->
+                        <!--                                    <label class="custom-file-label" for="customFile">Choose file</label>-->
+                        <!--                                </div>-->
+                        <!--                                <div class="invalid-feedback">-->
+                        <!--                                    Vui lòng không để trống tên sản phẩm-->
+                        <!--                                </div>-->
+                        <!--                            </div>-->
+
+
+                        <button class="btn btn-primary nextBtn btn-lg pull-right" type="button">Next</button>
+
+                    </div>
+                    <div class="setup-content d-none" id="step-2">
+                        <div id="step-2-content"></div>
+                        <button class="btn btn-primary nextBtn btn-lg" type="button">Next</button>
+                    </div>
+                    <div class="row setup-content d-none" id="step-3">
+<!--                     Khuyến mại-->
+
+
+                        <div id="step-3-content">
+                        </div>
+
+                        <div class="card shadow m-2 w-100 ">
+                            <div class="card-header py-3">
+                                <div class="row" style="align-items: center">
+                                    <h3 class="text-gray-800 col-6">Mô tả sản phẩm</h3>
+                                </div>
+                            </div>
+                            <div class="card-body">
+
+
+                                    <textarea id="sp-mo-ta">
+                                        <p><img style="display: block; margin-left: auto; margin-right: auto;" src="https://mcdn.coolmate.me/image/December2024/AKWBNTASLAN_93.jpg" width="1004" height="2067"></p>
+                                    </textarea>
+
+
+                            </div>
+                        </div>
+
+                        <button class="btn btn-success btn-lg pull-right" type="submit" id="btn-finish">Finish!</button>
+                    </div>
+
+
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+
+</div>
+<th:block th:insert="/admin/san-pham-chi-tiet/fragment-add::fragment_add"></th:block>
+
+
+<!-- modal select template-->
+<div class="modal fade" id="modal-template" tabindex="-1" role="dialog" aria-labelledby="modal-templateLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modal-templateLabel">Bạn muốn thêm nhanh chóng</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <form id="form-template" class="needs-validation" novalidate>
+                    <div class="form-group">
+                        <label for="selected-template">Chọn sản phẩm muốn copy</label><br>
+                        <select class="form-control" style="width: 100%" id="selected-template" required>
+                        </select>
+                    </div>
+                    <div class="form-group justify-content-end ">
+                        <button type="button" class="btn btn-secondary mr-3" data-dismiss="modal">Hủy</button>
+
+                        <button type="submit" class="btn btn-primary">Xác nhận</button>
+                    </div>
+
+                </form>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+
+</body>
+
+<th:block layout:fragment="bottom_link">
+
+    <!-- Page level plugins -->
+    <script src="/vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+    <script src="/vendor/select2/select2.min.js"></script>
+
+    <!-- Page level custom scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/ion-rangeslider@2.3.1/js/ion.rangeSlider.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
+    <script type="module" src="/js/admin/san-pham/edit-san-pham.js"></script>
+
+
+</th:block>
+

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+>
+<head>
+
+
+</head>
+
+<div th:fragment="container_ultils2">
+    <div class="modal fade" id="modal-add-chatLieu" tabindex="-1" role="dialog" >
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Thêm mới</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <form class="needs-validation" action="/api/v1/san-pham-chi-tiet/chat-lieu" novalidate>
+                        <div class="form-group">
+                            <label for="add-ten">Tên chất liệu:</label>
+                            <input type="text" class="form-control " name="ten" placeholder="Tên chất liệu" required>
+                            <div class="invalid-feedback">Tên đã tồn tại hoặc không hợp lệ</div>
+                        </div>
+
+                        <div class="form-group justify-content-end ">
+                            <button type="button" class="btn btn-secondary mr-3" data-dismiss="modal">Hủy</button>
+
+                            <button type="submit" class="btn btn-primary">Xác nhận</button>
+                        </div>
+
+                    </form>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+    <!--Danh muc-->
+    <div class="modal fade" id="modal-add-danhMuc" tabindex="-1" role="dialog" >
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Thêm mới</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <form class="needs-validation" action="/api/v1/san-pham-chi-tiet/danh-muc" novalidate>
+                        <div class="form-group">
+                            <label for="add-ten">Tên danh mục:</label>
+                            <input type="text" class="form-control " name="ten" placeholder="Tên danh mục" required>
+                            <div class="invalid-feedback">Tên đã tồn tại hoặc không hợp lệ</div>
+                        </div>
+
+                        <div class="form-group justify-content-end ">
+                            <button type="button" class="btn btn-secondary mr-3" data-dismiss="modal">Hủy</button>
+
+                            <button type="submit" class="btn btn-primary">Xác nhận</button>
+                        </div>
+
+                    </form>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+    <!--Kích thước-->
+    <div class="modal fade" id="modal-add-kichThuoc" tabindex="-1" role="dialog" >
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Thêm mới</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <form action="/api/v1/san-pham-chi-tiet/kich-thuoc" class="needs-validation" novalidate>
+                        <div class="form-group">
+                            <label for="add-ten">Tên kích thước:</label>
+                            <input type="text" class="form-control " name="ten" placeholder="Tên kích thước" required>
+                            <div class="invalid-feedback">Tên đã tồn tại hoặc không hợp lệ</div>
+                        </div>
+
+                        <div class="form-group justify-content-end ">
+                            <button type="button" class="btn btn-secondary mr-3" data-dismiss="modal">Hủy</button>
+
+                            <button type="submit" class="btn btn-primary">Xác nhận</button>
+                        </div>
+
+                    </form>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+    <!--Kiểu dáng-->
+    <div class="modal fade" id="modal-add-kieuDang" tabindex="-1" role="dialog" >
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Thêm mới</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <form action="/api/v1/san-pham-chi-tiet/kieu-dang" id="form-add" class="needs-validation"
+                          novalidate>
+                        <div class="form-group">
+                            <label for="add-ten">Tên công nghệ:</label>
+                            <input type="text" class="form-control " id="add-ten" placeholder="Tên kiểu dáng" required>
+                            <div class="invalid-feedback">Tên đã tồn tại hoặc không hợp lệ</div>
+                        </div>
+
+                        <div class="form-group justify-content-end ">
+                            <button type="button" class="btn btn-secondary mr-3" data-dismiss="modal">Hủy</button>
+
+                            <button type="submit" class="btn btn-primary">Xác nhận</button>
+                        </div>
+
+                    </form>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+    <!--Màu sắc-->
+    <div class="modal fade" id="modal-add-mauSac" tabindex="-1" role="dialog" >
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Thêm mới</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <form action="/api/v1/san-pham-chi-tiet/mau-sac" class="needs-validation" novalidate>
+                        <div class="form-group">
+                            <label for="add-ten">Tên màu sắc:
+
+                            <input type="text" class="form-control " name="ten" placeholder="Tên màu sắc" required>
+                            <div class="invalid-feedback">Tên đã tồn tại hoặc không hợp lệ</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="add-ten">Mã màu sắc:</label>
+                            <input type="color" class="form-control " name="code" placeholder="Mã màu sắc" required>
+                            <div class="invalid-feedback">Vui lòng chọn mã màu</div>
+                        </div>
+
+                        <div class="form-group justify-content-end ">
+                            <button type="button" class="btn btn-secondary mr-3" data-dismiss="modal">Hủy</button>
+
+                            <button type="submit" class="btn btn-primary">Xác nhận</button>
+                        </div>
+
+                    </form>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+    <!--Thương hiệu-->
+    <div class="modal fade" id="modal-add-thuongHieu" tabindex="-1" role="dialog" >
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Thêm mới</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <form action="/api/v1/san-pham-chi-tiet/thuong-hieu" class="needs-validation" novalidate>
+                        <div class="form-group">
+                            <label for="add-ten">Tên thương hiệu:</label>
+                            <input type="text" class="form-control " name="ten" placeholder="Tên thương hiệu" required>
+                            <div class="invalid-feedback">Tên đã tồn tại hoặc không hợp lệ</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="add-ten">Thương hiệu: <img class="image-preview d-none" style="width: 100px"
+                                                                   src="#" alt="Xem trước logo"></label>
+                            <input type="file" class="form-control image-input" id="add-thumbnail" name="thumbnail"
+                                   accept="image/*" placeholder="Logo" required>
+                            <div class="invalid-feedback">Vui lòng chọn Logo</div>
+                        </div>
+
+                        <div class="form-group justify-content-end ">
+                            <button type="button" class="btn btn-secondary mr-3" data-dismiss="modal">Hủy</button>
+
+                            <button type="submit" class="btn btn-primary">Xác nhận</button>
+                        </div>
+
+                    </form>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+</html>

@@ -1,0 +1,15 @@
+UPDATE datn.tai_khoan
+SET `ROLE`='ROLE_CUSTOMER'
+WHERE ID = 1;
+UPDATE datn.tai_khoan
+SET `ROLE`='ROLE_ADMIN'
+WHERE ID = 2;
+UPDATE datn.tai_khoan
+SET `ROLE`='ROLE_EMPLOYEE'
+WHERE ID = 3;
+UPDATE datn.tai_khoan
+SET `ROLE`='ROLE_ADMIN'
+WHERE ID = 4;
+UPDATE datn.tai_khoan
+SET `ROLE`='ROLE_ADMIN'
+WHERE ID = 5;

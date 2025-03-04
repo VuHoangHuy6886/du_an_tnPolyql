@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/client/layout/layout-client.html"
+>
+<head>
+    <!--    Custom link-->
+    <th:block layout:fragment="head_link">
+        <!-- Bootstrap CSS -->
+        <link href="/css/client/client.css" rel="stylesheet">
+        </style>
+    </th:block>
+
+</head>
+
+<!-- Custom styles for this page -->
+
+<body layout:fragment="content">
+<div class="container-content">
+    <div class="container">
+
+        <!--        Banner-->
+        <div class="banner">
+            <div id="demo" class="carousel slide" data-ride="carousel">
+
+                <!-- Indicators -->
+                <ul class="carousel-indicators">
+                    <li data-target="#demo" data-slide-to="0" class="active"></li>
+                    <li data-target="#demo" data-slide-to="1"></li>
+                    <li data-target="#demo" data-slide-to="2"></li>
+                </ul>
+
+                <!-- The slideshow -->
+                <div class="carousel-inner py-4">
+                    <div class="carousel-item active">
+                        <img src="https://media.licdn.com/dms/image/v2/C4E12AQGgFlLt3fTSlg/article-cover_image-shrink_600_2000/article-cover_image-shrink_600_2000/0/1520152790190?e=2147483647&v=beta&t=g6_n3YsZvutv6_TMs5eLKQE_Fjg90axz99HnGqD7iPA" alt="Los Angeles"
+                             width="1100" height="500">
+                    </div>
+
+                </div>
+
+                <!-- Left and right controls -->
+                <a class="carousel-control-prev" href="#demo" data-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </a>
+                <a class="carousel-control-next" href="#demo" data-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </a>
+            </div>
+        </div>
+        <!--            Nội dung-->
+        <div class="content">
+            <div class="fillter"></div>
+            <div class="order ">
+                <div class="form-group row justify-content-end">
+                    <label for="select-order-by" class="col-sm-2 col-form-label text-white text-right pr-0">Xếp theo</label>
+                    <div class="col-sm-2 mr-2">
+                        <select id="select-order-by" class="form-control form-control-sm">
+                            <option>Mới ra mắt</option>
+                            <option>Bán chạy</option>
+                            <option>Giá thấp tới cao</option>
+                            <option>Giá cao tới thấp</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-container row justify-content-between">
+            </div>
+            <div class="load-more text-center py-5" >
+                <button>Xem thêm</button>
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+</body>
+
+<th:block layout:fragment="bottom_link">
+    <!-- jQuery and Bootstrap JS -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
+    <script src="/js/client/iphone.js"></script>
+
+</th:block>
+</html>

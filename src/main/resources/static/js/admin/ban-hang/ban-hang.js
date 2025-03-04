@@ -179,8 +179,8 @@ $(document).ready(() => {
 
 
     });
-    $.get('/api/v1/admin/data-list-add-san-pham/series').done(dataSeries=>{
-        $('#filter-series').select2({
+    $.get('/api/v1/admin/data-list-add-san-pham/thuongHieu').done(dataSeries=>{
+        $('#filter-thuongHieu').select2({
             placeholder: "Tất cả",
             data:  dataSeries.results,
             closeOnSelect:false
@@ -210,8 +210,8 @@ $(document).ready(()=>{
         _mapParamFilters.set('pageNo', 0)
         timeout = setTimeout(applyFilter(), 500); // Thay đổi giá trị này đ
     })
-    $('#filter-series').on('change', function () {
-            _mapParamFilters.set('seriesFilter',$(this).val())
+    $('#filter-thuongHieu').on('change', function () {
+            _mapParamFilters.set('thuongHieuFilter',$(this).val())
             _mapParamFilters.set('pageNo', 0)
             applyFilter()
 
@@ -229,7 +229,7 @@ $(document).ready(()=>{
 
 function applyFilter() {
 
-    if($('#filter-order').val()!='id:desc'||$('#filter-series').val().length>0){
+    if($('#filter-order').val()!='id:desc'||$('#filter-thuongHieu').val().length>0){
         $('#filter-badge').removeClass('d-none')
     }else{
         $('#filter-badge').addClass('d-none')
