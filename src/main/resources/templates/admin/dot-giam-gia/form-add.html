@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/admin/layout-dashboard/layout.html">
+<head>
+    <!-- Custom link -->
+    <th:block layout:fragment="head_link">
+        <!-- Các link CSS nếu cần -->
+    </th:block>
+</head>
+<body layout:fragment="content">
+<div class="row">
+    <div class="card shadow m-2 w-100">
+        <div class="card-header py-3">
+            <div class="row d-flex justify-content-between align-items-center">
+                <h1 class="h3 text-gray-800 col-4">Thêm mới đợt giảm giá</h1>
+                <a th:href="@{/admin/dot-giam-gia/all}" class="btn bg-success font-weight-bold text-white"><i
+                        class="fa-solid fa-reply"></i> Quay lại</a>
+            </div>
+        </div>
+        <div class="card-body d-flex justify-content-between">
+            <!--start Form-->
+            <section>
+                <h5>Thông tin đợt giảm giá</h5>
+                <form th:action="@{/admin/dot-giam-gia/save}" th:object="${DotGiamGiaNew}" method="post" id="formAdd"
+                      class="p-4 border rounded shadow-sm bg-light">
+                    <input type="hidden" id="productDetailIds" name="productDetailIds" value="">
+                    <div class="mb-3">
+                        <label for="ten" class="form-label">Tên</label>
+                        <input type="text" id="ten" th:field="*{ten}" class="form-control" placeholder="Nhập tên"/>
+                        <span th:if="${#fields.hasErrors('ten')}" th:errors="*{ten}" style="color: red;"></span>
+                        <span th:if="${message}" th:text="${message}" style="color: red;"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label for="ipValues">Nhập giá trị</label>
+                        <div class="w-100 d-flex justify-content-around">
+                            <div class="w-auto">
+                                <input class="form-control" type="text" id="ipValues" th:field="*{giaTriGiam}"
+                                       style="width: 150px;">
+                                <span id="showEr" style="color: red;"></span>
+                            </div>
+                            <div class="w-50 d-flex justify-content-around align-items-center">
+                                <div class="mt-2">
+                                    <label for="ckPercent">%</label>
+                                    <input type="radio" name="loaiChietKhau" value="Phần trăm" id="ckPercent" checked>
+                                </div>
+                                <div class="mt-2">
+                                    <label for="ckDollar">$</label>
+                                    <input type="radio" name="loaiChietKhau" value="Số tiền" id="ckDollar">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="giamToiDa" class="form-label">Giảm tối đa</label>
+                        <input type="text" id="giamToiDa" step="0.01" th:field="*{giamToiDa}" class="form-control"
+                               placeholder="Nhập giảm tối đa"/>
+                        <span th:if="${#fields.hasErrors('giamToiDa')}" th:errors="*{giamToiDa}"
+                              style="color: red;"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label for="thoiGianBatDau" class="form-label">Thời gian bắt đầu</label>
+                        <input type="datetime-local" id="thoiGianBatDau" th:field="*{thoiGianBatDau}"
+                               class="form-control"/>
+                        <p id="showErStartDate" style="color: red"></p>
+                    </div>
+                    <div class="mb-3">
+                        <label for="thoiGianKetThuc" class="form-label">Thời gian kết thúc</label>
+                        <input type="datetime-local" id="thoiGianKetThuc" th:field="*{thoiGianKetThuc}"
+                               class="form-control"/>
+                        <p id="showErEndDate" style="color: red"></p>
+                    </div>
+                    <div class="mb-3">
+                        <label for="moTa" class="form-label">Mô tả</label>
+                        <textarea id="moTa" th:field="*{moTa}" class="form-control" placeholder="Nhập mô tả"></textarea>
+                        <span th:if="${#fields.hasErrors('moTa')}" th:errors="*{moTa}" style="color: red;"></span>
+                    </div>
+                    <div class="d-grid">
+                        <button id="btnAdd" type="submit" class="btn btn-primary">Thêm mới</button>
+                    </div>
+                </form>
+            </section>
+            <!--End form-->
+            <!-- Start Table sản phẩm -->
+            <section class="w-75 ">
+                <div class="w-100">
+                    <h5>Danh sách sản phẩm</h5>
+                </div>
+                <div class="p-4 border rounded shadow-sm bg-light">
+                    <!--form filter sản phẩm-->
+                    <form class="w-100 p-3 d-flex justify-content-around align-items-center bg-success">
+
+                        <div class="w-25">
+                            <h6>Lọc theo tên</h6>
+                        </div>
+                        <div class="w-50">
+                            <input type="text" class="form-control" name="name" value="" placeholder="nhập tên">
+                        </div>
+                        <div class="w-25 d-flex justify-content-center align-items-center">
+                            <button class="btn btn-primary">Search</button>
+                        </div>
+                        <nav aria-label="Page navigation example">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item" th:classappend="${!products.hasPrevious()} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/dot-giam-gia/form-add(page=${products.number - 1}, name=${name})}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item" th:each="pageNum : ${#numbers.sequence(0, products.totalPages - 1)}" th:classappend="${pageNum == products.number} ? 'active'">
+                                    <a class="page-link" th:href="@{/admin/dot-giam-gia/form-add(page=${pageNum}, name=${name})}" th:text="${pageNum + 1}"></a>
+                                </li>
+                                <li class="page-item" th:classappend="${!products.hasNext()} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/dot-giam-gia/form-add(page=${products.number + 1}, name=${name})}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </form>
+                    <!-- Start Nội dung danh sách sản phẩm -->
+                    <table class="table table-bordered table-hover text-center" id="dataTable">
+                        <thead>
+                        <tr>
+                            <th style="width: 10%;">STT</th>
+                            <th style="width: 20%;">Mã</th>
+                            <th style="width: 20%;">Tên</th>
+                            <th style="width: 20%;">Mô Tả</th>
+                            <th style="width: 20%;">Trạng Thái</th>
+                            <th style="width: 10%;">
+                                <label class="mr-2">All</label>
+                                <input type="checkbox" id="checkAll">
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="product, i : ${products.content}">
+                            <td th:text="${i.index + 1}"></td>
+                            <td th:text="${product.maSanPham}"></td>
+                            <td th:text="${product.ten}"></td>
+                            <td th:text="${product.moTa}"></td>
+                            <td>
+                            <span th:if="${product.trangThai} == 'hoatDong'"
+                                  class="badge badge-success">Hoạt Động</span>
+                                <span th:if="${product.trangThai} == 'khongHoatDong'" class="badge badge-danger">Không Hoạt Động</span>
+                            </td>
+                            <td>
+                                <input type="checkbox" name="selectedProducts" th:value="${product.id}"
+                                       th:id="${product.id}" onclick="handlerClick(this)">
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div class="w-100">
+                        <h5 class="d-flex justify-content-start">Danh sách biến thể sản phẩm</h5>
+                        <table class="w-100 table table-bordered" id="tableProductDetail">
+                            <thead>
+                            <th>Chọn</th>
+                            <th>Tên Sản Phẩm</th>
+                            <th>Kích Thước</th>
+                            <th>Màu Sắc</th>
+                            <th>Giá Bán</th>
+                            </thead>
+                            <tbody id="tableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- End Nội dung danh sách sản phẩm -->
+            </section>
+            <!-- End Table sản phẩm -->
+        </div>
+    </div>
+</div>
+</body>
+<th:block layout:fragment="bottom_link">
+    <!-- Page level plugins -->
+    <script src="/vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+    <script src="/js/admin/dot-giam-gia/form-add.js"></script>
+</th:block>
+</html>
