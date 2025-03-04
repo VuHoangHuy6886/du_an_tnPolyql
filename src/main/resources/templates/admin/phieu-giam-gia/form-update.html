@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/admin/layout-dashboard/layout.html"
+>
+<head>
+    <th:block layout:fragment="head_link">
+    </th:block>
+</head>
+<body layout:fragment="content">
+<div class=" d-flex w-100 " style="height: 700px">
+
+
+    <!--    star form-->
+    <section>
+        <h2>FORM EDIT</h2>
+        <form method="post" th:action="@{/admin/phieu-giam-gia/update}" th:object="${request}"
+              class=" w-100 p-4 border rounded shadow bg-white">
+            <div class="d-flex justify-content-center align-items-center">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Mã Phiếu Giảm Giá</label>
+                <input type="text" class="form-control w-50" th:field="*{ma}" id="ma" readonly>
+                <input type="hidden" class="form-control w-50" th:field="*{id}" id="id">
+
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Tên Phiếu Giảm Giá</label>
+                <input type="hidden" id="id" th:field="*{id}"/>
+                <input type="hidden" id="trangThai" th:field="*{trangThai}" class="form-control"/>
+                <input type="text" class="form-control" id="ten" th:field="*{ten}">
+                <span class="text-danger" th:if="${#fields.hasErrors('ten')}" th:errors="*{ten}"></span>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <!-- Start input  -->
+                    <section>
+                        <label class="form-label">Giá Trị Giảm</label>
+                        <input type="text" class="form-control" name="giaTriGiam" id="loaiHinhGiam"
+                               th:field="*{giaTriGiam}"
+                               placeholder="Vui lòng nhập">
+                        <span class="text-danger" th:if="${#fields.hasErrors('giaTriGiam')}"
+                              th:errors="*{giaTriGiam}"></span>
+                    </section>
+                    <!-- End input  -->
+                    <!-- Start radio -->
+                    <section>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="loaiHinhGiam" id="phantram"
+                                   value="phantram"
+                                   checked>
+                            <label class="form-check-label" for="phantram">%</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="loaiHinhGiam" id="giatien"
+                                   value="giatien">
+                            <label class="form-check-label" for="giatien">$</label>
+                        </div>
+                    </section>
+                    <span th:text="${message}" style="color: red"></span>
+                    <!-- end radio -->
+                </div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Giảm Tối Đa</label>
+                <input type="text" class="form-control" id="giamToiDa" th:field="*{giamToiDa}">
+                <span class="text-danger" th:if="${#fields.hasErrors('giamToiDa')}" th:errors="*{giamToiDa}"></span>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Số lượng</label>
+                    <input type="text" class="form-control" id="soLuong" th:field="*{soLuong}">
+                    <span class="text-danger" th:if="${#fields.hasErrors('soLuong')}" th:errors="*{soLuong}"></span>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Hóa đơn tối thiểu</label>
+                    <input type="text" class="form-control" id="hoaDonToiThieu" th:field="*{hoaDonToiThieu}">
+                    <span class="text-danger" th:if="${#fields.hasErrors('hoaDonToiThieu')}"
+                          th:errors="*{hoaDonToiThieu}"></span>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Từ Ngày</label>
+                    <input type="datetime-local" class="form-control" id="ngayBatDau" th:field="*{ngayBatDau}">
+                    <span class="text-danger" th:if="${#fields.hasErrors('ngayBatDau')}"
+                          th:errors="*{ngayBatDau}"></span>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Đến Ngày</label>
+                    <input type="datetime-local" class="form-control" id="ngayKetThuc" th:field="*{ngayKetThuc}">
+                    <span class="text-danger" th:if="${#fields.hasErrors('ngayKetThuc')}"
+                          th:errors="*{ngayKetThuc}"></span>
+                    <span th:text="${messages}" style="color: red"></span>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 fw-bold">Cập Nhật</button>
+        </form>
+
+    </section>
+    <!--    end form    -->
+
+</div>
+</body>
+</html>

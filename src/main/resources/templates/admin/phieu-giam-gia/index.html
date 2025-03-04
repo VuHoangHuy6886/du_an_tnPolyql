@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/admin/layout-dashboard/layout.html"
+>
+<head>
+    <!--    Custom link-->
+    <th:block layout:fragment="head_link">
+
+    </th:block>
+
+</head>
+
+<!-- Custom styles for this page -->
+
+<body layout:fragment="content">
+
+
+<div class="row">
+    <div class="card shadow m-2 w-100 ">
+        <div class="card-header py-3">
+            <div class="row">
+                <h1 class="h3 text-gray-800 col-4">Quản lý Phiếu Giảm Giá</h1>
+                <!-- Additional controls -->
+                <div class="col-8 d-flex justify-content-sm-end align-items-center">
+                    <!--                    <form class="form-inline mr-3 d-flex align-items-center">-->
+                    <!--                        <label for="status" class="mr-2">Trạng thái</label>-->
+                    <!--                        <select id="status" name="status" class="form-control-plaintext text-primary"-->
+                    <!--                                style="width: 100px">-->
+                    <!--                            <option value="">Select</option>-->
+                    <!--                            <option value="Chưa diễn ra" th:selected="${status == 'Chưa diễn ra'}">Chưa diễn ra-->
+                    <!--                            </option>-->
+                    <!--                            <option value="Đang diễn ra" th:selected="${status == 'Đang diễn ra'}">Đang diễn ra-->
+                    <!--                            </option>-->
+                    <!--                            <option value="Đã kết thúc" th:selected="${status == 'Đã kết thúc'}">Đã kết thúc-->
+                    <!--                            </option>-->
+                    <!--                        </select>-->
+                    <!--                    </form>-->
+                    <!--                    <a id="btn-reload" class="btn btn-primary btn-icon-split mr-2">-->
+                    <!--                                        <span class="icon text-white-50">-->
+                    <!--                                            <i class="fas fa-rotate-right"></i>-->
+                    <!--                                        </span>-->
+                    <!--                        <span class="text">Làm mới</span>-->
+                    <!--                    </a>-->
+
+
+                    <a th:href="@{'/admin/phieu-giam-gia/form-add'}" class="btn btn-primary btn-icon-split mr-2"
+                       id="btn-add">
+                                        <span class="icon text-white-50">
+                                            <i class="fas fa-plus"></i>
+                                        </span>
+                        <span class="text">Thêm mới</span>
+                    </a>
+                </div>
+
+
+                <!--form fillter-->
+                <div class="container mt-4">
+                    <div class="card p-4">
+                        <form class="row g-3 align-items-center">
+                            <div class="col-md-4">
+                                <span for="name">Tìm kiếm theo Mã & Tên</span>
+                                <input
+                                        id="name"
+                                        type="text"
+                                        name="name"
+                                        class="form-control"
+                                        th:value="${name}"
+                                        placeholder="Nhập Mã & Tên ">
+                            </div>
+
+                            <div class="col-md-4">
+                                <span for="startTime">Ngày bắt đầu</span>
+                                <input type="date" class="form-control" id="startTime" name="startTime"
+                                       th:value="${#temporals.format(startTime, 'yyyy-MM-dd')}"/>
+                            </div>
+
+                            <div class="col-md-4">
+                                <span for="endTime">Ngày kết thúc</span>
+                                <input type="date" class="form-control" id="endTime" name="endTime"
+                                       th:value="${#temporals.format(endTime, 'yyyy-MM-dd')}"/>
+                            </div>
+                            <div class="form-group d-flex flex-column justify-content-start align-items-start">
+                                <div class="form-group d-flex flex-column justify-content-start align-items-start">
+                                    <label for="status" class="form-label font-weight-bold">Trạng Thái</label>
+                                    <select id="status" class="form-control" name="status">
+                                        <option value="">Select</option>
+                                        <option value="Sắp diễn ra" th:selected="${status == 'Sắp diễn ra'}">Sắp diễn
+                                            ra
+                                        </option>
+                                        <option value="Đang diễn ra" th:selected="${status == 'Đang diễn ra'}">Đang diễn
+                                            ra
+                                        </option>
+                                        <option value="Đã kết thúc" th:selected="${status == 'Đã kết thúc'}">Đã kết thúc
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button class="btn btn-secondary">
+                                Tìm Kiếm
+                            </button>
+                            <button class="btn btn-secondary"  id="ClearForm">
+                                Clear
+                            </button>
+                        </form>
+<!--                        <div class="row g-3 align-items-center mt-3">-->
+<!--                            <div class="col-md-2 text-end">-->
+<!--                                <button class="btn btn-secondary">-->
+<!--                                    Tìm Kiếm-->
+<!--                                </button>-->
+<!--                            </div>-->
+<!--                        </div>-->
+
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div>
+                        <table class="table table-bordered" id="dataTable">
+                            <thead>
+                            <tr>
+                                <!--                                <th>STT</th>-->
+                                <th>Mã</th>
+                                <th>Tên</th>
+                                <th>Ngày bắt đầu</th>
+                                <th>Ngày kết thúc</th>
+                                <th>Trạng thái</th>
+                                <th>Hành Động</th>
+
+                            </tr>
+                            </thead>
+                            <tr th:each="phieuGiamGia : ${pages}">
+                                <td th:text="${phieuGiamGia.id}" hidden></td>
+                                <td th:text="${phieuGiamGia.ma}"></td>
+                                <td th:text="${phieuGiamGia.ten}"></td>
+                                <td th:text="${#temporals.format(phieuGiamGia.ngayBatDau, 'dd/MM/yyyy')}"></td>
+                                <td th:text="${#temporals.format(phieuGiamGia.ngayKetThuc, 'dd/MM/yyyy')}"></td>
+                                <td th:text="${phieuGiamGia.trangThai}"></td>
+                                </td>
+
+                                <td class="d-flex ">
+                                    <a th:href="@{'/admin/phieu-giam-gia/form-update/'+ ${phieuGiamGia.id}}"
+                                       class="d-flex justify-content-center text-dark"
+                                       style="text-decoration: none; margin: 10px">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </a>
+
+                                    <a class="d-flex justify-content-center text-dark"
+                                       style="text-decoration: none; margin: 10px">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </a>
+                                </td>
+
+                            </tr>
+                        </table>
+                        <!--  Phân Trang-->
+
+                        <nav class="d-flex justify-content-center mt-3" aria-label="Page navigation" th:if="${totalPages > 1}">
+                            <ul class="pagination">
+                                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/phieu-giam-gia/all(page=${currentPage - 1}, size=5)}">
+                                        &laquo;
+                                    </a>
+                                </li>
+
+                                <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                    th:classappend="${i == currentPage} ? 'active'">
+                                    <a class="page-link" th:href="@{/admin/phieu-giam-gia/all(page=${i}, size=5)}" th:text="${i + 1}"></a>
+                                </li>
+
+                                <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/phieu-giam-gia/all(page=${currentPage + 1}, size=5)}">
+                                        &raquo;
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+
+                        <!--  Phân Trang-->
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<th:block layout:fragment="bottom_link">
+    <!-- Page level plugins -->
+    <script src="/vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+
+
+    <!-- Page level custom scripts -->
+    <script src="/js/admin/phieu-giam-gia/index.js"></script>
+</th:block>
+</html>
