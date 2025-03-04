@@ -1,6 +1,6 @@
 package com.poliqlo.controllers.admin.san_pham.service;
 
-import com.poliqlo.controllers.admin.san_pham.model.request.AddRequest;
+import com.poliqlo.controllers.admin.san_pham.model.request.AddRequestNBC;
 import com.poliqlo.models.*;
 import com.poliqlo.repositories.SanPhamRepository;
 import jakarta.transaction.Transactional;
@@ -15,21 +15,21 @@ import java.util.stream.Collectors;
 public class SanPhamService {
     private final SanPhamRepository sanPhamRepository;
     @Transactional
-    public ResponseEntity<?> persist(AddRequest addRequest){
+    public ResponseEntity<?> persist(AddRequestNBC addRequestNBC){
         var sp = SanPham.builder()
-                .maSanPham(addRequest.getMaSanPham())
-                .ten(addRequest.getTen())
-                .moTa(addRequest.getMoTa())
-                .trangThai(addRequest.getTrangThai())
-                .thuongHieu(ThuongHieu.builder().id(addRequest.getThuongHieuId()).build())
-                .danhMucs(addRequest.getDanhMucIds().stream().map(id -> DanhMuc.builder().id(id).build()).collect(Collectors.toSet()))
-                .kieuDang(KieuDang.builder().id(addRequest.getKieuDangId()).build())
-                .chatLieu(ChatLieu.builder().id(addRequest.getChatLieuId()).build())
-                .trangThai(addRequest.getTrangThai())
-                .anhUrl(addRequest.getAnhUrl())
+                .maSanPham(addRequestNBC.getMaSanPham())
+                .ten(addRequestNBC.getTen())
+                .moTa(addRequestNBC.getMoTa())
+                .trangThai(addRequestNBC.getTrangThai())
+                .thuongHieu(ThuongHieu.builder().id(addRequestNBC.getThuongHieuId()).build())
+                .danhMucs(addRequestNBC.getDanhMucIds().stream().map(id -> DanhMuc.builder().id(id).build()).collect(Collectors.toSet()))
+                .kieuDang(KieuDang.builder().id(addRequestNBC.getKieuDangId()).build())
+                .chatLieu(ChatLieu.builder().id(addRequestNBC.getChatLieuId()).build())
+                .trangThai(addRequestNBC.getTrangThai())
+                .anhUrl(addRequestNBC.getAnhUrl())
                 .isDeleted(false)
                 .build();
-        sp.setAnhs(addRequest.getAnhs().stream()
+        sp.setAnhs(addRequestNBC.getAnhs().stream()
                 .map(obj -> {
                     var anh = Anh.builder()
                             .sanPham(sp)
@@ -42,7 +42,7 @@ public class SanPhamService {
                 })
                 .toList()
         );
-        sp.setSanPhamChiTiets(addRequest.getSanPhamChiTiets().stream()
+        sp.setSanPhamChiTiets(addRequestNBC.getSanPhamChiTiets().stream()
                 .map(spct->{
                     var spctNew=SanPhamChiTiet.builder()
                             .sanPham(sp)

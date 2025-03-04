@@ -3,7 +3,7 @@ package com.poliqlo.controllers.admin.san_pham.controller;
 
 import com.poliqlo.controllers.admin.san_pham.model.reponse.DataList;
 import com.poliqlo.controllers.admin.san_pham.model.reponse.ResponseDataList;
-import com.poliqlo.controllers.admin.san_pham.model.request.AddRequest;
+import com.poliqlo.controllers.admin.san_pham.model.request.AddRequestNBC;
 import com.poliqlo.controllers.admin.san_pham_chi_tiet.chat_lieu.service.ChatLieuService;
 import com.poliqlo.models.DanhMuc;
 import com.poliqlo.repositories.*;
@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -44,7 +42,7 @@ public class SanPhamChiTietDataListController {
     public ResponseEntity<?> getSanPhamTemplate(@PathVariable(name = "id") Integer id) {
         var sp = sanPhamRepository.findById(id);
         var sanPhamTemplate = sp
-                .map((element) -> modelMapper.map(element, AddRequest.class)).orElse(null);
+                .map((element) -> modelMapper.map(element, AddRequestNBC.class)).orElse(null);
         assert sanPhamTemplate != null;
         sanPhamTemplate.setDanhMucIds(sp.get().getDanhMucs().stream().map(DanhMuc::getId).collect(Collectors.toSet()));
         return ResponseEntity.ok(sanPhamTemplate);

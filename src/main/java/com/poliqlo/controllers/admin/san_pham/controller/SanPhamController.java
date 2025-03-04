@@ -1,31 +1,25 @@
 package com.poliqlo.controllers.admin.san_pham.controller;
 
 
-import com.poliqlo.controllers.admin.san_pham.model.request.AddRequest;
+import com.poliqlo.controllers.admin.san_pham.model.request.AddRequestNBC;
 import com.poliqlo.controllers.admin.san_pham.service.SanPhamService;
 import com.poliqlo.models.*;
 import com.poliqlo.repositories.SanPhamRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.properties.bind.BindResult;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Controller
@@ -127,7 +121,7 @@ public class SanPhamController {
 //
     @ResponseBody
     @PutMapping("/api/v1/san-pham")
-    public ResponseEntity<?> addNew(@Validated @RequestBody AddRequest addRequest, BindingResult bindResult) {
+    public ResponseEntity<?> addNew(@Validated @RequestBody AddRequestNBC addRequestNBC, BindingResult bindResult) {
         if(bindResult.hasErrors()){
             String errorMessages = bindResult.getAllErrors().stream()
                     .map(er-> ((DefaultMessageSourceResolvable) er.getArguments()[0]).getDefaultMessage()+ " " +er.getDefaultMessage())
@@ -135,7 +129,7 @@ public class SanPhamController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errorMessages);
 
         }
-        return sanPhamService.persist(addRequest);
+        return sanPhamService.persist(addRequestNBC);
     }
 
 //    @Transactional
