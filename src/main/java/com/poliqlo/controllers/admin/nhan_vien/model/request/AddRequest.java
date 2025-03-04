@@ -23,10 +23,10 @@ public class AddRequest implements Serializable {
     @Size(min = 1, max = 100, message = "Tên phải có độ dài từ 1 đến 100 ký tự")
     private String ten;
 
-    // Kiểm tra username chỉ chứa các ký tự hợp lệ (chữ cái, chữ số, dấu gạch dưới, dấu chấm, dấu gạch nối)
-    @NotNull(message = "Username không được để trống")
-    @Pattern(regexp = "^[a-zA-Z0-9_.-]{5,50}$", message = "Username phải chứa từ 5 đến 50 ký tự và chỉ được phép bao gồm chữ cái, chữ số, dấu chấm, gạch dưới hoặc dấu gạch nối")
-    private String username;
+//    // Kiểm tra username chỉ chứa các ký tự hợp lệ (chữ cái, chữ số, dấu gạch dưới, dấu chấm, dấu gạch nối)
+//    @NotNull(message = "Username không được để trống")
+//    @Pattern(regexp = "^[a-zA-Z0-9_.-]{5,50}$", message = "Username phải chứa từ 5 đến 50 ký tự và chỉ được phép bao gồm chữ cái, chữ số, dấu chấm, gạch dưới hoặc dấu gạch nối")
+//    private String username;
 
     @NotNull(message = "Email không được để trống")
     @Email(message = "Email không hợp lệ")

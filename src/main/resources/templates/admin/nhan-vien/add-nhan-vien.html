@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/admin/layout-dashboard/layout.html">
+<head>
+  <th:block layout:fragment="head_link">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+    <style>
+      select {
+        width: 100%;
+        padding: 8px;
+        border: 3px solid #ced4da;
+        border-radius: 4px;
+        background-color: white;
+        font-size: 16px;
+        color: #495057;
+        appearance: none;
+      }
+      select::-ms-expand {
+        display: none;
+      }
+
+      select:focus {
+        border-color: #80bdff;
+        outline: none;
+        box-shadow: 0 0 4px rgba(0, 123, 255, 0.25);
+      }
+
+    </style>
+  </th:block>
+</head>
+<body layout:fragment="content">
+<div class="row">
+  <!-- Hiển thị thông báo nếu có -->
+  <p id="successMessage" th:if="${successMessage}" th:text="${successMessage}" hidden></p>
+
+  <main class="container px-3 py-4">
+    <div class="card">
+      <div class="card-body">
+        <h3 class="fw-bold fs-4 mb-3">Thêm nhân viên mới</h3>
+
+        <form class="needs-validation" novalidate action="/admin/nhan-vien/add-nhan-vien" method="post" enctype="multipart/form-data">
+          <div class="row">
+            <div class="col-md-6">
+              <!-- Ảnh -->
+              <div class="mb-3">
+                <label for="anhUrl" class="form-label">Ảnh</label>
+                <input type="file" id="anhUrl" name="anhUrl" class="form-control" accept="image/jpeg, image/png" required>
+                <div class="invalid-feedback">Vui lòng chọn một ảnh (JPG, PNG).</div>
+              </div>
+
+              <!-- Mã nhân viên (readonly) -->
+              <div class="mb-3">
+                <label for="employeeCode" class="form-label">Mã nhân viên</label>
+                <input type="text" id="employeeCode" name="employeeCode" class="form-control" readonly required>
+                <div class="invalid-feedback">Không được để trống mã nhân viên.</div>
+              </div>
+              <!-- Tên nhân viên -->
+              <div class="mb-3">
+                <label for="ten" class="form-label">Tên nhân viên</label>
+                <input type="text" id="ten" name="ten" class="form-control" pattern="^[A-Za-zÀ-Ỹà-ỹ\s]+$" required>
+                <div class="invalid-feedback">Tên không được để trống và chỉ chứa chữ cái.</div>
+              </div>
+
+              <!-- Email -->
+              <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" id="email" name="email" class="form-control" required>
+                <div class="invalid-feedback">Vui lòng nhập email hợp lệ.</div>
+                <span style="color: red;">[[${errorEmail}]]</span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <!-- Số điện thoại -->
+              <div class="mb-3">
+                <label for="soDienThoai" class="form-label">Số điện thoại</label>
+                <input type="text" id="soDienThoai" name="soDienThoai" class="form-control" pattern="^0\d{9}$" required>
+                <div class="invalid-feedback">Số điện thoại phải bắt đầu bằng 0 và có đúng 10 số.</div>
+                <span style="color: red;">[[${errorPhone}]]</span>
+
+              </div>
+              <!-- Mật khẩu -->
+              <div class="mb-3">
+                <label for="password" class="form-label">Mật khẩu</label>
+                <input type="password" id="password" name="password" class="form-control" pattern="(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}" required>
+                <div class="invalid-feedback">Mật khẩu không được để trống, tối thiểu 6 ký tự, chứa ít nhất 1 chữ cái và 1 số.</div>
+              </div>
+
+              <!-- Chức vụ -->
+              <div class="mb-3">
+                <label for="role" class="form-label">Chức vụ</label>
+                <select id="role" name="role" class="form-select" required>
+                  <option value="">Chọn chức vụ...</option>
+                  <option value="ROLE_EMPLOYEE">ROLE_EMPLOYEE</option>
+                  <option value="ROLE_ADMIN">ROLE_ADMIN</option>
+                </select>
+                <div class="invalid-feedback">Vui lòng chọn chức vụ.</div>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-success">Lưu</button>
+          <a href="/admin/nhan-vien/list" class="btn btn-secondary">Hủy</a>
+        </form>
+
+
+      </div>
+    </div>
+  </main>
+</div>
+
+</body>
+
+<th:block layout:fragment="bottom_link">
+  <script>
+    const fileInput = document.getElementById("anhUrl");
+    const imagePreview = document.getElementById("imagePreview");
+
+    fileInput.addEventListener("change", function () {
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+
+      reader.onloadend = function () {
+        imagePreview.innerHTML = `<img src="${reader.result}" alt="Ảnh preview" class="img-thumbnail" style="max-width: 100px; max-height: 100px;">`;
+      };
+
+      if (file) {
+        reader.readAsDataURL(file);
+      } else {
+        imagePreview.innerHTML = '';
+      }
+    });
+    document.addEventListener("DOMContentLoaded", function () {
+      const form = document.querySelector("form.needs-validation");
+      const submitButton = document.querySelector("button[type='submit']");
+
+      submitButton.addEventListener("click", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (form.checkValidity()) {
+          Swal.fire({
+            title: "Xác nhận thêm nhân viên?",
+            text: "Bạn có chắc chắn muốn thêm nhân viên này?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Xác nhận",
+            cancelButtonText: "Hủy",
+          }).then((result) => {
+            if (result.isConfirmed) {
+              form.submit();
+            }
+          });
+        } else {
+          form.classList.add("was-validated");
+        }
+      });
+
+      // Kiểm tra nếu có thông báo thành công
+      const successMessage = document.getElementById("successMessage");
+      if (successMessage) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Thành công!',
+          text: successMessage.textContent,
+          timer: 3000,
+          showConfirmButton: false
+        });
+      }
+    });
+
+  </script>
+</th:block>
+
+</html>

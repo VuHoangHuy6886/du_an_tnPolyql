@@ -15,11 +15,12 @@ import org.hibernate.annotations.ColumnDefault;
 @Table(name = "nhan_vien")
 public class NhanVien {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID", nullable = false)
     private Integer id;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @OneToOne(fetch = FetchType.LAZY, optional = false , cascade = CascadeType.ALL)
     @JoinColumn(name = "TAI_KHOAN_ID", nullable = false)
     private TaiKhoan taiKhoan;
 

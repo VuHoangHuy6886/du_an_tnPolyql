@@ -56,10 +56,7 @@ public class BlobStoreService {
         blobClient.upload(file.getInputStream(), file.getSize(), true);
         var url=blobClient.getBlobUrl();
         return new BlobResponse (fileName, url);
-
     }
-
-
     public void delete(String url) {
         try {
             String regex = ".*/([^/]+)/([^/]+)$";
@@ -79,9 +76,7 @@ public class BlobStoreService {
         }catch (Exception e){
             System.out.println("Lỗi khi xóa file");
         }
-
     }
-
     public String moveImageToPermanent(String fileName) {
         BlobClient tempBlobClient = blobServiceClient
                 .getBlobContainerClient(tempContainerName)

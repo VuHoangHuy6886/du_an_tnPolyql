@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/admin/layout-dashboard/layout.html">
+<head>
+    <th:block layout:fragment="head_link">
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+        <style>
+            body {
+                background-color: #f8f9fa;
+            }
+            .card {
+                border-radius: 10px;
+                box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            }
+            .form-label {
+                font-weight: 600;
+                color: #333;
+            }
+            .form-control, .form-select {
+                border-radius: 8px;
+            }
+            .form-control:focus {
+                border-color: #007bff;
+                box-shadow: 0px 0px 5px rgba(0, 123, 255, 0.3);
+            }
+            .btn-custom {
+                border-radius: 8px;
+                font-size: 16px;
+                font-weight: 600;
+            }
+            #imagePreview img {
+                border-radius: 10px;
+                border: 2px solid #ccc;
+                max-width: 150px;
+                max-height: 150px;
+                object-fit: cover;
+            }
+            select, input {
+                height: 40px;
+                width: 100%;
+                padding: 8px;
+                border: 1px solid #1b74e4;
+                border-radius: 5px;
+                font-size: 16px;
+            }
+            .btn-save {
+                background-color: #28a745; /* Màu xanh lá */
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                font-size: 16px;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: background 0.3s ease;
+            }
+
+            .btn-save:hover {
+                background-color: #218838;
+            }
+
+            .btn-cancel {
+                background-color: #6c757d;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                font-size: 16px;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: background 0.3s ease;
+            }
+
+            .btn-cancel:hover {
+                background-color: #5a6268; /* Màu xám đậm hơn khi hover */
+            }
+
+        </style>
+    </th:block>
+</head>
+
+<body layout:fragment="content">
+<div class="row justify-content-center">
+    <main class="container px-3 py-4">
+        <div class="card p-4">
+            <h3 class="fw-bold fs-4 text-center" style="margin-bottom: 40px">Thêm khách hàng mới</h3>
+            <form class="needs-validation" novalidate action="/admin/khach-hang/add-khach-hang" method="post" enctype="multipart/form-data">
+                <div class="row">
+                    <!-- Cột 1: Ảnh khách hàng -->
+                    <div class="col-md-4 text-center">
+                        <label for="anhUrl" class="form-label">Ảnh khách hàng</label>
+                        <input type="file" id="anhUrl" name="anhUrl" class="form-control" accept="image/jpeg, image/png" required>
+                        <div class="invalid-feedback">Vui lòng chọn ảnh (JPG, PNG).</div>
+                        <div id="imagePreview" class="mt-3"></div>
+                    </div>
+
+                    <!-- Cột 2 & 3: Thông tin cá nhân -->
+                    <div class="col-md-8">
+                        <div class="row">
+                            <!-- Mã khách hàng -->
+                            <div class="col-md-6 mb-3">
+                                <label for="maKhachHang" class="form-label">Mã khách hàng</label>
+                                <input type="text" id="maKhachHang" name="maKhachHang" class="form-control" readonly required>
+                            </div>
+                            <!-- Tên khách hàng -->
+                            <div class="col-md-6 mb-3">
+                                <label for="ten" class="form-label">Tên khách hàng</label>
+                                <input type="text" id="ten" name="ten" class="form-control" pattern="^[A-Za-zÀ-Ỹà-ỹ\s]+$" required>
+                                <div class="invalid-feedback">Tên chỉ chứa chữ cái.</div>
+                            </div>
+                            <!-- Ngày sinh -->
+                            <div class="col-md-6 mb-3">
+                                <label for="ngaySinh" class="form-label">Ngày sinh</label>
+                                <input type="date" id="ngaySinh" name="ngaySinh" class="form-control" required>
+                            </div>
+                            <!-- Giới tính -->
+                            <div class="col-md-6 mb-3">
+                                <label for="gioiTinh" class="form-label">Giới tính</label>
+                                <select id="gioiTinh" name="gioiTinh" class="form-select" required>
+                                    <option value="">Chọn giới tính...</option>
+                                    <option value="Nam">Nam</option>
+                                    <option value="Nữ">Nữ</option>
+                                </select>
+                                <div class="invalid-feedback">Vui lòng chọn giới tính.</div>
+                            </div>
+                            <!-- Email -->
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" id="email" name="email" class="form-control" required>
+                                <div class="invalid-feedback">Vui lòng nhập email hợp lệ.</div>
+                                <span style="color: red;">[[${errorEmail01}]]</span>
+                            </div>
+                            <!-- Số điện thoại -->
+                            <div class="col-md-6 mb-3">
+                                <label for="soDienThoai" class="form-label">Số điện thoại</label>
+                                <input type="text" id="soDienThoai" name="soDienThoai" class="form-control" pattern="^0\d{9}$" required>
+                                <div class="invalid-feedback">Nhập đúng 10 số.</div>
+                                <span style="color: red;">[[${errorPhone01}]]</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Nút hành động -->
+                <div class="text-center mt-4">
+                    <button class="btn-save">Lưu</button>
+                    <a href="/admin/khach-hang/list-khach-hang" class="btn-cancel">Hủy</a>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+
+<!-- Script xử lý preview ảnh -->
+<script>
+    document.getElementById("anhUrl").addEventListener("change", function () {
+        const file = this.files[0];
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            document.getElementById("imagePreview").innerHTML = `<img src="${e.target.result}" alt="Ảnh xem trước">`;
+        };
+        if (file) reader.readAsDataURL(file);
+    });
+
+    (function () {
+        'use strict';
+        document.addEventListener('DOMContentLoaded', function () {
+            const forms = document.querySelectorAll('.needs-validation');
+            forms.forEach(form => {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        });
+    })();
+    document.getElementById("ngaySinh").addEventListener("change", function () {
+        const ngaySinhInput = this;
+        const ngaySinhValue = new Date(ngaySinhInput.value);
+        const today = new Date();
+        const minAge = 13;
+
+        // Đặt thời gian về 0h để so sánh chính xác
+        today.setHours(0, 0, 0, 0);
+
+        // Tính số tuổi
+        const age = today.getFullYear() - ngaySinhValue.getFullYear();
+        const monthDiff = today.getMonth() - ngaySinhValue.getMonth();
+        const dayDiff = today.getDate() - ngaySinhValue.getDate();
+
+        // Kiểm tra điều kiện
+        if (!ngaySinhInput.value) {
+            ngaySinhInput.setCustomValidity("Vui lòng nhập ngày sinh.");
+        } else if (ngaySinhValue >= today) {
+            ngaySinhInput.setCustomValidity("Ngày sinh không được là hôm nay hoặc tương lai.");
+        } else if (age < minAge || (age === minAge && (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)))) {
+            ngaySinhInput.setCustomValidity("Khách hàng phải ít nhất 13 tuổi.");
+        } else {
+            ngaySinhInput.setCustomValidity("");
+        }
+
+        ngaySinhInput.reportValidity();
+    });
+
+</script>
+
+</body>
+
+<th:block layout:fragment="bottom_link"></th:block>
+
+</html>

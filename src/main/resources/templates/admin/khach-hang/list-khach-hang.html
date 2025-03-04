@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="/admin/layout-dashboard/layout.html">
+<head>
+    <th:block layout:fragment="head_link">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    </th:block>
+    <style>
+        .search-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            flex-grow: 1;
+        }
+
+        .search-container input {
+            flex-grow: 1;
+            max-width: 400px;
+            height: 36px;
+            padding: 5px;
+        }
+
+        .control-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Đảm bảo nút không bị quá nhỏ trên màn hình nhỏ */
+        .control-buttons .btn {
+            white-space: nowrap;
+        }
+
+        /* Responsive chỉnh lại layout hợp lý */
+        @media (max-width: 992px) {
+            .search-container {
+                width: 100%;
+            }
+
+            .control-buttons {
+                justify-content: center;
+            }
+
+            .control-buttons .btn {
+                width: 100%;
+            }
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+        }
+
+        td img {
+            display: block;
+            margin: 0 auto;
+            border-radius: 5px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #ddd;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        td a {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        td a:hover {
+            color: #0056b3;
+        }
+
+        .table thead tr {
+            border-bottom: 2px solid #007bff;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: flex-end;  /* Di chuyển phân trang ra bên phải */
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .pagination .page-item {
+            margin: 0 3px;  /* Giảm khoảng cách giữa các nút */
+        }
+
+        .pagination .page-link {
+            display: inline-block;
+            padding: 6px 10px;  /* Giảm kích thước padding để nút nhỏ lại */
+            font-size: 14px;  /* Giảm kích thước chữ */
+            font-weight: 600;
+            color: #007bff;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .pagination .page-link:hover {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: #ddd;
+            background-color: #f8f9fa;
+            cursor: not-allowed;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .pagination .page-link:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.5);
+        }
+
+        .pagination .page-item a {
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body layout:fragment="content">
+<div class="row">
+    <!-- Table -->
+    <div class="card shadow m-2 w-100">
+        <div class="card-header py-3">
+            <div class="row align-items-center">
+                <div class="col-12 mb-2">
+                    <h1 class="h3 text-gray-800">Quản lý khách hàng</h1>
+                </div>
+                <div class="col-md-4">
+                    <div class="search-container">
+                        <input type="text" class="form-control" id="searchInput" placeholder="Tìm kiếm theo mã ,  email hoặc số điện thoại..." />
+                    </div>
+                </div>
+                <div class="col-md-8 d-flex justify-content-between align-items-center">
+                    <div class="filter-container">
+                        <label for="genderFilter">Giới tính:</label>
+                        <select id="genderFilter" class="form-control" style="width: 150px;">
+                            <option value="">Tất cả</option>
+                            <option value="Nam">Nam</option>
+                            <option value="Nữ">Nữ</option>
+                        </select>
+                        <label for="statusFilter">Trạng thái:</label>
+                        <select id="statusFilter" class="form-control" style="width: 150px;">
+                            <option value="Hoạt động">Hoạt động</option>
+                            <option value="Đã xóa">Đã xóa</option>
+                        </select>
+                    </div>
+
+                    <div class="control-buttons">
+                        <a id="btn-reload" href="#" class="btn btn-primary">
+                            <i class="fas fa-rotate-right"></i> Làm mới
+                        </a>
+                        <a href="/admin/khach-hang/add-khach-hang" class="btn btn-success">
+                            <i class="fas fa-plus"></i> Thêm mới
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="">
+                <table class="border">
+                    <thead>
+                    <tr>
+                        <th>Mã</th>
+                        <th>Ảnh</th>
+                        <th>Tên</th>
+                        <th>Ngày sinh</th>
+                        <th>Giới tính</th>
+                        <th>Email</th>
+                        <th>Số điện thoại</th>
+                        <th>Trạng thái</th>
+                        <th>Chức năng</th>
+                    </tr>
+                    </thead>
+                    <tbody id="customerTableBody">
+                    <tr th:each="khachHang : ${khachHangs}">
+                        <td th:text="${khachHang.id}"></td>
+                        <td>
+                            <img th:src="${khachHang.taiKhoan.anhUrl}" alt="Ảnh khách hàng" width="100">
+                        </td>
+                        <td th:text="${khachHang.ten}"></td>
+                        <td th:text="${khachHang.ngaySinh}"></td>
+                        <td th:text="${khachHang.gioiTinh}"></td>
+                        <td th:text="${khachHang.taiKhoan.email}"></td>
+                        <td th:text="${khachHang.taiKhoan.soDienThoai}"></td>
+                        <td th:text="${khachHang.isDeleted ? 'Đã xóa ' : 'Hoạt động'}"></td>
+                        <td>
+                            <a th:href="@{/admin/khach-hang/xem-chi-tiet/{id}(id=${khachHang.id})}" >
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a th:href="@{/admin/khach-hang/update-khach-hang/{id}(id=${khachHang.id})}" >
+                                <i style="margin-left: 10px" class="bi bi-pencil-square"></i>
+                            </a>
+                            <a href="#" class="delete-customer" th:data-url="@{/admin/khach-hang/delete-khach-hang/{id}(id=${khachHang.id})}">
+                                <i style="margin-left: 10px" class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination">
+                <ul class="pagination justify-content-center">
+                    <!-- Nút "Trước" -->
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{/admin/khach-hang/list-khach-hang(page=${currentPage - 1})}" tabindex="-1">Trước</a>
+                    </li>
+
+                    <!-- Các trang -->
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                        th:classappend="${currentPage == i} ? 'active'">
+                        <a class="page-link" th:href="@{/admin/khach-hang/list-khach-hang(page=${i})}"
+                           th:text="${i + 1}">1</a>
+                    </li>
+                    <!-- Nút "Sau" -->
+                    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{/admin/khach-hang/list-khach-hang(page=${currentPage + 1})}">Sau</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block layout:fragment="bottom_link">
+    <script >
+        // Hàm tìm kiếm theo input
+        document.getElementById('searchInput').addEventListener('input', function () {
+            var keyword = this.value.toLowerCase();
+            var rows = document.querySelectorAll('#customerTableBody tr');
+            rows.forEach(function(row) {
+                var cells = row.querySelectorAll('td');
+                var match = false;
+                cells.forEach(function(cell) {
+                    if (cell.textContent.toLowerCase().includes(keyword)) {
+                        match = true;
+                    }
+                });
+                if (match) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+        document.getElementById('genderFilter').addEventListener('change', function () {
+            var selectedGender = this.value.toLowerCase();
+            var rows = document.querySelectorAll('#customerTableBody tr');
+
+            rows.forEach(function (row) {
+                var genderCell = row.cells[4]; // Cột thứ 5 chứa giới tính
+                if (!genderCell) return;
+
+                var genderText = genderCell.textContent.trim().toLowerCase();
+
+                if (selectedGender === "" || genderText === selectedGender) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        });
+        document.getElementById('statusFilter').addEventListener('change', function () {
+            let selectedValue = this.value;
+            if (selectedValue === 'active') {
+                window.location.href = '/admin/khach-hang/list-khach-hang';
+            } else {
+                window.location.href = '/admin/khach-hang/list-customer-deleted';
+            }
+        });
+        document.addEventListener("DOMContentLoaded", function () {
+            const successMessage = document.getElementById("successMessage");
+            if (successMessage) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công!',
+                    text: successMessage.textContent,
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            }
+        });
+        document.querySelectorAll(".delete-customer").forEach(item => {
+            item.addEventListener("click", function (event) {
+                event.preventDefault();
+                const deleteUrl = this.getAttribute("data-url");
+                Swal.fire({
+                    title: "Bạn có chắc chắn muốn xóa?",
+                    text: "Hành động này không thể hoàn tác!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "Xóa",
+                    cancelButtonText: "Hủy"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = deleteUrl;
+                    }
+                });
+            });
+        });
+    </script>
+    <!-- Script khởi tạo DataTable -->
+</th:block>
+</body>
+</html>
