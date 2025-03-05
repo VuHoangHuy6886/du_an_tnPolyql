@@ -2,6 +2,8 @@ package com.poliqlo.models;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
@@ -11,6 +13,7 @@ import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Builder
 @AllArgsConstructor
@@ -21,6 +24,7 @@ import java.time.Instant;
 @Table(name = "phieu_giam_gia")
 public class PhieuGiamGia {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID", nullable = false)
     private Integer id;
 
@@ -53,11 +57,11 @@ public class PhieuGiamGia {
 
     @NotNull
     @Column(name = "NGAY_BAT_DAU", nullable = false)
-    private Instant ngayBatDau;
+    private LocalDateTime ngayBatDau;
 
     @NotNull
     @Column(name = "NGAY_KET_THUC", nullable = false)
-    private Instant ngayKetThuc;
+    private LocalDateTime ngayKetThuc;
 
     @Size(max = 50)
     @Column(name = "TRANG_THAI", length = 50)

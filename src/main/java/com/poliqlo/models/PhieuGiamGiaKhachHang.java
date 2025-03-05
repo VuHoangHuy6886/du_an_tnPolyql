@@ -15,6 +15,7 @@ import org.hibernate.annotations.ColumnDefault;
 public class PhieuGiamGiaKhachHang {
     @Id
     @Column(name = "ID", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @NotNull

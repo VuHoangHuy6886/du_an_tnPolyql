@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/admin/layout-dashboard/layout.html"
+>
+<head>
+    <!--    Custom link-->
+    <th:block layout:fragment="head_link">
+
+    </th:block>
+
+</head>
+
+<!-- Custom styles for this page -->
+
+<body layout:fragment="content">
+<div class="row d-flex justify-content-center align-items-center p-4 border rounded shadow bg-white">
+    <h3>Thêm Mới Đợt Giảm Giá</h3>
+</div>
+<div class="row d-flex justify-content-between ">
+    <form method="post" th:action="@{/admin/phieu-giam-gia/save}" th:object="${request}"
+          onsubmit="return validateForm()"
+          class=" w-50 p-4 border rounded shadow bg-white">
+        <div class="mb-3">
+            <label class="form-label">Tên Phiếu Giảm Giá</label>
+            <input type="hidden" id="listIdCustomer" name="listIdCustomer" value="">
+            <input type="text" class="form-control" id="ten" th:field="*{ten}">
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <!-- Start input  -->
+                <section>
+                    <label class="form-label">Giá Trị Giảm</label>
+                    <input type="text" class="form-control" name="giaTriGiam" id="loaiHinhGiam"
+                           th:field="*{giaTriGiam}"
+                           placeholder="Vui lòng nhập">
+                </section>
+                <!-- End input  -->
+                <!-- Start radio -->
+                <section>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="loaiHinhGiam" id="phantram"
+                               value="phantram"
+                               checked>
+                        <label class="form-check-label" for="phantram">%</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="loaiHinhGiam" id="giatien"
+                               value="giatien">
+                        <label class="form-check-label" for="giatien">VND</label>
+                    </div>
+                </section>
+                <span th:text="${message}" style="color: red"></span>
+                <!-- end radio -->
+            </div>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Giảm Tối Đa</label>
+            <input type="text" class="form-control" id="giamToiDa" th:field="*{giamToiDa}"/>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label class="form-label">Số lượng</label>
+                <input type="text" class="form-control" id="soLuong" th:field="*{soLuong}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Hóa đơn tối thiểu</label>
+                <input type="text" class="form-control" id="hoaDonToiThieu" th:field="*{hoaDonToiThieu}">
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label class="form-label">Ngày Bắt Đầu</label>
+                <input type="datetime-local" class="form-control" id="ngayBatDau" th:field="*{ngayBatDau}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Ngày Kết Thúc</label>
+                <input type="datetime-local" class="form-control" id="ngayKetThuc" th:field="*{ngayKetThuc}">
+            </div>
+            <span th:text="${messages}" style="color: red"></span>
+        </div>
+        <button type="submit" class="btn btn-primary w-100 fw-bold">Lưu</button>
+    </form>
+    <div class="w-50 p-4 border rounded shadow bg-white" id="formKhachHang">
+        <form id="formKhachHang">
+            <h6>Chọn khách hàng</h6>
+
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Nhập mã hoặc tên">
+                <button class="input-group-text">search</button>
+            </div>
+        </form>
+        <br>
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th></th>
+                <th>Tên khách hàng</th>
+                <!--                    <th>Số điện thoại</th>-->
+                <th>Ngày sinh</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="kh: ${listKH}">
+                <td><input type="checkbox" th:value="${kh.id}" onclick="toggleCheckbox(this)"></td>
+                <td th:text="${kh.ten}"></td>
+                <td th:text="${kh.ngaySinh}"></td>
+                <!--                <td th:text="${kh.sdt}"></td>-->
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+
+<th:block layout:fragment="bottom_link">
+    <!-- Page level plugins -->
+    <script src="/vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+
+
+    <!-- Page level custom scripts -->
+    <script src="/js/admin/phieu-giam-gia/form-add.js"></script>
+</th:block>
+</html>
