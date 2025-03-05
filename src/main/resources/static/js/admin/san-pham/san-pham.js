@@ -1,770 +1,517 @@
-// // dependency
-// Top
-// <link href="/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet"/>
-// <script src="/vendor/sweetalert2/sweetalert2.min.js"></script>
-// Bottom
-// <script src="/vendor/datatables/jquery.dataTables.min.js"></script>
-// <script src="/vendor/datatables/dataTables.bootstrap4.min.js"></script>
-
 const apiURL = "/api/v1/san-pham";
-let _existingNames;
-const TrangThai=new Map([
-    ['IN_STOCK',"Còn hàng"],
-    ['OUT_OF_STOCK',"Hết hàng"],
-    ['TEMPORARILY_OUT_OF_STOCK',"Hết hàng tạm thời"],
-    ['COMING_SOON',"Sắp ra mắt"],
-    ['DISCONTINUED',"Không kinh doanh"]
-])
-var lstSeries, lstMauSac;
-// fill data to select option
 
-$(document).ready(function () {
+const TrangThai = new Map([
+    ['IN_STOCK', "Còn hàng"],
+    ['OUT_OF_STOCK', "Hết hàng"],
+    ['TEMPORARILY_OUT_OF_STOCK', "Hết hàng tạm thời"],
+    ['COMING_SOON', "Sắp ra mắt"],
+    ['DISCONTINUED', "Không kinh doanh"]
+]);
 
-})
+$(document).attr("title", "Quản lý sản phẩm");
 
-function loadFilter() {
-    //Mau sac
-    $.ajax({
-            url: "/api/v1/admin/data-list-add-san-pham/mau-sac",
-            success: function (response) {
-                lstMauSac = response.results;
-                $('#filter-mau-sac').select2({
-                    data: lstMauSac.map(ms => {
-                        return {id: ms.text, text: ms.text}
-                    })
-                })
-            },
-            error: function (xhr, status, error) {
-            }
-        }
-    )
-    //Series
-    $.ajax({
-            url: "/api/v1/admin/data-list-add-san-pham/thuongHieu",
-            success: function (response) {
-                lstSeries = response.results;
-                $('#filter-thuongHieu').select2({
-                    data: lstSeries.map(s => {
-                        return {id: s.text, text: s.text}
-                    })
-                })
-            },
-            error: function (xhr, status, error) {
-            }
-        }
-    )
-    //Rom
-    $('#filter-rom').select2({})
-
-}
-
-$(document).attr("title", "Quản lý sản phẩm")
-
+// Hàm load DataTable
 function loadData() {
-
-    let table = $('#dataTable').DataTable({
-
-        "language": {
-            "sProcessing": "Đang xử lý...",
-            "sLengthMenu": "Hiển thị _MENU_ bản ghi",
-            "sZeroRecords": "Không tìm thấy dữ liệu",
-            "sInfo": "Hiển thị _START_ đến _END_ của _TOTAL_ bản ghi",
-            "sInfoEmpty": "Hiển thị 0 đến 0 của 0 bản ghi",
-            "sInfoFiltered": "(được lọc từ _MAX_ bản ghi)",
-            "sInfoPostFix": "",
-            "sSearch": "Tìm kiếm:",
-            "sUrl": "",
-            "oPaginate": {
-                "sFirst": "Đầu",
-                "sPrevious": "Trước",
-                "sNext": "Tiếp",
-                "sLast": "Cuối"
+    return $('#dataTable').DataTable({
+        destroy: true,
+        language: {
+            sProcessing: "Đang xử lý...",
+            sLengthMenu: "Hiển thị _MENU_ bản ghi",
+            sZeroRecords: "Không tìm thấy dữ liệu",
+            sInfo: "Hiển thị _START_ đến _END_ của _TOTAL_ bản ghi",
+            sInfoEmpty: "Hiển thị 0 đến 0 của 0 bản ghi",
+            sInfoFiltered: "(được lọc từ _MAX_ bản ghi)",
+            sSearch: "Tìm kiếm:",
+            oPaginate: {
+                sFirst: "Đầu",
+                sPrevious: "Trước",
+                sNext: "Tiếp",
+                sLast: "Cuối"
             }
         },
-        "ajax": {
-            "url": apiURL + "-data-table",
-            "cache": true,
-            "dataSrc": ""
+        ajax: {
+            url: "/api/v1/san-pham-table",
+            type: "GET",
+            cache: true,
+            dataSrc: function (json) {
+                console.log("Dữ liệu trả về:", json);
+                return json || [];
+            }
         },
-
-        "columns": [
-
-            {"data": "id", "name": "id", "visible": false},
+        columns: [
+            { data: "id", name: "id" },
+            { data: "maSanPham", name: "maSanPham" },
             {
-                "data": "anhSanPham",
-                "name": "anhSanPham",
-                "orderable": false,
-                "searchable": false,
-
-
-                "render": function (data) {
-
-                    if (data == null || data.length == 0)
-                        return ""
-                    return `<img src="${data}" class="" style="width: 70px; height:100px;" alt="...">`
-
-                },
-            },
-            {"data": "tenSanPham", "name": "tenSanPham"},
-            {"data": "thuongHieu", "name": "thuongHieu", "visible": false},
-            {
-
-                "data": "danhSachMauSac",
-                "render": function (data, type, row) {
-
-                    if (data == null || data.length == 0)
-                        return ""
-                    let lstMs = data.split(",");
-                    let lstE = "";
-                    lstMs.forEach(function (m) {
-                        let ten = m.split(":")[1];
-                        let ma = m.split(":")[0];
-                        lstE += `<a type="button" class="btn btn-sm mr-2" style="background-color: ${ma}"></a>`;
-                        lstE += `<span type="button" class="btn btn-sm d-none" > ${ten} </span>`
-                    })
-                    return lstE;
-
-                },
-                "orderable": false
-                , "name": "danhSachMauSac"
-
-
+                data: "tenSanPham",
+                name: "tenSanPham",
+                render: data => data && data.trim() !== "" ? data : "Không có dữ liệu"
             },
             {
-
-                "data": "danhSachMauSac",
-                "render": function (data, type, row) {
-
-                    if (data == null || data.length == 0)
-                        return ""
-                    let lstMs = data.split(",");
-                    let lstE = "";
-                    lstMs.forEach(function (m) {
-                        let ten = m.split(":")[1];
-                        let ma = m.split(":")[0];
-                        lstE += `<a type="button" class="btn btn-sm mr-2" style="background-color: ${ma}"></a>`;
-                        lstE += `<span type="button" class="btn btn-sm d-none" > _${ten}_ </span>`
-                    })
-                    return lstE;
-
-                },
-                "orderable": false,
-                "visible": false,
-                "name": "danhSachMaMau"
-
-
-            },
-            {"data": "danhSachRom", "name": "danhSachRom"},
-            {"data": "soLuong", "name": "soLuong"},
-            {"data": "thoiGianBaoHanh", "name": "thoiGianBaoHanh"},
-            {"data": "trangThai", "name": "trangThai",
-                "render": function (data) {
-                    return TrangThai.get(data)
-                }
+                data: "thuongHieu",
+                name: "thuongHieu",
+                render: data => data && data.trim() !== "" ? data : "Không có dữ liệu"
             },
             {
-                "data": "id",
-                "render": function (data, type, row) {
-                    if (data)
-                        return `<div class="d-flex justify-content-end"><a type="button" href="/admin/san-pham/${data}" class="btn btn-sm btn-primary mr-3 btn-edit">Chỉnh sửa</a><button type="button" class="btn btn-sm btn-danger btn-revert">Chỉnh sửa</button></div>`;
-                    else
-                        return '<div class="d-flex justify-content-end"><button type="button" class="btn btn-sm btn-primary mr-3 btn-edit">Xóa</button><button type="button" class="btn btn-sm btn-danger btn-delete">Xóa</button></div>';
-
+                data: "chatLieu",
+                name: "chatLieu",
+                render: data => data && data.trim() !== "" ? data : "Không có dữ liệu"
+            },
+            {
+                data: "kieuDang",
+                name: "kieuDang",
+                render: data => data && data.trim() !== "" ? data : "Không có dữ liệu"
+            },
+            {
+                data: "danhMuc",
+                name: "danhMuc",
+                render: data => data && data.trim() !== "" ? data : "Không có dữ liệu"
+            },
+            {
+                data: "soLuong",
+                name: "soLuong",
+                render: data => data !== null && data !== "" ? data : "Không có dữ liệu"
+            },
+            {
+                data: "trangThai",
+                name: "trangThai",
+                render: data => data && data.trim() !== "" ? data : "Không có dữ liệu"
+            },
+            {
+                data: "anhUrl",
+                name: "anhUrl",
+                render: data => data ? `<img src="${data}" style="width:70px; height:100px;" alt="Ảnh">` : "Không có ảnh"
+            },
+            {
+                data: "id",
+                render: function (data, type, row) {
+                    return `<div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-sm btn-primary mr-3 btn-edit" data-id="${data}"><i class="fa-solid fa-pen-to-square" style="color: #ffffff;"></i></button>
+                        <button type="button" class="btn btn-sm btn-info btn-detail" data-id="${data}"><i class="fa-solid fa-eye" style="color: #ffffff;"></i></button>
+                    </div>`;
                 }
             }
-
-
-            // {
-            //     "data": "deleted",
-            //     "render": function (data, type, row) {
-            //         if (data)
-            //             return '<div class="d-flex justify-content-end"><button type="button" class="btn btn-sm btn-primary mr-3 btn-edit">Chỉnh sửa</button><button type="button" class="btn btn-sm btn-danger btn-revert">Khôi phục</button></div>';
-            //         else
-            //             return '<div class="d-flex justify-content-end"><button type="button" class="btn btn-sm btn-primary mr-3 btn-edit">Chỉnh sửa</button><button type="button" class="btn btn-sm btn-danger btn-delete">Xóa</button></div>';
-            //
-            //     },
-            //     "orderable": false
-            //
-            // }
-        ]
+        ],
+        order: [[0, 'desc']]
     });
-    // let selectedStatus = $('#statusFilter').val();
-    // if (selectedStatus) {
-    //     table.column(3).search('^' + selectedStatus + '$', true, false).draw();
-    // } else {
-    //     // Xóa bộ lọc nếu không có gì được chọn
-    //     table.column(3).search('').draw();
-    // }
-    // ;
 }
-
 
 const reloadDataTable = () => {
     $('#dataTable').DataTable().ajax.reload();
+};
+//model detail
+// Biến toàn cục lưu ID sản phẩm hiện tại (để reload bảng chi tiết)
+let currentProductId = null;
+
+// Hàm load danh sách chi tiết sản phẩm cho sản phẩm có id = productId
+function loadProductDetails(productId) {
+    currentProductId = productId;
+    $.ajax({
+        url: `/api/v1/san-pham/${productId}/details`,
+        type: 'GET',
+        success: function (data) {
+            let tbody = $('#detailTable tbody');
+            tbody.empty();
+            if (data && data.length > 0) {
+                data.forEach(function(detail) {
+                    let formattedPrice = detail.giaBan
+                        ? new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(detail.giaBan)
+                        : '';
+                    let row = `<tr data-detail-id="${detail.id}">
+                        <td>${detail.id}</td>
+                        <td>${detail.tenSanPham || ''}</td>
+                        <td>${detail.kichThuoc || ''}</td>
+                        <td>${formattedPrice}</td>
+                        <td>${detail.soLuong || ''}</td>
+                        <td>${detail.tenMau || ''}</td>
+                        <td>${detail.anhUrlDetail ? `<img src="${detail.anhUrlDetail}" style="width:70px; height:100px;" alt="Ảnh">` : ''}</td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-warning btn-edit-detail" data-id="${detail.id}">
+                                <i class="fas fa-edit"></i> Sửa
+                            </button>
+                        </td>
+                    </tr>`;
+                    tbody.append(row);
+                });
+            } else {
+                tbody.append('<tr><td colspan="8" class="text-center">Không có dữ liệu chi tiết</td></tr>');
+            }
+            $('#modal-product-detail').modal('show');
+        },
+        error: function (xhr, status, error) {
+            console.error(xhr.responseText);
+            Swal.fire('Lỗi', 'Không thể tải chi tiết sản phẩm', 'error');
+        }
+    });
 }
 
-//config dataTable
+// Xử lý khi nhấn nút "Chi tiết" trên DataTable (chứa ID sản phẩm)
 $(document).ready(() => {
-        loadData();
-        loadFilter()
-
-    }
-);
-
-//Reload event
-$(document).ready(() => {
-    $('#btn-reload').on("click", () => {
-        reloadDataTable()
-    })
-})
-
-//Filter
-$(document).ready(function () {
-    // Khởi tạo DataTable
-
-    let table = $('#dataTable').DataTable();
-    let filterCount = 1;
-
-    let filterTrangThai = $('#filter-trang-thai').val();
-    let filterSeries = $('#filter-thuongHieu').val();
-    let filterMauSac = $('#filter-mau-sac').val();
-    let filterRom = $('#filter-rom').val();
-    let filterSoLuong = $('#rangeSlider').val();
-    let debounceTimeout1, debounceTimeout2;
-
-    //load filter, init default val
-    $('#modal-filter').on('show.bs.modal', function (event) {
-        //So Luong
-        filterCount = 1;
-        let maxSoLuong = 0;
-        maxSoLuong = Math.max.apply(Math, $('#dataTable').DataTable().column(7).data().toArray());
-        maxSoLuong = Math.ceil(maxSoLuong / 100) * 100
-        console.log(maxSoLuong)
-
-
-        $("#rangeSlider").ionRangeSlider({
-            type: "double",
-            min: 0,
-            max: maxSoLuong,
-            from: 0,
-            to: maxSoLuong,
-            grid: true,
-            prettify: true,
-            skin: "round"
-        });
-        $('#filter-confirm').text(`Xác nhận`)
-
-        filterTrangThai = $('#filter-trang-thai').val();
-        filterSeries = $('#filter-thuongHieu').val();
-        filterMauSac = $('#filter-mau-sac').val();
-        filterRom = $('#filter-rom').val();
-        filterSoLuong = $('#rangeSlider').val();
-
-    })
-
-
-    function applyFilterField() {
-        debugger
-        let filterTrangThai = $('#filter-trang-thai').val();
-        let filterSeries = $('#filter-thuongHieu').val();
-        let filterMauSac = $('#filter-mau-sac').val();
-        let filterRom = $('#filter-rom').val();
-        let filterSoLuong = $('#rangeSlider').val();
-        let currentRowsCount = table.rows({search: "removed"}).count();
-        console.log('applyFilter')
-        if (filterSeries.length > 0) {
-            let regex = "(" + filterSeries.join("|") + ")"
-            console.log(regex)
-            table.column('thuongHieu:name').search(regex, true, false);
-            filterCount++;
-        } else {
-            // Xóa bộ lọc nếu không có gì được chọn
-            table.column('thuongHieu:name').search('');
-        }
-        if (filterRom.length > 0) {
-            let regex = "(" + filterRom.join("|") + ")"
-            console.log(regex)
-            table.column('danhSachRom:name').search(regex, true, false);
-            filterCount++;
-        } else {
-            // Xóa bộ lọc nếu không có gì được chọn
-            table.column('danhSachRom:name').search('');
-        }
-        if (filterMauSac.length > 0) {
-            let regex = "(_" + filterMauSac.join("_|_") + "_)"
-            console.log(regex)
-            // Lọc dữ liệu trong cột thứ hai (index 1)
-            table.column('danhSachMaMau:name').search(regex, true, false);
-            filterCount++;
-
-        } else {
-            // Xóa bộ lọc nếu không có gì được chọn
-            table.column('danhSachMaMau:name').search('');
-        }
-
-
-        console.log(filterSoLuong)
-
-        //Hiển thị nếu cs thay đổi
-        if (table.rows({search: "removed"}).count() != currentRowsCount) {
-            $('#filter-confirm').text(`Áp dụng (${table.rows({search: "applied"}).count()})`)
-        }
-
-
-    }
-
-    function applyFilterRanger() {
-        $.fn.dataTable.ext.search.pop();
-        let currentFilterSoLuong = $('#rangeSlider').val();
-
-        console.log('applyFilterRanger')
-
-
-        $.fn.dataTable.ext.search.push(function (searchStr, data, index) {
-            let min = parseInt(currentFilterSoLuong.split(';')[0]);
-            let max = parseInt(currentFilterSoLuong.split(';')[1]);
-            let soLuong = parseFloat(data[7]) || 0; // use data for the soLuong column
-
-            if (
-                (isNaN(min) && isNaN(max)) ||
-                (isNaN(min) && soLuong <= max) ||
-                (min <= soLuong && isNaN(max)) ||
-                (min <= soLuong && soLuong <= max)
-            ) {
-                return true;
-            }
-
-            return false;
-        });
-        table.draw();
-        console.log(currentFilterSoLuong)
-        $('#filter-confirm').text(`Áp dụng (${table.rows({search: "applied"}).count()})`)
-        $.fn.dataTable.ext.search.pop();
-        $.fn.dataTable.ext.search.push(function (searchStr, data, index) {
-            let min = parseInt(filterSoLuong.split(';')[0]);
-            let max = parseInt(filterSoLuong.split(';')[1]);
-            let soLuong = parseFloat(data[7]) || 0; // use data for the soLuong column
-
-            if (
-                (isNaN(min) && isNaN(max)) ||
-                (isNaN(min) && soLuong <= max) ||
-                (min <= soLuong && isNaN(max)) ||
-                (min <= soLuong && soLuong <= max)
-            ) {
-                return true;
-            }
-
-            return false;
-        });
-        table.draw();
-        $.fn.dataTable.ext.search.pop();
-        $.fn.dataTable.ext.search.push(function (searchStr, data, index) {
-            let min = parseInt(currentFilterSoLuong.split(';')[0]);
-            let max = parseInt(currentFilterSoLuong.split(';')[1]);
-            let soLuong = parseFloat(data[7]) || 0; // use data for the soLuong column
-
-            if (
-                (isNaN(min) && isNaN(max)) ||
-                (isNaN(min) && soLuong <= max) ||
-                (min <= soLuong && isNaN(max)) ||
-                (min <= soLuong && soLuong <= max)
-            ) {
-                return true;
-            }
-
-            return false;
-        });
-
-    }
-
-    // Lắng nghe sự kiện thay đổi của select option
-
-    $('#modal-filter').on('change', "select", () => {
-        clearTimeout(debounceTimeout1)
-        debounceTimeout1 = setTimeout(applyFilterField, 10);
+    $('#dataTable tbody').on('click', '.btn-detail', function () {
+        let productId = $(this).data('id');
+        loadProductDetails(productId);
     });
-    $('#modal-filter').on('change', "input", () => {
-        clearTimeout(debounceTimeout2)
-        debounceTimeout2 = setTimeout(applyFilterRanger, 500);
-    });
-    let flagEventClose = true;
-    $('#modal-filter').on('hide.bs.modal', function () {
-        if (flagEventClose) {
-            console.log("default-filter")
-            $('#filter-trang-thai').val(filterTrangThai).trigger('change');
-            $('#filter-thuongHieu').val(filterSeries).trigger('change');
-            $('#filter-mau-sac').val(filterMauSac).trigger('change');
-            $('#filter-rom').val(filterRom).trigger('change');
-            console.log(filterSoLuong + "filterSoLuong");
-            $('#rangeSlider').data("ionRangeSlider").update({
-                from: filterSoLuong.split(";")[0],
-                to: filterSoLuong.split(";")[1]
-            })
-            table.draw();
-
-        }
-    })
-    $('#modal-filter').on('click', '#filter-confirm', function () {
-        flagEventClose = false
-        table.draw();
-        $('#badge-filter').text(`${filterCount}`)
-        $('#modal-filter').modal('hide')
-        flagEventClose = true;
-    })
-    $('#modal-filter').on('click', '#filter-clear', function () {
-
-
-        console.log("clear filter");
-        $('#badge-filter').text('')
-
-        filterTrangThai = []
-        filterSeries = []
-        filterMauSac = []
-        filterRom = []
-        let maxSoLuong = 0;
-        maxSoLuong = Math.max.apply(Math, $('#dataTable').DataTable().column(7).data().toArray());
-        maxSoLuong = Math.ceil(maxSoLuong / 100) * 100
-        filterSoLuong = `$0;${maxSoLuong}`
-
-    })
-
 });
 
-// //Add
-// $(document).ready(() => {
-//     let existingNames;
-//     //Event
-//     $('#btn-add').on('click', () => {
-//         clearForm();
-//         existingNames = $('#dataTable').DataTable().column(1).data().toArray().map(name => name.toLowerCase());
-//         $('#modal-add').modal('show');
-//         console.log(existingNames)
-//     })
-//     //Validate exitst
-//     $('#add-ten').on('input paste', function () {
-//         let ten = $('#add-ten').val().toLowerCase().trim();
-//         if (existingNames.includes(ten) || ten.trim() === "") {
-//             $('#add-ten').addClass('is-invalid');
-//             $('#add-ten').removeClass('is-valid');
-//         } else {
-//             $('#add-ten').removeClass('is-invalid');
-//             $('#add-ten').addClass('is-valid');
-//         }
-//     });
-//     //Core
-//     $('#form-add').submit(function (event) {
-//         event.preventDefault(); // Ngăn chặn submit mặc định của form
-//         const form = $(this);
-//         if (!form[0].checkValidity()) {
-//             // Nếu form không hợp lệ, hiển thị các lỗi validation từ Bootstrap
-//             event.stopPropagation();
-//             form.addClass('was-validated');
-//         } else {
-//             let formData = {
-//                 ten: $('#add-ten').val(),
-//                 link: $('#add-link').val()
-//             }
-//             // Nếu form hợp lệ, gửi dữ liệu form lên server
-//             $.ajax({
-//                 url: apiURL, // Thay 'URL_API' bằng đường dẫn của API của bạn
-//                 method: 'PUT', // Phương thức HTTP
-//                 data: JSON.stringify(formData),
-//                 contentType: 'application/json',
-//                 success: function (response) {
-//                     Toast.fire({
-//                         icon: "success",
-//                         title: "Thêm mới thành công"
-//                     })
-//                     $('#modal-add').modal('hide');
-//                     reloadDataTable();
-//                     console.log(response);
-//                 },
-//                 error: function (xhr, status, error) {
-//                     Toast.fire({
-//                         icon: "error",
-//                         title: "Thêm mới thất bại"
-//                     });
-//                     reloadDataTable();
-//                     console.log(response);
-//                     console.error(xhr.responseText);
-//                 }
-//             });
-//
-//         }
-//     });
-// })
-// //Edit
-// $(document).ready(() => {
-//     let existingNames;
-//     //Event
-//     $('#dataTable tbody').on('click', '.btn-edit', function () {
-//         clearForm()
-//         let rowData = $('#dataTable').DataTable().row($(this).closest('tr')).data();
-//         if (rowData) {
-//             // Lấy dữ liệu từ hàng
-//             let id = rowData.id;
-//             let ten = rowData.ten;
-//             let link = rowData.link;
-//             let deleted = rowData.deleted;
-//
-//             // Binding dữ liệu vào modal
-//             $('#edit-id').val(id);
-//             $('#edit-ten').val(ten);
-//             $('#edit-link').val(link);
-//             $('#edit-deleted').html(`
-//                 <option value="false">Hoạt động</option>
-//                 <option ${deleted ? "selected" : ""}  value="true">Đã xóa</option>`)
-//             if (deleted) {
-//                 $('#edit-deleted').parent(".form-group").removeClass("d-none");
-//
-//             } else {
-//                 $('#edit-deleted').parent(".form-group").addClass("d-none");
-//
-//             }
-//             // Hiển thị modal
-//             $('#modal-edit').modal('show');
-//             existingNames = $('#dataTable').DataTable().column(1).data().toArray().filter(elm => elm !== ten).map(name => name.toLowerCase().trim());
-//             console.log(existingNames)
-//
-//         }
-//
-//     });
-//     //Validate
-//     $('#edit-ten').off();
-//     $('#edit-ten').on('input paste', function () {
-//         let ten = $('#edit-ten').val().toLowerCase().trim();
-//         if (existingNames.includes(ten) || ten.trim() === "") {
-//             $('#edit-ten').addClass('is-invalid');
-//             $('#edit-ten').removeClass('is-valid');
-//         } else {
-//             $('#edit-ten').removeClass('is-invalid');
-//             $('#edit-ten').addClass('is-valid');
-//         }
-//     });
-//     //Core
-//     $('#form-edit').submit(function (event) {
-//         event.preventDefault(); // Ngăn chặn submit mặc định của form
-//         const form = $(this);
-//         if (!form[0].checkValidity()) {
-//             // Nếu form không hợp lệ, hiển thị các lỗi validation từ Bootstrap
-//             event.stopPropagation();
-//             form.addClass('was-validated');
-//         } else {
-//             let formData = {
-//                 id: $('#edit-id').val(),
-//                 ten: $('#edit-ten').val(),
-//                 link: $('#edit-link').val(),
-//                 deleted: $('#edit-deleted').val()
-//             }
-//             // Nếu form hợp lệ, gửi dữ liệu form lên server
-//             $.ajax({
-//                 url: apiURL, // Thay 'URL_API' bằng đường dẫn của API của bạn
-//                 method: 'POST', // Phương thức HTTP
-//                 data: JSON.stringify(formData),
-//                 contentType: 'application/json',
-//                 success: function (response) {
-//                     Toast.fire({
-//                         icon: "success",
-//                         title: "Cập nhật thành công"
-//                     })
-//                     $('#modal-edit').modal('hide');
-//                     reloadDataTable();
-//                     console.log(response);
-//                 },
-//                 error: function (xhr, status, error) {
-//                     Toast.fire({
-//                         icon: "error",
-//                         title: "Cập nhật thất bại"
-//                     });
-//                     reloadDataTable();
-//                     console.log(response);
-//                     console.error(xhr.responseText);
-//                 }
-//             });
-//
-//         }
-//     });
-// })
-//
-// //Delete
-// $(document).ready(() => {
-//     $('#dataTable tbody').on('click', '.btn-delete', function () {
-//         let rowData = $('#dataTable').DataTable().row($(this).closest('tr')).data();
-//         if (rowData) {
-//             // Lấy dữ liệu từ hàng
-//             let id = rowData.id;
-//             let ten = rowData.ten;
-//             // Hiển thị modal
-//
-//             Swal.fire({
-//                 title: `Bạn chắc chắn muốn xóa ${ten}?`,
-//                 icon: "warning",
-//                 showCancelButton: true,
-//                 confirmButtonColor: "#3085d6",
-//                 cancelButtonColor: "#d33",
-//                 cancelButtonText: "Hủy",
-//                 confirmButtonText: "Xác nhận"
-//             }).then((result) => {
-//                 if (result.isConfirmed) {
-//                     $.ajax({
-//                         url: apiURL + '?id=' + id,
-//                         type: 'DELETE',
-//                         success: function () {
-//                             Toast.fire({
-//                                 icon: "success",
-//                                 title: "Xóa thành công"
-//                             })
-//                             reloadDataTable();
-//                         },
-//                         error: () => {
-//                             Toast.fire({
-//                                 icon: "error",
-//                                 title: "Xóa thất bại"
-//                             })
-//                             reloadDataTable();
-//                         }
-//
-//                     })
-//                 }
-//             });
-//
-//
-//         }
-//
-//     });
-//
-//
-// })
-//
-//
-// //Revert
-// $(document).ready(() => {
-//     $('#dataTable tbody').on('click', '.btn-revert', function () {
-//         let rowData = $('#dataTable').DataTable().row($(this).closest('tr')).data();
-//         if (rowData) {
-//             // Lấy dữ liệu từ hàng
-//             let id = rowData.id;
-//             let ten = rowData.ten;
-//             // Hiển thị modal
-//             Swal.fire({
-//                 title: `Bạn chắc chắn muốn khôi phục ${ten}?`,
-//                 icon: "warning",
-//                 showCancelButton: true,
-//                 confirmButtonColor: "#3085d6",
-//                 cancelButtonColor: "#d33",
-//                 cancelButtonText: "Hủy",
-//                 confirmButtonText: "Xác nhận"
-//             }).then((result) => {
-//                 if (result.isConfirmed) {
-//                     $.ajax({
-//                         url: apiURL + '/revert?id=' + id,
-//                         type: 'POST',
-//                         success: function () {
-//                             Toast.fire({
-//                                 icon: "success",
-//                                 title: "Khôi phục thành công"
-//                             })
-//                             reloadDataTable();
-//                         },
-//                         error: () => {
-//                             Toast.fire({
-//                                 icon: "error",
-//                                 title: "Khôi phục thất bại"
-//                             })
-//                             reloadDataTable();
-//                         }
-//                     })
-//                 }
-//             });
-//
-//
-//
-//
-//         }
-//
-//     });
-//
-//
-// })
-//
+// Khi nhấn nút "Sửa" trong bảng chi tiết, mở modal chỉnh sửa chi tiết
+$(document).on('click', '.btn-edit-detail', function () {
+    let tr = $(this).closest('tr');
+    let detailId = tr.data('detail-id');
 
+    // Lấy dữ liệu từ các cột
+    let tenSanPham = tr.find('td').eq(1).text().trim();
+    let mauSanPham = tr.find('td').eq(5).text().trim();
+    let kichThuoc = tr.find('td').eq(2).text().trim();
+
+    // Lấy giá bán (cột thứ 4, index 3): Loại bỏ dấu phân cách và ký tự không phải số
+    let giaBanText = tr.find('td').eq(3).text().trim();
+    let giaBanStr = giaBanText.replace(/\./g, '').replace(/,/g, '.').replace(/[^0-9.]/g, '');
+    let giaBan = parseFloat(giaBanStr) || 0;
+
+    // Lấy số lượng (cột thứ 5, index 4)
+    let soLuong = parseInt(tr.find('td').eq(4).text().trim()) || 0;
+
+    // Gán dữ liệu vào form chỉnh sửa chi tiết
+    $('#detail-id').val(detailId);
+    // Nối chuỗi cho trường "Tên sản phẩm": hiển thị tên, màu, kích thước
+    $('#detail-ten-san-pham').val(tenSanPham + " Màu " + mauSanPham + " ( Size: " + kichThuoc + " )");
+    $('#detail-gia-ban').val(giaBan);
+    $('#detail-so-luong').val(soLuong);
+
+    $('#modal-edit-detail').modal('show');
+});
+
+// Xử lý submit form chỉnh sửa chi tiết sản phẩm
+$('#form-edit-detail').on('submit', function (e) {
+    e.preventDefault();
+    let detailId = $('#detail-id').val();
+    let newGiaBan = $('#detail-gia-ban').val();
+    let newSoLuong = $('#detail-so-luong').val();
+
+    $.ajax({
+        url: `/api/v1/san-pham-detail/update`, // Endpoint cập nhật chi tiết sản phẩm trên server
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            id: detailId,
+            giaBan: newGiaBan,
+            soLuong: newSoLuong
+        }),
+        success: function (response) {
+            Swal.fire("Thành công", "Cập nhật chi tiết sản phẩm thành công", "success");
+            $('#modal-edit-detail').modal('hide');
+            if (currentProductId) {
+                loadProductDetails(currentProductId);
+                reloadDataTable();
+            }
+        },
+        error: function (xhr, status, error) {
+            Swal.fire("Lỗi", "Cập nhật chi tiết sản phẩm thất bại", "error");
+            console.error(xhr.responseText);
+        }
+    });
+});
 
 //
-// //Import file
-// $(document).ready(function () {
-//     //Event
-//     $('#btn-import').on("click", (event) => {
-//         $('#import-file').click();
-//         $('#import-file').val("");
-//     })
-//     //Core
-//     $('#import-file').on("change", (event) => {
-//         dataToJson(event)
-//             .then(jsonData => validate_import(jsonData)
-//                 .then(
-//                     jsonData => {
-//                         Swal.fire({
-//                             title: "Bạn chắc chắn chứ ?",
-//                             text: "Sau khi import bạn sẽ không thể quay lại!",
-//                             icon: "warning",
-//                             showCancelButton: true,
-//                             confirmButtonColor: "#3085d6",
-//                             cancelButtonColor: "#d33",
-//                             cancelButtonText: "Hủy",
-//                             confirmButtonText: "Xác nhận"
-//                         }).then((result) => {
-//                             if (result.isConfirmed) {
-//                                 import_excel(jsonData);
-//
-//                             }
-//                         });
-//
-//                     }
-//                 )
-//             )
-//             .catch(e =>
-//                 showErrorToast("Lỗi: " + e)
-//             )
-//     })
-//     //Validate
-//     const validate_import = (jsonData) => {
-//         return new Promise((resolve, reject) => {
-//             for (let obj of jsonData) {
-//                 // Kiểm tra field
-//
-//                 if (!obj.hasOwnProperty('ten')) {
-//                     reject("Lỗi định dạng: Thiếu tên sản phẩm")
-//                 }
-//             }
-//             resolve(jsonData)
-//         })
-//     }
-//     //Import
-//     const import_excel = (jsonData) => {
-//         $.ajax({
-//             url: apiURL + "/import-excel",
-//             type: 'POST',
-//             contentType: "application/json; charset=utf-8",
-//             data: JSON.stringify(jsonData),
-//             success: function (data) {
-//                 Toast.fire({
-//                     icon: "success",
-//                     title: "Nhập excel thành công"
-//                 })
-//                 Toast.fire({
-//                     icon: "success",
-//                     title: "Đã thay đổi " + data.length + " bản ghi"
-//                 })
-//                 reloadDataTable();
-//             },
-//             error: (jqXHR, textStatus, errorThrown) => {
-//                 showErrorToast(`Lỗi: ${textStatus} - ${errorThrown}`);
-//                 reloadDataTable();
-//             }
-//
-//
-//         })
-//     }
-//
-// });
-//
+$(document).ready(function () {
+    // Khởi tạo DataTable và lưu vào biến table
+    let table = loadData();
+    let existingNames; // Dùng cho validate tên khi chỉnh sửa
+
+    // Reload DataTable khi nhấn nút "Làm mới"
+    $('#btn-reload').on("click", () => {
+        reloadDataTable();
+    });
+
+    // Lọc chung cho bảng
+    $('#search-column').on('keyup', function () {
+        table.search(this.value).draw();
+    });
+
+    // Lọc theo các bộ lọc theo cột (Trạng thái, Thương hiệu, Danh mục)
+    function applyFilters() {
+        table.columns().every(function () {
+            var columnIndex = this.index();
+            var inputValue = $('.filter-input[data-column="' + columnIndex + '"]').val();
+            this.search(inputValue ? inputValue : '');
+        });
+        table.draw();
+    }
+    $('.filter-input').on('change keyup', applyFilters);
+
+    // Reset các bộ lọc
+    $('#reset-filters').on('click', function () {
+        $('.filter-input').val('');
+        table.search('').columns().search('').draw();
+    });
+
+    // Hiển thị modal "Thêm mới"
+    $('#btn-add').on("click", () => {
+        $('#modal-add').modal('show');
+    });
+
+    // Xử lý submit form "Thêm mới"
+    $('#form-add').on("submit", function (e) {
+        e.preventDefault();
+        const data = {
+            maSanPham: $('#add-ma-san-pham').val(),
+            ten: $('#add-ten').val(),
+            trangThai: $('#add-trang-thai').val(),
+            moTa: $('#add-mo-ta').val(),
+            anhUrl: $('#add-anh-url').val()
+        };
+        $.ajax({
+            url: apiURL,
+            type: "PUT",
+            contentType: "application/json",
+            data: JSON.stringify(data),
+            success: function (response) {
+                $('#modal-add').modal('hide');
+                reloadDataTable();
+                Swal.fire("Thành công", "Đã thêm sản phẩm mới", "success");
+            },
+            error: function (xhr, status, error) {
+                Swal.fire("Lỗi", "Không thể thêm sản phẩm", "error");
+            }
+        });
+    });
+
+    // Xử lý sự kiện "Chỉnh sửa" khi nhấn nút btn-edit trong DataTable
+
+
+    $(document).ready(() => {
+        let existingNames;
+        const table = $('#dataTable').DataTable();
+
+        // Hàm reset form edit
+        function clearForm() {
+            $('#form-edit')[0].reset();
+            $('#form-edit').removeClass('was-validated');
+            $('#edit-ten').removeClass('is-invalid is-valid');
+        }
+
+        // Hàm hỗ trợ binding giá trị cho select theo text hiển thị
+        const setSelectValue = (selectId, displayText) => {
+            let text = displayText ? displayText.toString().trim() : "";
+            let option = $(selectId + " option").filter(function () {
+                return $(this).text().trim() === text;
+            });
+            if (option.length > 0) {
+                $(selectId).val(option.val());
+            } else {
+                $(selectId).val($(selectId + " option:first").val());
+            }
+        };
+
+        // Khi click nút "Chỉnh sửa" trong DataTable
+        $('#dataTable tbody').on('click', '.btn-edit', function () {
+            clearForm();
+            let rowData = table.row($(this).closest('tr')).data();
+            if (rowData) {
+                // Gán các trường cơ bản
+                $('#edit-id').val(rowData.id);
+                $('#edit-ma-san-pham').val(rowData.maSanPham);
+                $('#edit-ten').val(rowData.tenSanPham);
+
+                // Binding các trường select: Thương hiệu, Chất liệu, Kiểu dáng
+                setSelectValue("#edit-thuong-hieu", rowData.thuongHieu || "");
+                setSelectValue("#edit-chat-lieu", rowData.chatLieu || "");
+                setSelectValue("#edit-kieu-dang", rowData.kieuDang || "");
+
+                $('#modal-edit').modal('show');
+
+                // Lấy danh sách tên sản phẩm (ngoại trừ tên hiện tại) để validate
+                existingNames = table.column(2).data().toArray()
+                    .filter(name => name !== rowData.tenSanPham)
+                    .map(name => name.toLowerCase().trim());
+            }
+        });
+
+        // Validate tên sản phẩm
+        $('#edit-ten').off('input paste').on('input paste', function () {
+            let tenVal = $(this).val().toLowerCase().trim();
+            if ((existingNames && existingNames.includes(tenVal)) || tenVal === "") {
+                $(this).addClass('is-invalid').removeClass('is-valid');
+            } else {
+                $(this).removeClass('is-invalid').addClass('is-valid');
+            }
+        });
+
+        // Submit form chỉnh sửa, gửi JSON
+        $('#form-edit').submit(function (event) {
+            event.preventDefault();
+            const form = $(this);
+            let maSanPhamVal = $('#edit-ma-san-pham').val().trim();
+            let tenVal = $('#edit-ten').val().trim();
+
+            // Validate cơ bản
+            if (maSanPhamVal === "" || tenVal === "") {
+                form.addClass('was-validated');
+                return;
+            }
+
+            // Tạo payload JSON
+            let payload = {
+                id: $('#edit-id').val(),
+                maSanPham: maSanPhamVal,
+                ten: tenVal,
+                idThuongHieu: $('#edit-thuong-hieu').val() ? parseInt($('#edit-thuong-hieu').val()) : null,
+                idChatLieu: $('#edit-chat-lieu').val() ? parseInt($('#edit-chat-lieu').val()) : null,
+                idKieuDang: $('#edit-kieu-dang').val() ? parseInt($('#edit-kieu-dang').val()) : null
+            };
+            console.log(payload)
+            $.ajax({
+                url: apiURL + "/update",
+                method: 'POST',
+                contentType: "application/json",
+                data: JSON.stringify(payload),
+                success: function (response) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Cập nhật sản phẩm thành công"
+                    });
+                    $('#modal-edit').modal('hide');
+                    reloadDataTable(); // Hàm reload bảng DataTable
+                },
+                error: function (xhr, status, error) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Cập nhật sản phẩm thất bại"
+                    });
+                    reloadDataTable();
+                    console.error(xhr.responseText);
+                }
+            });
+        });
+    });
+
+
+
+
+
+
+
+
+
+
+
+    $(document).on("click", ".btn-delete", function(e) {
+        e.preventDefault();
+        let id = $(this).data("id");
+        Swal.fire({
+            title: 'Bạn có chắc muốn xóa sản phẩm này?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Xóa',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: apiURL + "?id=" + id,
+                    type: "DELETE",
+                    success: function(response) {
+                        Swal.fire("Thành công", "Đã xóa sản phẩm", "success");
+                        reloadDataTable();
+                    },
+                    error: function(xhr, status, error) {
+                        Swal.fire("Lỗi", "Không thể xóa sản phẩm", "error");
+                    }
+                });
+            }
+        });
+    });
+
+    $(document).on("click", ".btn-revert", function(e) {
+        e.preventDefault();
+        let id = $(this).data("id");
+        Swal.fire({
+            title: 'Bạn có chắc muốn khôi phục sản phẩm này?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Khôi phục',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: apiURL + "/revert?id=" + id,
+                    type: "POST",
+                    success: function(response) {
+                        Swal.fire("Thành công", "Đã khôi phục sản phẩm", "success");
+                        reloadDataTable();
+                    },
+                    error: function(xhr, status, error) {
+                        Swal.fire("Lỗi", "Không thể khôi phục sản phẩm", "error");
+                    }
+                });
+            }
+        });
+    });
+
+    // Xử lý import file Excel (đoạn code giữ nguyên)
+    $(document).ready(function () {
+        // Event: Nhấn nút Import
+        $('#btn-import').on("click", (event) => {
+            $('#import-file').click();
+            $('#import-file').val("");
+        });
+        // Core: Khi chọn file
+        $('#import-file').on("change", (event) => {
+            dataToJson(event)
+                .then(jsonData => validate_import(jsonData)
+                    .then(jsonData => {
+                        Swal.fire({
+                            title: "Bạn chắc chắn chứ ?",
+                            text: "Sau khi import bạn sẽ không thể quay lại!",
+                            icon: "warning",
+                            showCancelButton: true,
+                            confirmButtonColor: "#3085d6",
+                            cancelButtonColor: "#d33",
+                            cancelButtonText: "Hủy",
+                            confirmButtonText: "Xác nhận"
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                import_excel(jsonData);
+                            }
+                        });
+                    })
+                )
+                .catch(e =>
+                    showErrorToast("Lỗi: " + e)
+                );
+        });
+        // Validate
+        const validate_import = (jsonData) => {
+            return new Promise((resolve, reject) => {
+                for (let obj of jsonData) {
+                    if (!obj.hasOwnProperty('ten')) {
+                        reject("Lỗi định dạng: Thiếu tên SP");
+                    }
+                }
+                resolve(jsonData);
+            });
+        };
+        // Import
+        const import_excel = (jsonData) => {
+            $.ajax({
+                url: apiURL + "/import-excel",
+                type: 'POST',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(jsonData),
+                success: function (data) {
+                    Toast.fire({
+                        icon: "success",
+                        title: "Nhập excel thành công"
+                    });
+                    Toast.fire({
+                        icon: "success",
+                        title: "Đã thay đổi " + data.length + " bản ghi"
+                    });
+                    reloadDataTable();
+                },
+                error: (jqXHR, textStatus, errorThrown) => {
+                    showErrorToast(`Lỗi: ${textStatus} - ${errorThrown}`);
+                    reloadDataTable();
+                }
+            });
+        };
+    });
+});

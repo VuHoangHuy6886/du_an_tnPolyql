@@ -1,4 +1,4 @@
-package com.poliqlo.controllers.admin.san_pham_chi_tiet.chat_lieu.model.response;
+package com.poliqlo.controllers.admin.chi_tiet_san_pham.model.response;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -21,10 +21,10 @@ import java.io.Serializable;
 public class Response implements Serializable {
     @Positive
     private Integer id;
-    private String tenSanPham;
-    private String kichThuoc;
-    private Double giaBan;
-    private Integer soLuong;
-    private String anhSanPham;
-    private String tenMau;
+    @NotNull
+    @Size(max = 255)
+    @NotBlank
+    private String ten;
+
+    private Boolean isDeleted;
 }

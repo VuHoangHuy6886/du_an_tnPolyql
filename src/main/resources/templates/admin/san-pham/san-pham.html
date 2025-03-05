@@ -2,83 +2,135 @@
 <html lang="en"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="/admin/layout-dashboard/layout.html"
->
+      layout:decorate="/admin/layout-dashboard/layout.html">
 <head>
-    <!--    Custom link-->
     <th:block layout:fragment="head_link">
         <link href="/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
         <script src="/vendor/sweetalert2/sweetalert2.min.js"></script>
-        <link href="/vendor/select2/select2.min.css" rel="stylesheet">
-        <link href="https://cdn.jsdelivr.net/npm/ion-rangeslider@2.3.1/css/ion.rangeSlider.min.css" rel="stylesheet">
-
-
     </th:block>
 
 </head>
-
-<!-- Custom styles for this page -->
-
 <body layout:fragment="content">
-
-
 <div class="row">
-    <!--    Table-->
-
-    <div class="card shadow m-2 w-100 ">
+    <div class="card shadow m-2 w-100">
         <div class="card-header py-3">
-            <!--            <h6 class="m-0 font-weight-bold text-primary">DataTables Example</h6>-->
-
             <div class="row">
                 <h1 class="h3 text-gray-800 col-4">Quản lý sản phẩm</h1>
-                <!-- Additional controls -->
                 <div class="col-8 d-flex justify-content-sm-end align-items-center">
-                    <form class="form-inline mr-3 d-flex align-items-center">
-                                <button type="button" data-toggle="modal" data-target="#modal-filter" id="filter" class="btn btn-primary position-relative">
-                                    Bộ lọc
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="badge-filter"></span>
-                                </button>
-
-                    </form>
                     <a id="btn-reload" href="#" class="btn btn-primary btn-icon-split mr-2">
-                                        <span class="icon text-white-50">
-                                            <i class="fas fa-rotate-right"></i>
-                                        </span>
+                        <span class="icon text-white-50">
+                            <i class="fas fa-rotate-right"></i>
+                        </span>
                         <span class="text">Làm mới</span>
                     </a>
-                    <a href="/admin/san-pham/add" class="btn btn-primary btn-icon-split mr-2" target="_blank">
-                                        <span class="icon text-white-50">
-                                            <i class="fas fa-plus"></i>
-                                        </span>
+                    <a href="#" class="btn btn-primary btn-icon-split mr-2" id="btn-add">
+                        <span class="icon text-white-50">
+                            <i class="fas fa-plus"></i>
+                        </span>
                         <span class="text">Thêm mới</span>
                     </a>
-                    <a href="/admin/kho" target="_blank" class="btn btn-primary btn-icon-split mr-2" id="btn-import">
-                                        <span class="icon text-white-50">
-                                            <i class="fas fa-file-import"></i>
-                                        </span>
-
-
-                        <span class="text">Nhập hàng</span>
+                    <a href="#" class="btn btn-primary btn-icon-split mr-2" id="btn-import">
+                        <span class="icon text-white-50">
+                            <i class="fas fa-file-import"></i>
+                        </span>
+                        <span class="text">Import</span>
                     </a>
-
+                    <input type="file" class="d-none" id="import-file"/>
+                    <a th:href="@{/admin/san-pham/export-excel}" class="btn btn-primary btn-icon-split" id="btn-export">
+                        <span class="icon text-white-50">
+                            <i class="fas fa-file-export"></i>
+                        </span>
+                        <span class="text">Export</span>
+                    </a>
                 </div>
             </div>
         </div>
         <div class="card-body">
+            <!-- Form lọc sản phẩm -->
+            <div class="row mb-3">
+                <!-- Ô tìm kiếm chung -->
+<!--                <div class="col-md-2">-->
+<!--                    <label for="search-column">Tìm kiếm chung:</label>-->
+<!--                    <input type="text" id="search-column" class="form-control" placeholder="Nhập nội dung...">-->
+<!--                </div>-->
+
+                <!-- Bộ lọc Trạng thái -->
+                <div class="col-md-2">
+                    <label for="statusFilter">Trạng thái:</label>
+                    <select id="statusFilter" class="form-control filter-input" data-column="8">
+                        <option value="">Tất cả</option>
+                        <option>Còn hàng</option>
+                        <option>Hết hàng</option>
+                    </select>
+                </div>
+
+                <!-- Bộ lọc Thương hiệu -->
+                <div class="col-md-2">
+                    <label for="filter-thuong-hieu">Thương hiệu:</label>
+                    <select id="filter-thuong-hieu" class="form-control filter-input" data-column="3">
+                        <option value="">Tất cả</option>
+                        <th:block th:each="thuongHieu : ${listThuongHieu}">
+                            <option th:value="${thuongHieu.ten}" th:text="${thuongHieu.ten}"></option>
+                        </th:block>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="filter-kieu-dang">Kiểu dáng:</label>
+                    <select id="filter-kieu-dang" class="form-control filter-input" data-column="5">
+                        <option value="">Tất cả</option>
+                        <th:block th:each="kieuDang : ${listKieuDang}">
+                            <option th:value="${kieuDang.ten}" th:text="${kieuDang.ten}"></option>
+                        </th:block>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="filter-chat-lieu">Chất liệu:</label>
+                    <select id="filter-chat-lieu" class="form-control filter-input" data-column="4">
+                        <option value="">Tất cả</option>
+                        <th:block th:each="chatLieu : ${listChatLieu}">
+                            <option th:value="${chatLieu.ten}" th:text="${chatLieu.ten}"></option>
+                        </th:block>
+                    </select>
+                </div>
+                <!-- Bộ lọc Danh mục -->
+                <div class="col-md-2">
+                    <label for="filter-danh-muc">Danh mục:</label>
+                    <select id="filter-danh-muc" class="form-control filter-input" data-column="6">
+                        <option value="">Tất cả</option>
+                        <th:block th:each="danhMuc : ${listDanhMuc}">
+                            <option th:value="${danhMuc.ten}" th:text="${danhMuc.ten}"></option>
+                        </th:block>
+                    </select>
+                </div>
+
+
+                <!-- Nút Đặt lại -->
+                <div class="col-md-2 d-flex align-items-end justify-content-center">
+                    <button id="reset-filters" class="btn btn-secondary">
+                        <span class="icon text-white-50">
+                            <i class="fas fa-rotate-right"></i>
+                        </span>Đặt lại</button>
+                </div>
+            </div>
+
+
+
+
             <div class="table-responsive">
+                <!-- Bảng DataTable hiển thị sản phẩm -->
                 <table class="table table-bordered" id="dataTable">
                     <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Hình ảnh</th>
-                        <th>Tên</th>
-                        <th>Series</th>
-                        <th>Màu sắc</th>
-                        <th>Tên màu</th>
-                        <th>Bộ nhớ</th>
-                        <th>Số lượng</th>
-                        <th>Thời gian bảo hành</th>
+                        <th>Mã sản phẩm</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Thương hiệu</th>
+                        <th>Chất liệu</th>
+                        <th>Kiểu dáng</th>
+                        <th>Danh mục</th>
+                        <th>Số lương</th>
                         <th>Trạng thái</th>
+                        <th>Ảnh</th>
                         <th>Chỉnh sửa</th>
 
                     </tr>
@@ -86,155 +138,261 @@
                     <tfoot>
                     <tr>
                         <th>ID</th>
-                        <th>Hình ảnh</th>
-                        <th>Tên</th>
-                        <th>Series</th>
-                        <th>Mã màu</th>
-                        <th>Tên màu</th>
-                        <th>Bộ nhớ</th>
-                        <th>Số lượng</th>
-                        <th>Thời gian bảo hành</th>
+                        <th>Mã sản phẩm</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Thương hiệu</th>
+                        <th>Chất liệu</th>
+                        <th>Kiểu dáng</th>
+                        <th>Danh mục</th>
+                        <th>Số lương</th>
                         <th>Trạng thái</th>
+                        <th>Ảnh</th>
                         <th>Chỉnh sửa</th>
 
                     </tr>
                     </tfoot>
                     <tbody>
-
+                    <!-- DataTables sẽ load dữ liệu -->
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 </div>
-<!--modal edit-->
+
+
+<!-- Modal Edit -->
 <div class="modal fade" id="modal-edit" tabindex="-1" role="dialog" aria-labelledby="EditModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-lg" role="document">  <!-- Sử dụng modal-lg cho không gian rộng hơn -->
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="EditModalLabel">Chỉnh sửa sản phẩm</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="EditModalLabel">
+                    <i class="fas fa-edit"></i> Chỉnh sửa nhanh sản phẩm
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Đóng">
+                    <span aria-hidden="true"><i class="fas fa-times"></i></span>
                 </button>
             </div>
             <div class="modal-body">
-
                 <form id="form-edit" class="needs-validation" novalidate>
-                    <div class="form-group">
-                        <label for="edit-id">ID sản phẩm:</label>
-                        <input type="text" class="form-control" id="edit-id" placeholder="ID" readonly>
-                        <div class="invalid-feedback">ID không được để trống</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-ten">Tên sản phẩm:</label>
-                        <input type="text" class="form-control" id="edit-ten" placeholder="Tên sản phẩm" required>
-                        <div class="invalid-feedback">Tên sản phẩm đã tồn tại hoặc không hợp lệ</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-link">Đường dẫn chi tiết:</label>
-                        <input type="text" class="form-control" id="edit-link" placeholder="Đường dẫn chi tiết"
-                               pattern="^$|^((https?:\/\/)?([a-zA-Z0-9\-\_]+\.)+[a-zA-Z]{2,})(:[0-9]{1,5})?(\/[^\s]*)?$">
-                        <div class="invalid-feedback">Đường dẫn không hợp lệ</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-deleted" class="form-label">Trạng thái</label>
-                        <select class="form-control" id="edit-deleted" required>
-                        </select>
-                        <div class="invalid-feedback">
-                            Vui lòng chọn trạng thái
+                    <!-- Hàng 1: ID, Mã sản phẩm, Tên sản phẩm -->
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="edit-id"><i class="fas fa-hashtag"></i> ID</label>
+                            <input type="text" class="form-control" id="edit-id" placeholder="ID" readonly>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="edit-ma-san-pham"><i class="fas fa-barcode"></i> Mã sản phẩm</label>
+                            <input type="text" class="form-control" id="edit-ma-san-pham" required>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="edit-ten"><i class="fas fa-tag"></i> Tên sản phẩm</label>
+                            <input type="text" class="form-control" id="edit-ten" required>
                         </div>
                     </div>
-                    <div class="form-group justify-content-end ">
-                        <button type="button" class="btn btn-secondary mr-3" data-dismiss="modal">Hủy</button>
-
-                        <button type="submit" class="btn btn-primary">Cập nhật</button>
+                    <!-- Hàng 2: Thương hiệu, Chất liệu, Kiểu dáng, Danh mục -->
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="edit-thuong-hieu"><i class="fas fa-industry"></i> Thương hiệu</label>
+                            <select class="form-control" id="edit-thuong-hieu" required>
+                                <option value="">Chọn thương hiệu</option>
+                                <th:block th:each="thuongHieu : ${listThuongHieu}">
+                                    <option th:value="${thuongHieu.id}" th:text="${thuongHieu.ten}"></option>
+                                </th:block>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="edit-chat-lieu"><i class="fas fa-cubes"></i> Chất liệu</label>
+                            <select class="form-control" id="edit-chat-lieu" required>
+                                <option value="">Chọn chất liệu</option>
+                                <th:block th:each="chatLieu : ${listChatLieu}">
+                                    <option th:value="${chatLieu.id}" th:text="${chatLieu.ten}"></option>
+                                </th:block>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="edit-kieu-dang"><i class="fas fa-shapes"></i> Kiểu dáng</label>
+                            <select class="form-control" id="edit-kieu-dang" required>
+                                <option value="">Chọn kiểu dáng</option>
+                                <th:block th:each="kieuDang : ${listKieuDang}">
+                                    <option th:value="${kieuDang.id}" th:text="${kieuDang.ten}"></option>
+                                </th:block>
+                            </select>
+                        </div>
+<!--                        <div class="form-group col-md-3">-->
+<!--                            <label for="edit-danh-muc"><i class="fas fa-list"></i> Danh mục</label>-->
+<!--                            <select class="form-control" id="edit-danh-muc" required>-->
+<!--                                <option value="">Chọn danh mục</option>-->
+<!--                                <th:block th:each="danhMuc : ${listDanhMuc}">-->
+<!--                                    <option th:value="${danhMuc.id}" th:text="${danhMuc.ten}"></option>-->
+<!--                                </th:block>-->
+<!--                            </select>-->
+<!--                        </div>-->
                     </div>
-
+                    <!-- Hàng 3: Chọn ảnh với preview -->
+<!--                    <div class="form-row">-->
+<!--                        <div class="form-group col-md-6">-->
+<!--                            <label for="edit-anh-file"><i class="fas fa-image"></i> Chọn ảnh</label>-->
+<!--                            <input type="file" class="form-control-file" id="edit-anh-file" accept="image/*">-->
+<!--                            <div class="mt-2 text-center">-->
+<!--                                <img id="edit-anh-preview" src="" alt="Ảnh preview" class="img-fluid" style="max-height: 150px;">-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+                    <!-- Nút hành động -->
+                    <div class="form-group d-flex justify-content-center">
+                        <button type="button" class="btn btn-secondary mr-3" data-dismiss="modal">
+                            <i class="fas fa-times"></i> Hủy
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Cập nhật
+                        </button>
+                    </div>
                 </form>
             </div>
-
-
         </div>
     </div>
 </div>
-<!--add modal-->
-<div class="modal fade" id="modal-filter" tabindex="-1" role="dialog" aria-labelledby="modal-filterLabel"
-     aria-hidden="true">
+
+<!-- Modal Chi tiết sản phẩm -->
+<div class="modal fade" id="modal-product-detail" tabindex="-1" role="dialog" aria-labelledby="ProductDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document"> <!-- modal-lg cho không gian rộng -->
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="ProductDetailModalLabel">
+                    <i class="fas fa-info-circle"></i> Chi tiết sản phẩm
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Đóng">
+                    <span aria-hidden="true"><i class="fas fa-times"></i></span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="detailTable">
+                        <thead>
+                        <tr>
+                            <th>ID SPCT</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Kích thước</th>
+                            <th>Giá bán</th>
+                            <th>Số lượng</th>
+                            <th>Màu sắc</th>
+                            <th>Ảnh</th>
+                            <th>Hành động</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!-- Dữ liệu chi tiết sẽ được load qua AJAX -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times"></i> Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal chỉnh sửa chi tiết sản phẩm -->
+<div class="modal fade" id="modal-edit-detail" tabindex="-1" role="dialog" aria-labelledby="EditDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="EditDetailModalLabel">
+                    <i class="fas fa-edit"></i> Chỉnh sửa sản phẩm chi tiết
+                </h5>
+                <button type="button" class="close text-dark" data-dismiss="modal" aria-label="Đóng">
+                    <span aria-hidden="true"><i class="fas fa-times"></i></span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="form-edit-detail" class="needs-validation" novalidate>
+                    <input type="hidden" id="detail-id">
+                    <div class="form-group">
+                        <label for="detail-ten-san-pham">Tên sản phẩm:</label>
+                        <input type="text" class="form-control" id="detail-ten-san-pham" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="detail-gia-ban">Giá bán:</label>
+                        <input type="number" step="0.01" class="form-control" id="detail-gia-ban" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="detail-so-luong">Số lượng:</label>
+                        <input type="number" class="form-control" id="detail-so-luong" required>
+                    </div>
+                    <div class="form-group d-flex justify-content-end">
+                        <button type="button" class="btn btn-secondary mr-3" data-dismiss="modal">
+                            <i class="fas fa-times"></i> Hủy
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Lưu
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Add -->
+<div class="modal fade" id="modal-add" tabindex="-1" role="dialog" aria-labelledby="modal-addLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modal-filterLabel">Thêm mới</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <h5 class="modal-title" id="modal-addLabel">Thêm sản phẩm mới</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Đóng">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-
                 <form id="form-add" class="needs-validation" novalidate>
                     <div class="form-group">
-                        <label for="filter-thuongHieu" class="form-label">Series</label>
-                        <select class="form-control" style="width: 100%" id="filter-thuongHieu" multiple="multiple"
-                                required>
-                        </select>
-                        <div class="invalid-feedback">
-                            Vui lòng không để trống tên sản phẩm
-                        </div>
+                        <label for="add-ma-san-pham">Mã sản phẩm:</label>
+                        <input type="text" class="form-control" id="add-ma-san-pham" required>
                     </div>
                     <div class="form-group">
-                        <label for="filter-mau-sac" class="form-label">Màu sắc</label>
-                        <select class="form-control" style="width: 100%" id="filter-mau-sac" multiple="multiple"
-                                required>
-                        </select>
-                        <div class="invalid-feedback">
-                            Vui lòng không để trống tên sản phẩm
-                        </div>
+                        <label for="add-ten">Tên:</label>
+                        <input type="text" class="form-control" id="add-ten" required>
                     </div>
                     <div class="form-group">
-                        <label for="filter-rom" class="form-label">Bộ nhớ</label>
-                        <select class="form-control" style="width: 100%" id="filter-rom" multiple="multiple" required>
-                            <option value="32">32 GB</option>
-                            <option value="64">64 GB</option>
-                            <option value="128">128 GB</option>
-                            <option value="256">256 GB</option>
-                            <option value="512">512 GB</option>
-                            <option value="1024">1 TB</option>
-                            <option value="2048">2 TB</option>
-                            <option value="3072">3 TB</option>
+                        <label for="add-trang-thai">Trạng thái:</label>
+                        <select class="form-control" id="add-trang-thai">
+                            <option value="IN_STOCK">Còn hàng</option>
+                            <option value="OUT_OF_STOCK">Hết hàng</option>
+                            <option value="TEMPORARILY_OUT_OF_STOCK">Hết hàng tạm thời</option>
+                            <option value="COMING_SOON">Sắp ra mắt</option>
+                            <option value="DISCONTINUED">Không kinh doanh</option>
                         </select>
-
-                        <div class="invalid-feedback">
-                            Vui lòng không để trống tên sản phẩm
-                        </div>
                     </div>
                     <div class="form-group">
-                        <label for="rangeSlider" class="form-label">Số lượng</label>
-                        <input id="rangeSlider" type="text" name="range">
+                        <label for="add-mo-ta">Mô tả:</label>
+                        <textarea class="form-control" id="add-mo-ta" rows="3"></textarea>
                     </div>
-
-
+                    <div class="form-group">
+                        <label for="add-anh-url">Ảnh URL:</label>
+                        <input type="text" class="form-control" id="add-anh-url">
+                    </div>
+                    <div class="form-group d-flex justify-content-end">
+                        <button type="button" class="btn btn-secondary mr-3" data-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Xác nhận</button>
+                    </div>
                 </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" id="filter-clear" class="btn btn-danger" data-dismiss="modal">Xóa bộ lọc</button>
-                <button type="button" id="filter-confirm" class="btn btn-primary">Hiển thị</button>
-            </div>
         </div>
-
     </div>
 </div>
 
 </body>
-
 <th:block layout:fragment="bottom_link">
-    <!-- Page level plugins -->
-
     <script src="/vendor/datatables/jquery.dataTables.min.js"></script>
     <script src="/vendor/datatables/dataTables.bootstrap4.min.js"></script>
-    <script src="/vendor/select2/select2.min.js"></script>
+    <script type="module" src="/js/admin/san-pham/san-pham.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/ion-rangeslider@2.3.1/js/ion.rangeSlider.min.js"></script>
 
-    <!-- Page level custom scripts -->
-    <script src="/js/admin/san-pham/san-pham.js"></script>
 </th:block>
+
 </html>

@@ -1,36 +1,60 @@
 package com.poliqlo.controllers.admin.san_pham.controller;
 
-
 import com.poliqlo.controllers.admin.san_pham.model.request.AddRequestNBC;
 import com.poliqlo.controllers.admin.san_pham.service.SanPhamService;
 import com.poliqlo.models.*;
-import com.poliqlo.repositories.SanPhamRepository;
+import com.poliqlo.repositories.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import com.poliqlo.controllers.admin.san_pham_chi_tiet.chat_lieu.model.response.ProductDetailDTO;
+import org.modelmapper.TypeToken;
+import org.springframework.http.MediaType;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 @RequiredArgsConstructor
 @Controller
 public class SanPhamController {
+    private static final Logger log = LoggerFactory.getLogger(SanPhamController.class);
+    //    private static final Logger logger = LoggerFactory.getLogger(SanPhamController.class);
+    private final ModelMapper modelMapper;
+    private final SanPhamRepository sanPhamRepository;
+    private final SanPhamService sanPhamService;
+    @Autowired
+    private ThuongHieuRepository thuongHieuRepository;
+
+    @Autowired
+    private ChatLieuRepository chatLieuRepository;
+
+    @Autowired
+    private KieuDangRepository kieuDangRepository;
+    @Autowired
+    private DanhMucRepository danhMucRepository;
+    private final SanPhamChiTietRepository sanPhamChiTietRepository;
+
     private final SanPhamRepository sanPhamRepository;
     private final SanPhamService sanPhamService;
     @PersistenceContext
     private EntityManager entityManager;
     private static final Logger log = LoggerFactory.getLogger(SanPhamController.class);
     private final ModelMapper modelMapper;
-
 
     @GetMapping("/admin/san-pham")
     public String ui(Model model) {
@@ -48,77 +72,6 @@ public class SanPhamController {
 
         return "/admin/san-pham/edit-san-pham";
     }
-
-//    @ResponseBody
-//    @GetMapping("/api/v1/admin/san-pham/{id}")
-//    public ResponseEntity<?> getSanPhamEdit(@PathVariable(name = "id") SanPham sp) {
-//        var spEditResp = modelMapper.map(sp, SanPhamEditResponse.class);
-//        spEditResp.setCameraSauTinhNangCameraIds(sp.getCameraTruoc()
-//                .getTinhNangCameras()
-//                .stream()
-//                .map(TinhNangCamera::getId)
-//                .collect(Collectors.toSet()));
-//        spEditResp.setCameraTruocTinhNangCameraIds(sp.getCameraSau()
-//                .getTinhNangCameras()
-//                .stream()
-//                .map(TinhNangCamera::getId)
-//                .collect(Collectors.toSet()));
-//        spEditResp.setKetNoiWifiIds(sp
-//                .getKetNoi()
-//                .getWifi()
-//                .stream()
-//                .map(Wifi::getId)
-//                .collect(Collectors.toSet()));
-//        spEditResp.setKetNoiGpsIds(sp
-//                .getKetNoi()
-//                .getGps()
-//                .stream()
-//                .map(Gps::getId)
-//                .collect(Collectors.toSet()));
-//        spEditResp.setKetNoiBluetoothIds(sp
-//                .getKetNoi()
-//                .getBluetooth()
-//                .stream()
-//                .map(Bluetooth::getId)
-//                .collect(Collectors.toSet()));
-//        spEditResp.setPinVaSacCongNghePinIds(sp
-//                .getPinVaSac()
-//                .getCongNghePin()
-//                .stream()
-//                .map(CongNghePin::getId)
-//                .collect(Collectors.toSet()));
-//        spEditResp.setKhuyenMaiIds(sp
-//                .getKhuyenMai()
-//                .stream()
-//                .map(KhuyenMai::getId)
-//                .collect(Collectors.toList()));
-//        spEditResp.setSanPhamChiTietRoms(sp
-//                .getSanPhamChiTiet()
-//                .stream()
-//                .map(SanPhamChiTiet::getRom)
-//                .collect(Collectors.toSet())
-//        );
-//        spEditResp.setSanPhamChiTietMauSacIds(sp
-//                .getSanPhamChiTiet()
-//                .stream()
-//                .map(SanPhamChiTiet::getMauSac)
-//                .map(MauSac::getId)
-//                .collect(Collectors.toSet())
-//        );
-//        spEditResp.setThongTinChungTinhNangDacBietIds(sp
-//                .getThongTinChung()
-//                .getTinhNangDacBiet()
-//                .stream()
-//                .map(tndb -> tndb.getId())
-//                .collect(Collectors.toSet())
-//        );
-//        spEditResp.setRam(sp.getRam());
-//        spEditResp.setThoiGianBaoHanh(sp.getThoiGianBaoHanh());
-//
-//
-//        return ResponseEntity.ok(spEditResp);
-//    }
-//
     @ResponseBody
     @PutMapping("/api/v1/san-pham")
     public ResponseEntity<?> addNew(@Validated @RequestBody AddRequestNBC addRequestNBC, BindingResult bindResult) {
@@ -131,166 +84,110 @@ public class SanPhamController {
         }
         return sanPhamService.persist(addRequestNBC);
     }
+    // Các phương thức khác...
+    // API trả về danh sách sản phẩm chi tiết cho 1 sản phẩm
+    @GetMapping("/api/v1/san-pham/{id}/details")
+    public ResponseEntity<List<ProductDetailDTO>> getProductDetails(@PathVariable("id") Integer id) {
+        List<ProductDetailDTO> details = sanPhamChiTietRepository.findProductDetailsBySanPhamId(id);
+        return ResponseEntity.ok(details);
+    }
+    // Hiển thị giao diện quản lý sản phẩm
+    @GetMapping("/admin/san-pham")
+    public String ui(Model model) {
+        List<ThuongHieu> listThuongHieu = thuongHieuRepository.findAll();
+        List<ChatLieu> listChatLieu = chatLieuRepository.findAll();
+        List<DanhMuc> listDanhMuc = danhMucRepository.findAll();
+        List<KieuDang> listKieuDang = kieuDangRepository.findAll();
+        model.addAttribute("listThuongHieu", listThuongHieu);
+        model.addAttribute("listChatLieu", listChatLieu);
+        model.addAttribute("listDanhMuc", listDanhMuc);
+        model.addAttribute("listKieuDang", listKieuDang);
+        return "/admin/san-pham/san-pham";
+    }
+    // API trả về dữ liệu cho DataTables
+    @ResponseBody
+    @GetMapping("/api/v1/san-pham-table")
+    public List<Response> findAllSanPhamResponse() {
+        List<Object[]> results = sanPhamRepository.findAllSanPham(); // Gọi phương thức findAllSanPham()
+        List<Response> responses = new ArrayList<>();
 
-//    @Transactional
-//    @ResponseBody
-//    @PostMapping("/api/v1/san-pham/{id}")
-//    public ResponseEntity<?> edit(@RequestBody SanPhamEditRequest editRequest, @PathVariable(name = "id") SanPham sp) {
-//        var spEdit = modelMapper.map(editRequest, SanPham.class);
-//        //Đưa ảnh về container chính
-//        if (spEdit.getAnh().getId() == null) {
-//            var anhSanPhamAddRquest = new Anh();
-//            anhSanPhamAddRquest.setName(editRequest.getAnh().getName());
-//            anhSanPhamAddRquest.setUrl(imageService.moveImageToPermanent(editRequest.getAnh().getName()));
-//            var anhSanPham = anhRepository.save(anhSanPhamAddRquest);
-//            spEdit.setAnh(anhSanPham);
-//        }
-//
-//        //Lưu ảnh theo màu sắc sản phẩm chi tiết.
-//        Map<Integer, List<Anh>> mapImgByMsId = new HashMap<>();
-//        spEdit.getSanPhamChiTiet().forEach(spct -> {
-//            if (!mapImgByMsId.containsKey(spct.getMauSac().getId())) {
-//                //Chuyển về cùng 1 thực thể
-//                List<Anh> lstNewImg=new ArrayList<>();
-//                if (spct.getAnh().get(0).getId() == null) {
-//                    spct.getAnh().forEach(newImg -> {
-//                        newImg.setUrl(imageService.moveImageToPermanent(newImg.getName()));
-//                        var anhSanPham = anhRepository.save(newImg);
-//                        lstNewImg.add(anhSanPham);
-//                    });
-//                }else{
-//                    lstNewImg.addAll(spct.getAnh());
-//                }
-//
-//                mapImgByMsId.put(spct.getMauSac().getId(), lstNewImg);
-//            }
-//        });
-//        spEdit.getSanPhamChiTiet().forEach(spct -> {
-//            var oldSpct=sanPhamChiTietRepository.findById(spct.getId()).orElse(spct);
-//            spct.setAnh(mapImgByMsId.get(spct.getMauSac().getId()));
-//            spct.setSanPham(sp);
-//            spct.setDotGiamGia(oldSpct.getDotGiamGia());
-//            spct.setSoLuong(oldSpct.getSoLuong());
-//        });
-//
-//        sanPhamRepository.save(spEdit);
-//
-//        return ResponseEntity.ok("Save success");
-//
-//
-//    }
-//
-//    private void optimizeField(Object source, Object target) {
-//        if (target == null) {
-//        }
-//    }
-//
-//
-//    @ResponseBody
-//    @GetMapping("/api/v1/san-pham-data-table")
-//    public List<SanPhamDataTable> getAll(
-//    ) {
-//        var spdt = sanPhamRepository.findAllSanPhamDataTable();
-//        return spdt;
-//    }
-//
-//    public Collection<SanPham> findAllByDeletedIsFalseOrderByIdDesc() {
-//        return null;
-//    }
-//
-//    @ResponseBody
-//    @PutMapping("/api/v1/san-pham")
-//    public Response add(@Valid @RequestBody AddRequest req, Errors errors, HttpServletResponse response) {
-//        if (errors.hasErrors()) {
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errors.getFieldError().getDefaultMessage());
-//        }
-//        SanPham cnmh = modelMapper.map(req, SanPham.class);
-//        Response cnmhRP = modelMapper.map(sanPhamRepository.save(cnmh), Response.class);
-//        response.setStatus(HttpStatus.CREATED.value());
-//        return cnmhRP;
-//    }
-//
-//
-//    @ResponseBody
-//    @PostMapping("/api/v1/san-pham")
-//    public Response update(@Valid @RequestBody EditReq editReq, Errors errors, HttpServletResponse resp) {
-//        if (errors.hasErrors()) {
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errors.getFieldError().getDefaultMessage());
-//        }
-//        if (editReq.getId() == null || !sanPhamRepository.existsById(editReq.getId())) {
-//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
-//        }
-//        sanPhamRepository.save(modelMapper.map(editReq, SanPham.class));
-//        resp.setStatus(HttpStatus.ACCEPTED.value());
-//        return sanPhamRepository.findById(editReq.getId()).map((element) -> modelMapper.map(element, Response.class)).get();
-//    }
-//
-//
-//    @ResponseBody
-//    @DeleteMapping("/api/v1/san-pham")
-//    public Response delete(@RequestParam(name = "id") Integer id, HttpServletResponse resp) {
-//        if (id == null || !sanPhamRepository.existsById(id)) {
-//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
-//        }
-//        var cnmhE = sanPhamRepository.findById(id).get();
-//        cnmhE.setDeleted(true);
-//        var cnmhR = modelMapper.map(cnmhE, Response.class);
-//        sanPhamRepository.save(cnmhE);
-//        resp.setStatus(HttpStatus.ACCEPTED.value());
-//        return cnmhR;
-//    }
-//
-//    @ResponseBody
-//    @PostMapping("/api/v1/san-pham/revert")
-//    public Response revert(@RequestParam(name = "id") Integer id, HttpServletResponse resp) {
-//        if (id == null || !sanPhamRepository.existsById(id)) {
-//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
-//        }
-//        var cnmhE = sanPhamRepository.findById(id).get();
-//        cnmhE.setDeleted(false);
-//        var cnmhR = modelMapper.map(cnmhE, Response.class);
-//        sanPhamRepository.save(cnmhE);
-//        resp.setStatus(HttpStatus.ACCEPTED.value());
-//        return cnmhR;
-//    }
-//
-//
-//    @ResponseBody
-//    @PostMapping("/api/v1/san-pham/import-excel")
-//    @Transactional
-//    public List<Response> importExcel(@Valid @RequestBody List<@Valid ImportReq> lstCNMH, Errors errors) {
-//        if (errors.hasErrors()) {
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lỗi: Vui lòng kiểm tra lại các trường trong file excel !");
-//        }
-//        try{
-//            List<SanPham> lstMS = lstCNMH.stream()
-//                    .map((element) -> modelMapper.map(element, SanPham.class))
-//                    .collect(Collectors.toList());
-//            List<Response> lstRP = sanPhamRepository.saveAll(lstMS).stream()
-//                    .map((element) -> modelMapper.map(element, Response.class))
-//                    .collect(Collectors.toList());
-//            return lstRP;
-//        }
-//        catch (Exception e) {
-//            log.error("Lỗi import file");
-//            TransactionAspectSupport.currentTransactionStatus().isRollbackOnly();
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lỗi: Vui lòng kiểm tra lại các trường trong file excel !");
-//        }
-//
-//    }
-//
-//    @GetMapping("/admin/san-pham/export-excel")
-//    public ResponseEntity<byte[]> exportToExcel() throws IOException {
-//        List<SanPham> mauSacList = sanPhamRepository.findAll();
-//        ExportExcel<SanPham> exportExcel = new ExportExcel();
-//        ByteArrayInputStream in = exportExcel.export(mauSacList);
-//
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.add("Content-Disposition", "attachment; filename=cong_nghe_man_hinh.xlsx");
-//
-//        return ResponseEntity.ok()
-//                .headers(headers)
-//                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-//                .body(in.readAllBytes());
-//    }
+        for (Object[] row : results) {
+            Response respone = new Response();
+            respone.setId((Integer) row[0]);
+            respone.setMaSanPham((String) row[1]);
+            respone.setTenSanPham((String) row[2]);
+            respone.setThuongHieu((String) row[3]);
+            respone.setChatLieu((String) row[4]);
+            respone.setKieuDang((String) row[5]);
+            respone.setDanhMuc((String) row[6]);
+            respone.setAnhUrl((String) row[7]);
+            respone.setSoLuong((Long) row[8]);
+            respone.setTrangThai((String) row[9]);
+
+            responses.add(respone);
+        }
+
+        return responses;
+    }
+    // API lấy danh sách sản phẩm (nếu cần)
+    @ResponseBody
+    @GetMapping("/api/v1/san-pham")
+    public List<Response> getAll() {
+        return modelMapper.map(sanPhamRepository.findAll(), new TypeToken<List<Response>>() {}.getType());
+    }
+
+    // Thêm mới sản phẩm (PUT)
+    @ResponseBody
+    @PutMapping("/api/v1/san-pham")
+    public ResponseEntity<Response> add(@Valid @RequestBody AddRequest req) {
+        return sanPhamService.save(req);
+    }
+
+    // Cập nhật sản phẩm (POST)
+
+    @ResponseBody
+    @PostMapping("/api/v1/san-pham/update")
+    public ResponseEntity<?> updateSanPham(@Valid @RequestBody EditReq request) {
+        try {
+            boolean isUpdated = sanPhamService.updateSanPham(request);
+            if (isUpdated) {
+                return ResponseEntity.ok("Cập nhật sản phẩm thành công!");
+            }
+            return ResponseEntity.badRequest().body("Sản phẩm không tồn tại hoặc cập nhật thất bại!");
+        } catch (Exception ex) {
+            log.error("Lỗi cập nhật sản phẩm với id {}: {}", request.getId(), ex.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Có lỗi xảy ra khi cập nhật sản phẩm!");
+        }
+    }
+
+
+    // Xóa sản phẩm
+    @ResponseBody
+    @DeleteMapping("/api/v1/san-pham")
+    public ResponseEntity<SanPham> delete(@RequestParam(name = "id") Integer id) {
+        return sanPhamService.delete(id);
+    }
+
+    // Khôi phục sản phẩm
+    @ResponseBody
+    @PostMapping("/api/v1/san-pham/revert")
+    public ResponseEntity<?> revert(@RequestParam(name = "id") Integer id) {
+        return sanPhamService.revert(id);
+    }
+
+    // Import file Excel
+    @ResponseBody
+    @PostMapping("/api/v1/san-pham/import-excel")
+    @Transactional
+    public ResponseEntity<?> importExcel(@Valid @RequestBody List<@Valid ImportReq> lstChatLieu) {
+        return sanPhamService.importExcel(lstChatLieu);
+    }
+
+    // Export Excel
+    @GetMapping("/admin/san-pham/export-excel")
+    public ResponseEntity<byte[]> exportToExcel() throws IOException {
+        return sanPhamService.exportToExcel();
+    }
+
 }
