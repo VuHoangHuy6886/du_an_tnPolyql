@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/admin/layout-dashboard/layout.html">
+<head>
+    <th:block layout:fragment="head_link">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+        <!-- Thêm CSS cho form -->
+        <style>
+            .btn-back {
+                font-size: 14px;
+                padding: 5px 10px;
+            }
+
+            .search-input {
+                width: 2400px; /* Thu nhỏ ô tìm kiếm */
+                display: inline-block;
+                margin-right: 10px;
+            }
+
+            .filter-container {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 10px;
+            }
+
+            .card-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px 15px; /* Giảm padding */
+            }
+
+            .card-header h1 {
+                font-size: 20px; /* Giảm kích thước tiêu đề */
+                margin-bottom: 0;
+            }
+
+            .table th, .table td {
+                vertical-align: middle;
+            }
+
+            .table img {
+                border-radius: 5px;
+            }
+
+            .table thead {
+                background-color: #007bff;
+                color: white;
+            }
+
+            .table thead th {
+                text-align: center;
+            }
+        </style>
+    </th:block>
+</head>
+<body layout:fragment="content">
+<div class="row">
+    <div class="card shadow m-2 w-100">
+        <div class="card-header py-2">
+            <h1 style="font-size: 20px" class="h5 text-gray-800">Danh sách khách hàng đã xóa</h1>
+            <a href="/admin/khach-hang/list-khach-hang" class="btn btn-primary btn-back">
+                <i class="fas fa-arrow-left"></i> Quay lại danh sách khách hàng
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="filter-container">
+                <input type="text" class="form-control search-input" id="searchInput" placeholder="Tìm kiếm...">
+                <select class="form-control" id="filterGender">
+                    <option value="">Tất cả giới tính</option>
+                    <option value="Nam">Nam</option>
+                    <option value="Nữ">Nữ</option>
+                </select>
+            </div>
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>Mã</th>
+                    <th>Ảnh</th>
+                    <th>Tên</th>
+                    <th>Ngày sinh</th>
+                    <th>Giới tính</th>
+                    <th>Email</th>
+                    <th>Số điện thoại</th>
+                    <th>Trạng thái</th>
+                    <th>Chức năng</th>
+                </tr>
+                </thead>
+                <tbody id="customerTableBody">
+                <tr th:each="khachHang : ${khachHangs}">
+                    <td th:text="${khachHang.id}"></td>
+                    <td><img th:src="${khachHang.taiKhoan.anhUrl}" alt="Ảnh khách hàng" width="100"></td>
+                    <td th:text="${khachHang.ten}"></td>
+                    <td th:text="${khachHang.ngaySinh}"></td>
+                    <td th:text="${khachHang.gioiTinh}"></td>
+                    <td th:text="${khachHang.taiKhoan.email}"></td>
+                    <td th:text="${khachHang.taiKhoan.soDienThoai}"></td>
+                    <td th:text="${khachHang.isDeleted ? 'Đã xóa ' : 'Hoạt động'}"></td>
+                    <td>
+                        <button class="btn btn-warning" onclick="confirmRestore(this)" th:data-id="${khachHang.id}">
+                        <i class="bi bi-arrow-clockwise"></i> Khôi phục
+                    </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<th:block layout:fragment="bottom_link">
+    <script>
+        document.getElementById('searchInput').addEventListener('input', function () {
+            var keyword = this.value.toLowerCase();
+            var rows = document.querySelectorAll('#customerTableBody tr');
+            rows.forEach(function(row) {
+                var cells = row.querySelectorAll('td');
+                var match = false;
+                cells.forEach(function(cell) {
+                    if (cell.textContent.toLowerCase().includes(keyword)) {
+                        match = true;
+                    }
+                });
+                row.style.display = match ? '' : 'none';
+            });
+        });
+        document.getElementById('filterGender').addEventListener('change', function () {
+            var selectedGender = this.value.toLowerCase();
+            var rows = document.querySelectorAll('#customerTableBody tr');
+            rows.forEach(function(row) {
+                var genderCell = row.cells[4];
+                if (selectedGender === '' || genderCell.textContent.toLowerCase() === selectedGender) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+        function confirmRestore(button) {
+            var id = button.getAttribute("data-id");
+            Swal.fire({
+                title: "Xác nhận khôi phục",
+                text: "Bạn có chắc chắn muốn khôi phục khách hàng này không?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#28a745",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Khôi phục",
+                cancelButtonText: "Hủy"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "/admin/khach-hang/restore/" + id;
+                }
+            });
+        }
+
+        // Kiểm tra nếu có thông báo từ server
+        window.onload = function () {
+            let successMessage = `[[${successMessage}]]`;
+            let errorMessage = `[[${errorMessage}]]`;
+
+            if (successMessage) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Khôi phục thành công!",
+                    showConfirmButton: false,
+                    timer: 3000
+                }).then(() => {
+                    window.location.href = "/admin/khach-hang/list-customer-deleted";
+                });
+            }
+
+            if (errorMessage) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Không thể khôi phục!",
+                    showConfirmButton: false,
+                    timer: 5000
+                });
+            }
+        };
+    </script>
+</th:block>
+</body>
+</html>
