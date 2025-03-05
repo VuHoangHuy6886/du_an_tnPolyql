@@ -1,6 +1,9 @@
 package com.poliqlo.controllers.admin.san_pham.service;
 
+import com.poliqlo.controllers.admin.san_pham.model.request.AddRequest;
 import com.poliqlo.controllers.admin.san_pham.model.request.AddRequestNBC;
+import com.poliqlo.controllers.admin.san_pham.model.request.EditReq;
+import com.poliqlo.controllers.admin.san_pham.model.response.Response;
 import com.poliqlo.models.*;
 import com.poliqlo.repositories.*;
 import com.poliqlo.utils.ExportExcel;
@@ -8,13 +11,11 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.ByteArrayInputStream;
@@ -27,17 +28,12 @@ import java.util.stream.Collectors;
 public class SanPhamService {
     private final SanPhamRepository sanPhamRepository;
     private final ModelMapper modelMapper;
-    private final SanPhamRepository sanPhamRepository;
-    @Autowired
-    private ThuongHieuRepository thuongHieuRepository;
+    private final ThuongHieuRepository thuongHieuRepository;
 
-    @Autowired
-    private ChatLieuRepository chatLieuRepository;
-    @Autowired
-    private DanhMucRepository DanhMucRepository;
+    private final ChatLieuRepository chatLieuRepository;
+    private final DanhMucRepository DanhMucRepository;
 
-    @Autowired
-    private KieuDangRepository kieuDangRepository;
+    private final KieuDangRepository kieuDangRepository;
     @Transactional
     public ResponseEntity<?> persist(AddRequestNBC addRequestNBC){
         var sp = SanPham.builder()
@@ -128,23 +124,7 @@ public class SanPhamService {
         return ResponseEntity.accepted().body(chatLieu);
     }
 
-    @org.springframework.transaction.annotation.Transactional
-    public ResponseEntity<?> importExcel(@Valid List<@Valid ImportReq> lstSanPham) {
 
-        try{
-            List<SanPham> lstMS = lstSanPham.stream()
-                    .map((element) -> modelMapper.map(element, SanPham.class))
-                    .collect(Collectors.toList());
-            List<Response> lstRP = sanPhamRepository.saveAll(lstMS).stream()
-                    .map((element) -> modelMapper.map(element, Response.class))
-                    .collect(Collectors.toList());
-            return ResponseEntity.accepted().body(lstRP);
-        }
-        catch (Exception e) {
-            TransactionAspectSupport.currentTransactionStatus().isRollbackOnly();
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lỗi: Vui lòng kiểm tra lại các trường trong file excel !");
-        }
-    }
 
     public ResponseEntity<byte[]> exportToExcel() throws IOException {
         List<SanPham> mauSacList = sanPhamRepository.findAll();

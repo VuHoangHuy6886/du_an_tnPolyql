@@ -1,24 +1,22 @@
 package com.poliqlo.controllers.admin.san_pham.controller;
 
 import com.poliqlo.controllers.admin.san_pham.model.request.AddRequestNBC;
+import com.poliqlo.controllers.admin.san_pham.model.request.EditReq;
+import com.poliqlo.controllers.admin.san_pham.model.response.Response;
 import com.poliqlo.controllers.admin.san_pham.service.SanPhamService;
+import com.poliqlo.controllers.admin.san_pham_chi_tiet.chat_lieu.model.response.ProductDetailDTO;
 import com.poliqlo.models.*;
 import com.poliqlo.repositories.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.modelmapper.TypeToken;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import com.poliqlo.controllers.admin.san_pham_chi_tiet.chat_lieu.model.response.ProductDetailDTO;
-import org.modelmapper.TypeToken;
-import org.springframework.http.MediaType;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -32,34 +30,21 @@ import java.util.List;
 @RequiredArgsConstructor
 @Controller
 public class SanPhamController {
-    private static final Logger log = LoggerFactory.getLogger(SanPhamController.class);
-    //    private static final Logger logger = LoggerFactory.getLogger(SanPhamController.class);
     private final ModelMapper modelMapper;
     private final SanPhamRepository sanPhamRepository;
     private final SanPhamService sanPhamService;
-    @Autowired
-    private ThuongHieuRepository thuongHieuRepository;
+    private final ThuongHieuRepository thuongHieuRepository;
 
-    @Autowired
-    private ChatLieuRepository chatLieuRepository;
+    private final ChatLieuRepository chatLieuRepository;
 
-    @Autowired
-    private KieuDangRepository kieuDangRepository;
-    @Autowired
-    private DanhMucRepository danhMucRepository;
+    private final KieuDangRepository kieuDangRepository;
+    private final DanhMucRepository danhMucRepository;
     private final SanPhamChiTietRepository sanPhamChiTietRepository;
 
-    private final SanPhamRepository sanPhamRepository;
-    private final SanPhamService sanPhamService;
     @PersistenceContext
     private EntityManager entityManager;
-    private static final Logger log = LoggerFactory.getLogger(SanPhamController.class);
-    private final ModelMapper modelMapper;
 
-    @GetMapping("/admin/san-pham")
-    public String ui(Model model) {
-        return "/admin/san-pham/san-pham";
-    }
+
 
     @GetMapping("/admin/san-pham/add")
     public String add(Model model) {
@@ -136,12 +121,12 @@ public class SanPhamController {
         return modelMapper.map(sanPhamRepository.findAll(), new TypeToken<List<Response>>() {}.getType());
     }
 
-    // Thêm mới sản phẩm (PUT)
-    @ResponseBody
-    @PutMapping("/api/v1/san-pham")
-    public ResponseEntity<Response> add(@Valid @RequestBody AddRequest req) {
-        return sanPhamService.save(req);
-    }
+//    // Thêm mới sản phẩm (PUT)
+//    @ResponseBody
+//    @PutMapping("/api/v1/san-pham")
+//    public ResponseEntity<Response> add(@Valid @RequestBody AddRequest req) {
+//        return sanPhamService.save(req);
+//    }
 
     // Cập nhật sản phẩm (POST)
 
@@ -155,7 +140,6 @@ public class SanPhamController {
             }
             return ResponseEntity.badRequest().body("Sản phẩm không tồn tại hoặc cập nhật thất bại!");
         } catch (Exception ex) {
-            log.error("Lỗi cập nhật sản phẩm với id {}: {}", request.getId(), ex.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Có lỗi xảy ra khi cập nhật sản phẩm!");
         }
@@ -176,13 +160,7 @@ public class SanPhamController {
         return sanPhamService.revert(id);
     }
 
-    // Import file Excel
-    @ResponseBody
-    @PostMapping("/api/v1/san-pham/import-excel")
-    @Transactional
-    public ResponseEntity<?> importExcel(@Valid @RequestBody List<@Valid ImportReq> lstChatLieu) {
-        return sanPhamService.importExcel(lstChatLieu);
-    }
+
 
     // Export Excel
     @GetMapping("/admin/san-pham/export-excel")

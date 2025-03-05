@@ -1,5 +1,6 @@
 package com.poliqlo.repositories;
 
+import com.poliqlo.controllers.admin.san_pham_chi_tiet.chat_lieu.model.response.ProductDetailDTO;
 import com.poliqlo.models.SanPhamChiTiet;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -21,13 +22,13 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
         ms.TEN AS tenMau,
         a.URL AS anhUrlDetail
     FROM SAN_PHAM_CHI_TIET spct
-    LEFT JOIN SAN_PHAM sp ON spct.ID_SAN_PHAM = sp.ID
-    LEFT JOIN KICH_THUOC kt ON spct.ID_KICH_THUOC = kt.ID
-    LEFT JOIN MAU_SAC ms ON spct.ID_MAU_SAC = ms.ID
-    LEFT JOIN ANH a ON spct.ID_SAN_PHAM = a.ID_SAN_PHAM 
-                    AND ms.ID = a.ID_MAU_SAC
+    LEFT JOIN SAN_PHAM sp ON spct.SAN_PHAM_ID = sp.ID
+    LEFT JOIN KICH_THUOC kt ON spct.KICH_THUOC_ID = kt.ID
+    LEFT JOIN MAU_SAC ms ON spct.MAU_SAC_ID = ms.ID
+    LEFT JOIN ANH a ON spct.SAN_PHAM_ID = a.SAN_PHAM_ID 
+                    AND ms.ID = a.MAU_SAC_ID
     WHERE spct.IS_DELETED = 0
-      AND spct.ID_SAN_PHAM = :sanPhamId
+      AND spct.SAN_PHAM_ID = :sanPhamId
     GROUP BY spct.ID, sp.TEN, kt.TEN, spct.GIA_BAN, spct.SO_LUONG, ms.TEN, a.URL
 """, nativeQuery = true)
     List<ProductDetailDTO> findProductDetailsBySanPhamId(@Param("sanPhamId") Integer sanPhamId);

@@ -31,16 +31,16 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer>, JpaS
         T.SO_LUONG, 
         SP.TRANG_THAI
     FROM SAN_PHAM SP
-    LEFT JOIN THUONG_HIEU TH ON TH.ID = SP.ID_THUONG_HIEU
-    LEFT JOIN CHAT_LIEU CL ON CL.ID = SP.ID_CHAT_LIEU
-    LEFT JOIN KIEU_DANG KD ON KD.ID = SP.ID_KIEU_DANG
-    LEFT JOIN SAN_PHAM_DANH_MUC SPDM ON SPDM.ID_SAN_PHAM = SP.ID
-    LEFT JOIN DANH_MUC DM ON DM.ID = SPDM.ID_DANH_MUC
+    LEFT JOIN THUONG_HIEU TH ON TH.ID = SP.THUONG_HIEU_ID
+    LEFT JOIN CHAT_LIEU CL ON CL.ID = SP.CHAT_LIEU_ID
+    LEFT JOIN KIEU_DANG KD ON KD.ID = SP.KIEU_DANG_ID
+    LEFT JOIN SAN_PHAM_DANH_MUC SPDM ON SPDM.SAN_PHAM_ID = SP.ID
+    LEFT JOIN DANH_MUC DM ON DM.ID = SPDM.DANH_MUC_ID
     LEFT JOIN (
-        SELECT SPCT.ID_SAN_PHAM, CAST(COALESCE(SUM(SPCT.SO_LUONG), 0) AS UNSIGNED) AS SO_LUONG
+        SELECT SPCT.SAN_PHAM_ID, CAST(COALESCE(SUM(SPCT.SO_LUONG), 0) AS UNSIGNED) AS SO_LUONG
         FROM SAN_PHAM_CHI_TIET SPCT
-        GROUP BY SPCT.ID_SAN_PHAM
-    ) AS T ON T.ID_SAN_PHAM = SP.ID
+        GROUP BY SPCT.SAN_PHAM_ID
+    ) AS T ON T.SAN_PHAM_ID = SP.ID
     WHERE SP.IS_DELETED = FALSE
     GROUP BY SP.ID, SP.MA_SAN_PHAM, SP.TEN, TH.TEN, CL.TEN, KD.TEN, SP.ANH_URL, T.SO_LUONG, SP.TRANG_THAI;
     """, nativeQuery = true)
@@ -50,9 +50,9 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer>, JpaS
     @Modifying
     @Transactional
     @Query("UPDATE SanPham sp SET sp.maSanPham = :maSanPham, sp.ten = :ten, " +
-            "sp.idThuongHieu = (SELECT th FROM ThuongHieu th WHERE th.id = :idThuongHieu), " +
-            "sp.idChatLieu = (SELECT cl FROM ChatLieu cl WHERE cl.id = :idChatLieu), " +
-            "sp.idKieuDang = (SELECT kd FROM KieuDang kd WHERE kd.id = :idKieuDang) " +
+            "sp.thuongHieu = (SELECT th FROM ThuongHieu th WHERE th.id = :idThuongHieu), " +
+            "sp.chatLieu = (SELECT cl FROM ChatLieu cl WHERE cl.id = :idChatLieu), " +
+            "sp.kieuDang = (SELECT kd FROM KieuDang kd WHERE kd.id = :idKieuDang) " +
             "WHERE sp.id = :id")
     int updateSanPham(
             @Param("id") Integer id,
