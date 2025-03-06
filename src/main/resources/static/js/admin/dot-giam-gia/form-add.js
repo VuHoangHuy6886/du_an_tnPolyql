@@ -40,10 +40,10 @@ function sendListIdProducts(listIdProducts) {
             tablebodys.innerHTML = '';
             //
             if (data.length >= 1) {
+                console.log(data)
                 data.map(item => {
                     let row = `<tr scope="row">
                             <td><input type="checkbox" value="${item.id}" onclick="handlerGetIdProductDetail(this)"></td>
-                            <td>${item.sanPham.ten}</td>
                             <td>${item.kichThuoc.ten}</td>
                             <td>${item.mauSac.ten}</td>
                             <td>${item.giaBan}</td></tr>`;

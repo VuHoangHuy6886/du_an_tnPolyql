@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Builder
@@ -34,6 +35,9 @@ public class GioHangChiTiet {
     @Column(name = "SO_LUONG", nullable = false)
     private Integer soLuong;
 
+    @NotNull
+    @Column(name = "GIA", nullable = false, precision = 15, scale = 2)
+    private BigDecimal gia;
     @NotNull
     @Column(name = "NGAY_THEM_VAO", nullable = false)
     private Instant ngayThemVao;
