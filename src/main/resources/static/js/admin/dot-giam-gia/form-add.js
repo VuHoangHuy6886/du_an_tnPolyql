@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function handleRadioChange() {
         const selectedValue = document.querySelector('input[name="loaiChietKhau"]:checked').value;
         ipValues.value = ""; // Reset giá trị khi chuyển đổi
-        if (selectedValue === "Phần trăm") {
+        if (selectedValue === "PHAN_TRAM") {
             ipValues.placeholder = "phần trăm giảm";
             ipValues.removeEventListener("input", validateDollar);
             ipValues.addEventListener("input", validatePercentage);
