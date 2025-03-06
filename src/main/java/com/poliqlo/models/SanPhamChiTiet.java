@@ -59,7 +59,7 @@ public class SanPhamChiTiet {
             "JOIN dot_giam_gia d ON spdgg.dot_giam_gia_id = d.id " +
             "WHERE spdgg.san_pham_chi_tiet_id = id " +
             "AND d.is_deleted = 0 " +
-            "AND spdgg.is_active = 1 " +
+            "AND d.trang_thai = 'HOAT_DONG' " +
             "AND d.thoi_gian_bat_dau <= NOW() " +
             "AND d.thoi_gian_ket_thuc >= NOW() " +
             "ORDER BY spdgg.id " +
