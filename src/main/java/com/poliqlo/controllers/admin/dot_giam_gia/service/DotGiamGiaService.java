@@ -56,7 +56,6 @@ public class DotGiamGiaService {
             SanPhamChiTietDotGiamGia discountToProduct = SanPhamChiTietDotGiamGia.builder()
                     .dotGiamGia(result)
                     .sanPhamChiTiet(sanPhamChiTiet)
-                    .soLuong(50)
                     .build();
             sanPhamChiTietDotGiamGiaRepository.save(discountToProduct);
         }
