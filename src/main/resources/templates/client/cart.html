@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/client/layout/layout-client.html"
+>
+<head>
+    <!--    Custom link-->
+    <th:block layout:fragment="head_link">
+        <!-- Bootstrap CSS -->
+        <link href="/css/client/client.css" rel="stylesheet">
+        </style>
+    </th:block>
+
+</head>
+
+<!-- Custom styles for this page -->
+
+<body layout:fragment="content">
+<div class="w-100 vh-100 mt-5">
+    <div class="row d-flex justify-content-center align-content-center p-2 bg-warning mb-5">
+        <h3 class="font-weight-bold m-auto">Giỏ hàng</h3>
+    </div>
+    <div class="row w-75 m-auto">
+        <div class="col-md-8">
+            <table class="table table-bordered align-middle">
+                <thead>
+                <tr>
+                    <th class="text-center">Sản phẩm</th>
+                    <th class="text-center">Đơn giá</th>
+                    <th class="text-center">Số lượng</th>
+                    <th class="text-center">Thành tiền</th>
+                    <th class="text-center">Thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="cart : ${carts}">
+                    <td class="d-flex align-items-center">
+                        <div class="bg-danger d-flex justify-content-center align-items-center me-2"
+                             style="height: 80px; width: 80px; overflow: hidden;">
+                            <img src="https://nguonlaodong.edu.vn/wp-content/uploads/2024/12/anh-anime-gai-xinh-mac-bikini-10.webp"
+                                 alt="ảnh" style="height: 100%; width: 100%; object-fit: cover;">
+                        </div>
+                        <div class="pl-2">
+                            <div><strong>Tên:</strong><p th:text="${cart.name}"></p></div>
+                            <div><strong>Màu:</strong><p th:text="${cart.color}"></p></div>
+                            <div><strong>Size:</strong><p th:text="${cart.size}"></p></div>
+                        </div>
+                    </td>
+                    <td class="text-center text-nowrap" th:text="${cart.priceAfterDiscount}"></td>
+                    <td class="text-center">
+                        <input type="number" class="form-control mx-auto text-center" value="2" min="1"
+                               style="width: 80px;" th:text="${cart.quantity}">
+                    </td>
+                    <td class="text-center text-nowrap" th:text="${cart.totalPrice}"></td>
+                    <td class="text-center"><button class="btn btn-danger btn-sm">Xóa</button></td>
+                </tr>
+                </tbody>
+            </table>
+            <button class="btn btn-outline-danger">Xóa tất cả sản phẩm</button>
+        </div>
+        <div class="col-md-4">
+            <div class="card p-3">
+                <h5>Đơn hàng</h5>
+                <p>Voucher: <a href="#">Chọn hoặc nhập mã</a></p>
+                <p>Tạm tính: <strong>64.600.000đ</strong></p>
+                <p>Voucher: PGG174017502450</p>
+                <p>Giảm: <strong>1.000.000đ</strong></p>
+                <hr>
+                <h4>Tổng tiền: <strong>63.600.000đ</strong></h4>
+                <button class="btn btn-warning w-100">Tiến hành thanh toán</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+<th:block layout:fragment="bottom_link">
+    <!-- jQuery and Bootstrap JS -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
+    <script src="/js/client/iphone.js"></script>
+
+</th:block>
+</html>
