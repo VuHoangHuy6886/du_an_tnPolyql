@@ -2,16 +2,26 @@ package com.poliqlo.controllers.common.api.service;
 
 import com.poliqlo.controllers.common.api.model.request.SanPhamSearchRequest;
 import com.poliqlo.controllers.common.api.model.response.SanPhamAPIResponse;
+import com.poliqlo.controllers.common.api.model.response.SanPhamChiTietAPIResponse;
 import com.poliqlo.models.SanPham;
+import com.poliqlo.repositories.SanPhamChiTietRepository;
 import com.poliqlo.repositories.SanPhamRepository;
-import jakarta.persistence.criteria.*;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -21,8 +31,9 @@ public class SanPhamAPIService {
 
     private final SanPhamRepository sanPhamRepository;
     private final ModelMapper modelMapper;
+    private final SanPhamChiTietRepository sanPhamChiTietRepository;
 
-    public ResponseEntity<?> findAll(SanPhamSearchRequest request) {
+    public Page<?> findAll(SanPhamSearchRequest request) {
         Specification<SanPham> specification=new Specification<SanPham>() {
             @Override
             public Predicate toPredicate(Root<SanPham> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
@@ -116,12 +127,45 @@ public class SanPhamAPIService {
             pageResponse=sanPhamRepository.findAll(specification, pageable);
         }
         Page<SanPhamAPIResponse> resp=pageResponse.map(sp->{
+           var sanPhamAPIResponse= modelMapper.map(sp, SanPhamAPIResponse.class);
+           sanPhamAPIResponse.getSanPhamChiTiets().forEach(spct->{
+               var dgg= spct.getDotGiamGias().stream()
+                       .filter(p ->
+                               p.getTrangThai().equalsIgnoreCase("HOAT_DONG") &&
+                                       p.getThoiGianBatDau().isBefore(LocalDateTime.now()) &&
+                                       p.getThoiGianKetThuc().isAfter(LocalDateTime.now()) &&
+                                       (!p.getIsDeleted())
 
-           return modelMapper.map(sp, SanPhamAPIResponse.class);
+                       ).max(Comparator.comparing(SanPhamAPIResponse.SanPhamChiTiet.DotGiamGiaDto::getId));
+               spct.setDotGiamGia(dgg.orElse(null));
+               spct.setIsPromotionProduct(spct.getDotGiamGia()==null);
+           });
+           return sanPhamAPIResponse;
         });
 
 
 
+        return resp;
+    }
+
+    public ResponseEntity<?> findSPCTById(Integer id) {
+        SanPhamChiTietAPIResponse sanPhamChiTietAPIResponse=null;
+        var respModel=sanPhamChiTietRepository.findById(id);
+        if(respModel.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Không tìm thấy sản phẩm chi tiết");
+        }
+        var resp=modelMapper.map(respModel.get(), SanPhamChiTietAPIResponse.class);
+        var dgg= resp.getDotGiamGias().stream()
+                .filter(p ->
+                        p.getTrangThai().equalsIgnoreCase("HOAT_DONG") &&
+                                p.getThoiGianBatDau().isBefore(LocalDateTime.now()) &&
+                                p.getThoiGianKetThuc().isAfter(LocalDateTime.now()) &&
+                                (!p.getIsDeleted())
+
+                ).max(Comparator.comparing(SanPhamChiTietAPIResponse.DotGiamGiaDto::getId));
+        resp.setTen(resp.getSanPham().getTen()+" " +resp.getMauSac().getTen()+ " "+resp.getKichThuoc().getTen());
+        resp.setDotGiamGia(dgg.orElse(null));
+        resp.setGiaChietKhau(BigDecimal.valueOf(9999999999.99));
         return ResponseEntity.ok(resp);
     }
 }

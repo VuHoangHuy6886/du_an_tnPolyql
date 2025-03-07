@@ -6,9 +6,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.JoinFormula;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Builder
 @AllArgsConstructor
@@ -54,17 +54,13 @@ public class SanPhamChiTiet {
     @Column(name = "IS_DELETED", nullable = false)
     private Boolean isDeleted = false;
 
-    @ManyToOne
-    @JoinFormula("(SELECT d.id FROM san_pham_chi_tiet_dot_giam_gia spdgg " +
-            "JOIN dot_giam_gia d ON spdgg.dot_giam_gia_id = d.id " +
-            "WHERE spdgg.san_pham_chi_tiet_id = id " +
-            "AND d.is_deleted = 0 " +
-            "AND d.trang_thai = 'HOAT_DONG' " +
-            "AND d.thoi_gian_bat_dau <= NOW() " +
-            "AND d.thoi_gian_ket_thuc >= NOW() " +
-            "ORDER BY spdgg.id " +
-            "LIMIT 1)")
-    private DotGiamGia dotGiamGia;
+    @ManyToMany
+    @JoinTable(
+            name = "san_pham_chi_tiet_dot_giam_gia",
+            joinColumns = @JoinColumn(name = "san_pham_chi_tiet_id"),
+            inverseJoinColumns = @JoinColumn(name = "dot_giam_gia_id")
+    )
+    private List<DotGiamGia> dotGiamGias;
 
 //    @OneToMany(mappedBy = "sanPhamChiTiet")
 //    private Set<SanPhamChiTietDotGiamGia> sanPhamChiTietDotGiamGias = new LinkedHashSet<>();

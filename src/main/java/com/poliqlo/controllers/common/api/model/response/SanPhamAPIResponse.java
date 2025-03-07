@@ -1,5 +1,6 @@
 package com.poliqlo.controllers.common.api.model.response;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -114,6 +115,7 @@ public class SanPhamAPIResponse implements Serializable {
         String barcode; // Mã vạch sản phẩm
         Boolean isDeleted; // Đánh dấu sản phẩm chi tiết có bị xóa hay không
         DotGiamGiaDto dotGiamGia; // Chương trình giảm giá hiện tại
+        List<DotGiamGiaDto> dotGiamGias; // Chương trình giảm giá hiện tại
         Boolean isPromotionProduct = true;
 
         /** DTO cho kích thước sản phẩm */
@@ -142,6 +144,8 @@ public class SanPhamAPIResponse implements Serializable {
             private BigDecimal giaTriGiam; // Giá trị giảm
             private BigDecimal giamToiDa; // Giảm tối đa cho một sản phẩm
             private String trangThai; // Trạng thái khuyến mãi (còn hiệu lực hay không)
+            @NotNull
+            private Boolean isDeleted = false;
         }
 
         /** DTO cho màu sắc sản phẩm */
