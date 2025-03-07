@@ -39,6 +39,11 @@ public class SanPhamRestController {
         var resp=sanPhamAPIService.findSPCTById(id);
         return resp;
     }
+    @GetMapping("/api/san-pham-chi-tiet")
+    public ResponseEntity<?> getAllSPCT(@ModelAttribute SanPhamSearchRequest request) {
+        var resp=sanPhamAPIService.findAllSPCT(request);
+        return ResponseEntity.ok(resp);
+    }
 
 
 

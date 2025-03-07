@@ -1,6 +1,5 @@
 package com.poliqlo.controllers.common.api.model.response;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,14 +23,8 @@ public class SanPhamAPIResponse implements Serializable {
     /** ID của sản phẩm */
     Integer id;
 
-    /** Thương hiệu của sản phẩm */
-    ThuongHieu thuongHieu;
-
-    /** Chất liệu của sản phẩm */
-    ChatLieu chatLieu;
-
-    /** Kiểu dáng của sản phẩm */
-    KieuDang kieuDang;
+    /** Đường dẫn ảnh đại diện của sản phẩm */
+    String anhUrl;
 
     /** Mã sản phẩm */
     String maSanPham;
@@ -39,14 +32,19 @@ public class SanPhamAPIResponse implements Serializable {
     /** Tên sản phẩm */
     String ten;
 
+    /** Tổng số lượng sản phẩm đang có sẵn */
+    Integer soLuong = 1;
+
+    /** Đánh dấu sản phẩm có đang trong chương trình khuyến mãi hay không */
+    Boolean isPromotionProduct;
+
     /** Trạng thái của sản phẩm (ví dụ: Đang bán, Hết hàng, Ngừng kinh doanh) */
     String trangThai;
 
     /** Mô tả chi tiết về sản phẩm */
     String moTa;
 
-    /** Đường dẫn ảnh đại diện của sản phẩm */
-    String anhUrl;
+
 
     /** Cờ đánh dấu sản phẩm đã bị xóa hay chưa */
     Boolean isDeleted;
@@ -60,14 +58,18 @@ public class SanPhamAPIResponse implements Serializable {
     /** Danh sách ảnh của sản phẩm */
     List<AnhDto> anhs;
 
-    /** Tổng số lượng sản phẩm đang có sẵn */
-    Integer soLuong = 1;
 
-    /** Giá bán của sản phẩm */
-    Integer giaBan = 1;
 
-    /** Đánh dấu sản phẩm có đang trong chương trình khuyến mãi hay không */
-    Boolean isPromotionProduct;
+
+    /** Thương hiệu của sản phẩm */
+    ThuongHieu thuongHieu;
+
+    /** Chất liệu của sản phẩm */
+    ChatLieu chatLieu;
+
+    /** Kiểu dáng của sản phẩm */
+    KieuDang kieuDang;
+
 
     /** DTO cho thương hiệu sản phẩm */
     @AllArgsConstructor
@@ -107,16 +109,18 @@ public class SanPhamAPIResponse implements Serializable {
     @NoArgsConstructor
     public static class SanPhamChiTiet implements Serializable {
         Integer id;
-        KichThuocDto kichThuoc;
-        MauSacDto mauSac;
+
         BigDecimal giaBan;
-        BigDecimal giaChietKhau = BigDecimal.valueOf(9999999999.0); // Giá chiết khấu nếu có
+        BigDecimal giaChietKhau; // Giá chiết khấu nếu có
         Integer soLuong; // Số lượng còn lại trong kho
-        String barcode; // Mã vạch sản phẩm
-        Boolean isDeleted; // Đánh dấu sản phẩm chi tiết có bị xóa hay không
+        String barcode;
         DotGiamGiaDto dotGiamGia; // Chương trình giảm giá hiện tại
+        Boolean isPromotionProduct;
+        Boolean isDeleted; // Đánh dấu sản phẩm chi tiết có bị xóa hay không
+        MauSacDto mauSac;// Mã vạch sản phẩm
         List<DotGiamGiaDto> dotGiamGias; // Chương trình giảm giá hiện tại
-        Boolean isPromotionProduct = true;
+        KichThuocDto kichThuoc;
+
 
         /** DTO cho kích thước sản phẩm */
         @AllArgsConstructor
@@ -144,8 +148,7 @@ public class SanPhamAPIResponse implements Serializable {
             private BigDecimal giaTriGiam; // Giá trị giảm
             private BigDecimal giamToiDa; // Giảm tối đa cho một sản phẩm
             private String trangThai; // Trạng thái khuyến mãi (còn hiệu lực hay không)
-            @NotNull
-            private Boolean isDeleted = false;
+            private Boolean isDeleted;
         }
 
         /** DTO cho màu sắc sản phẩm */

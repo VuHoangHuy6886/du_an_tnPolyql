@@ -21,22 +21,18 @@ import java.util.List;
 @Setter
 public class SanPhamChiTietAPIResponse implements Serializable {
     Integer id;
-    @NotNull
+    String ten;
+    BigDecimal giaBan;
+    BigDecimal giaChietKhau;
+    Integer soLuong;
+    String barcode;
+    Boolean isDeleted;
+    Boolean isPromotionProduct;
+    DotGiamGiaDto dotGiamGia;
     SanPhamChiTietAPIResponse.SanPhamDto sanPham;
     KichThuocDto kichThuoc;
     MauSacDto mauSac;
-    @NotNull
-    BigDecimal giaBan;
-    BigDecimal giaChietKhau;
-    @NotNull
-    Integer soLuong;
-    @Size(max = 100)
-    String barcode;
-    String ten;
-    @NotNull
-    Boolean isDeleted;
     List<DotGiamGiaDto> dotGiamGias;
-    DotGiamGiaDto dotGiamGia;
 
     /**
      * DTO for {@link com.poliqlo.models.SanPham}
@@ -47,21 +43,14 @@ public class SanPhamChiTietAPIResponse implements Serializable {
     @Setter
     public static class SanPhamDto implements Serializable {
         Integer id;
+        String maSanPham;
+        String ten;
+        String anhUrl;
+        String trangThai;
+        String moTa;
         ThuongHieuDto thuongHieu;
         ChatLieuDto chatLieu;
         KieuDangDto kieuDang;
-        @NotNull
-        @Size(max = 50)
-        String maSanPham;
-        @NotNull
-        @Size(max = 255)
-        String ten;
-        @Size(max = 50)
-        String trangThai;
-        String moTa;
-        @Size(max = 255)
-        String anhUrl;
-        @NotNull
         Boolean isDeleted;
         List<AnhDto> anhs;
 
