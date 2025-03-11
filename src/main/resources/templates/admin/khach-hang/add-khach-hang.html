@@ -20,6 +20,12 @@
                 font-weight: 600;
                 color: #333;
             }
+            /* Style cho dấu hoa thị đỏ */
+            .required-field::after {
+                content: " *";
+                color: red;
+                font-weight: bold;
+            }
             .form-control, .form-select {
                 border-radius: 8px;
             }
@@ -90,7 +96,7 @@
                 <div class="row">
                     <!-- Cột 1: Ảnh khách hàng -->
                     <div class="col-md-4 text-center">
-                        <label for="anhUrl" class="form-label">Ảnh khách hàng</label>
+                        <label for="anhUrl" class="form-label required-field">Ảnh khách hàng</label>
                         <input type="file" id="anhUrl" name="anhUrl" class="form-control" accept="image/jpeg, image/png" required>
                         <div class="invalid-feedback">Vui lòng chọn ảnh (JPG, PNG).</div>
                         <div id="imagePreview" class="mt-3"></div>
@@ -101,23 +107,23 @@
                         <div class="row">
                             <!-- Mã khách hàng -->
                             <div class="col-md-6 mb-3">
-                                <label for="maKhachHang" class="form-label">Mã khách hàng</label>
+                                <label for="maKhachHang" class="form-label required-field">Mã khách hàng</label>
                                 <input type="text" id="maKhachHang" name="maKhachHang" class="form-control" readonly required>
                             </div>
                             <!-- Tên khách hàng -->
                             <div class="col-md-6 mb-3">
-                                <label for="ten" class="form-label">Tên khách hàng</label>
+                                <label for="ten" class="form-label required-field">Tên khách hàng</label>
                                 <input type="text" id="ten" name="ten" class="form-control" pattern="^[A-Za-zÀ-Ỹà-ỹ\s]+$" required>
                                 <div class="invalid-feedback">Tên chỉ chứa chữ cái.</div>
                             </div>
                             <!-- Ngày sinh -->
                             <div class="col-md-6 mb-3">
-                                <label for="ngaySinh" class="form-label">Ngày sinh</label>
+                                <label for="ngaySinh" class="form-label required-field">Ngày sinh</label>
                                 <input type="date" id="ngaySinh" name="ngaySinh" class="form-control" required>
                             </div>
                             <!-- Giới tính -->
                             <div class="col-md-6 mb-3">
-                                <label for="gioiTinh" class="form-label">Giới tính</label>
+                                <label for="gioiTinh" class="form-label required-field">Giới tính</label>
                                 <select id="gioiTinh" name="gioiTinh" class="form-select" required>
                                     <option value="">Chọn giới tính...</option>
                                     <option value="Nam">Nam</option>
@@ -127,14 +133,14 @@
                             </div>
                             <!-- Email -->
                             <div class="col-md-6 mb-3">
-                                <label for="email" class="form-label">Email</label>
+                                <label for="email" class="form-label required-field">Email</label>
                                 <input type="email" id="email" name="email" class="form-control" required>
                                 <div class="invalid-feedback">Vui lòng nhập email hợp lệ.</div>
                                 <span style="color: red;">[[${errorEmail01}]]</span>
                             </div>
                             <!-- Số điện thoại -->
                             <div class="col-md-6 mb-3">
-                                <label for="soDienThoai" class="form-label">Số điện thoại</label>
+                                <label for="soDienThoai" class="form-label required-field">Số điện thoại</label>
                                 <input type="text" id="soDienThoai" name="soDienThoai" class="form-control" pattern="^0\d{9}$" required>
                                 <div class="invalid-feedback">Nhập đúng 10 số.</div>
                                 <span style="color: red;">[[${errorPhone01}]]</span>
@@ -142,6 +148,12 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Chú thích trường bắt buộc -->
+                <div class="mt-3 mb-2">
+                    <small class="text-muted"><span class="text-danger">*</span> Trường bắt buộc phải nhập</small>
+                </div>
+
                 <!-- Nút hành động -->
                 <div class="text-center mt-4">
                     <button class="btn-save">Lưu</button>
@@ -205,7 +217,6 @@
 
         ngaySinhInput.reportValidity();
     });
-
 </script>
 
 </body>

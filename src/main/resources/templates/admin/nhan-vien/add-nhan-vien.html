@@ -30,6 +30,12 @@
         box-shadow: 0 0 4px rgba(0, 123, 255, 0.25);
       }
 
+      /* Style cho dấu hoa thị đỏ */
+      .required-field::after {
+        content: " *";
+        color: red;
+        font-weight: bold;
+      }
     </style>
   </th:block>
 </head>
@@ -48,27 +54,27 @@
             <div class="col-md-6">
               <!-- Ảnh -->
               <div class="mb-3">
-                <label for="anhUrl" class="form-label">Ảnh</label>
+                <label for="anhUrl" class="form-label required-field">Ảnh</label>
                 <input type="file" id="anhUrl" name="anhUrl" class="form-control" accept="image/jpeg, image/png" required>
                 <div class="invalid-feedback">Vui lòng chọn một ảnh (JPG, PNG).</div>
               </div>
 
               <!-- Mã nhân viên (readonly) -->
               <div class="mb-3">
-                <label for="employeeCode" class="form-label">Mã nhân viên</label>
+                <label for="employeeCode" class="form-label required-field">Mã nhân viên</label>
                 <input type="text" id="employeeCode" name="employeeCode" class="form-control" readonly required>
                 <div class="invalid-feedback">Không được để trống mã nhân viên.</div>
               </div>
               <!-- Tên nhân viên -->
               <div class="mb-3">
-                <label for="ten" class="form-label">Tên nhân viên</label>
+                <label for="ten" class="form-label required-field">Tên nhân viên</label>
                 <input type="text" id="ten" name="ten" class="form-control" pattern="^[A-Za-zÀ-Ỹà-ỹ\s]+$" required>
                 <div class="invalid-feedback">Tên không được để trống và chỉ chứa chữ cái.</div>
               </div>
 
               <!-- Email -->
               <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
+                <label for="email" class="form-label required-field">Email</label>
                 <input type="email" id="email" name="email" class="form-control" required>
                 <div class="invalid-feedback">Vui lòng nhập email hợp lệ.</div>
                 <span style="color: red;">[[${errorEmail}]]</span>
@@ -77,22 +83,21 @@
             <div class="col-md-6">
               <!-- Số điện thoại -->
               <div class="mb-3">
-                <label for="soDienThoai" class="form-label">Số điện thoại</label>
+                <label for="soDienThoai" class="form-label required-field">Số điện thoại</label>
                 <input type="text" id="soDienThoai" name="soDienThoai" class="form-control" pattern="^0\d{9}$" required>
                 <div class="invalid-feedback">Số điện thoại phải bắt đầu bằng 0 và có đúng 10 số.</div>
                 <span style="color: red;">[[${errorPhone}]]</span>
-
               </div>
               <!-- Mật khẩu -->
               <div class="mb-3">
-                <label for="password" class="form-label">Mật khẩu</label>
+                <label for="password" class="form-label required-field">Mật khẩu</label>
                 <input type="password" id="password" name="password" class="form-control" pattern="(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}" required>
                 <div class="invalid-feedback">Mật khẩu không được để trống, tối thiểu 6 ký tự, chứa ít nhất 1 chữ cái và 1 số.</div>
               </div>
 
               <!-- Chức vụ -->
               <div class="mb-3">
-                <label for="role" class="form-label">Chức vụ</label>
+                <label for="role" class="form-label required-field">Chức vụ</label>
                 <select id="role" name="role" class="form-select" required>
                   <option value="">Chọn chức vụ...</option>
                   <option value="ROLE_EMPLOYEE">ROLE_EMPLOYEE</option>
@@ -103,11 +108,14 @@
             </div>
           </div>
 
+          <!-- Có thể thêm một ghi chú cho người dùng -->
+          <div class="mb-3">
+            <small class="text-muted"><span class="text-danger">*</span> Trường bắt buộc phải nhập</small>
+          </div>
+
           <button type="submit" class="btn btn-success">Lưu</button>
           <a href="/admin/nhan-vien/list" class="btn btn-secondary">Hủy</a>
         </form>
-
-
       </div>
     </div>
   </main>
@@ -117,6 +125,14 @@
 
 <th:block layout:fragment="bottom_link">
   <script>
+    // Thêm div để preview ảnh nếu chưa có
+    if (!document.getElementById("imagePreview")) {
+      const previewDiv = document.createElement("div");
+      previewDiv.id = "imagePreview";
+      previewDiv.style.marginTop = "10px";
+      document.getElementById("anhUrl").parentNode.appendChild(previewDiv);
+    }
+
     const fileInput = document.getElementById("anhUrl");
     const imagePreview = document.getElementById("imagePreview");
 
@@ -172,8 +188,6 @@
         });
       }
     });
-
   </script>
 </th:block>
-
 </html>

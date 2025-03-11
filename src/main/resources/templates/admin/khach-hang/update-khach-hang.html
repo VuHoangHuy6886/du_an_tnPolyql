@@ -93,6 +93,61 @@
                 border: none;
             }
 
+            /* Confirmation Modal Styles */
+            .modal {
+                display: none;
+                position: fixed;
+                z-index: 1000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+            }
+
+            .modal-content {
+                position: relative;
+                background-color: #fff;
+                margin: 10% auto;
+                padding: 20px;
+                border-radius: 10px;
+                width: 400px;
+                text-align: center;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            }
+
+            .modal-icon {
+                color: #ff9800;
+                font-size: 3rem;
+                margin-bottom: 15px;
+            }
+
+            .modal-title {
+                font-size: 1.5rem;
+                font-weight: bold;
+                margin-bottom: 15px;
+            }
+
+            .modal-message {
+                margin-bottom: 20px;
+            }
+
+            .modal-buttons {
+                display: flex;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .btn-confirm {
+                background-color: #28a745;
+                color: white;
+            }
+
+            .btn-cancel {
+                background-color: #dc3545;
+                color: white;
+            }
+
         </style>
     </th:block>
 </head>
@@ -110,7 +165,7 @@
             <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
             <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
 
-            <form th:action="@{/admin/khach-hang/update-khach-hang/{id}(id=${khachHang.id})}"
+            <form id="updateCustomerForm" th:action="@{/admin/khach-hang/update-khach-hang/{id}(id=${khachHang.id})}"
                   th:object="${khachHang}"
                   method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
 
@@ -176,7 +231,7 @@
 
                 <!-- Nút cập nhật -->
                 <div class="text-center mt-4">
-                    <button type="submit" class="btn btn-success">
+                    <button type="button" id="saveBtn" class="btn btn-success">
                         <i class="bi bi-check-circle"></i> Lưu thay đổi
                     </button>
                     <a href="/admin/khach-hang/list-khach-hang" class="btn btn-secondary">
@@ -185,6 +240,21 @@
                 </div>
             </form>
 
+        </div>
+    </div>
+</div>
+
+<!-- Modal xác nhận cập nhật -->
+<div id="updateConfirmModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-icon">
+            <i class="bi bi-exclamation-circle"></i>
+        </div>
+        <h2 class="modal-title">Xác nhận cập nhật</h2>
+        <p class="modal-message">Bạn có chắc chắn muốn cập nhật thông tin khách hàng này?</p>
+        <div class="modal-buttons">
+            <button id="confirmUpdate" class="btn btn-confirm">Xác nhận</button>
+            <button id="cancelUpdate" class="btn btn-cancel">Hủy</button>
         </div>
     </div>
 </div>
@@ -204,6 +274,60 @@
                 reader.readAsDataURL(file);
             }
         });
+
+        // Modal confirmation for updating
+        const updateForm = document.getElementById("updateCustomerForm");
+        const saveBtn = document.getElementById("saveBtn");
+        const updateConfirmModal = document.getElementById("updateConfirmModal");
+        const confirmUpdateBtn = document.getElementById("confirmUpdate");
+        const cancelUpdateBtn = document.getElementById("cancelUpdate");
+
+        saveBtn.addEventListener("click", function() {
+            // First validate the form
+            let isValid = true;
+
+            // Kiểm tra ngày sinh không lớn hơn ngày hiện tại
+            const ngaySinhInput = document.getElementById("ngaySinh");
+            if (ngaySinhInput && ngaySinhInput.value) {
+                const ngaySinh = new Date(ngaySinhInput.value);
+                const today = new Date();
+                if (ngaySinh > today) {
+                    ngaySinhInput.setCustomValidity("Ngày sinh không được lớn hơn ngày hiện tại.");
+                    isValid = false;
+                } else {
+                    ngaySinhInput.setCustomValidity("");
+                }
+            }
+
+            // Validate all form fields
+            if (!updateForm.checkValidity()) {
+                updateForm.classList.add("was-validated");
+                isValid = false;
+            }
+
+            // If valid, show confirmation modal
+            if (isValid) {
+                updateConfirmModal.style.display = "block";
+            }
+        });
+
+        // Confirm update
+        confirmUpdateBtn.addEventListener("click", function() {
+            updateForm.submit();
+        });
+
+        // Cancel update
+        cancelUpdateBtn.addEventListener("click", function() {
+            updateConfirmModal.style.display = "none";
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener("click", function(event) {
+            if (event.target === updateConfirmModal) {
+                updateConfirmModal.style.display = "none";
+            }
+        });
+
         (function () {
             "use strict";
             const forms = document.querySelectorAll(".needs-validation");
@@ -213,17 +337,6 @@
                     if (!form.checkValidity()) {
                         event.preventDefault();
                         event.stopPropagation();
-                    }
-                    // Kiểm tra ngày sinh không lớn hơn ngày hiện tại
-                    const ngaySinhInput = document.getElementById("ngaySinh");
-                    if (ngaySinhInput) {
-                        const ngaySinh = new Date(ngaySinhInput.value);
-                        const today = new Date();
-                        if (ngaySinh > today) {
-                            ngaySinhInput.setCustomValidity("Ngày sinh không được lớn hơn ngày hiện tại.");
-                        } else {
-                            ngaySinhInput.setCustomValidity("");
-                        }
                     }
 
                     form.classList.add("was-validated");
