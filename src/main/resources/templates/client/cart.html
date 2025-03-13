@@ -1,85 +1,161 @@
-<!DOCTYPE html>
-<html lang="en"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="/client/layout/layout-client.html"
->
-<head>
-    <!--    Custom link-->
-    <th:block layout:fragment="head_link">
-        <!-- Bootstrap CSS -->
-        <link href="/css/client/client.css" rel="stylesheet">
-        </style>
-    </th:block>
+    <!DOCTYPE html>
+    <html lang="en"
+          xmlns:th="http://www.thymeleaf.org"
+          xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+          layout:decorate="/client/layout/layout-client.html"
+    >
+    <head>
+        <!--    Custom link-->
+        <th:block layout:fragment="head_link">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+                  integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+                  crossorigin="anonymous" referrerpolicy="no-referrer"/>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+                  integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+                  crossorigin="anonymous">
+        </th:block>
 
-</head>
+    </head>
 
-<!-- Custom styles for this page -->
+    <!-- Custom styles for this page -->
 
-<body layout:fragment="content">
-<div class="w-100 vh-100 mt-5">
-    <div class="row d-flex justify-content-center align-content-center p-2 bg-warning mb-5">
-        <h3 class="font-weight-bold m-auto">Giỏ hàng</h3>
-    </div>
-    <div class="row w-75 m-auto">
-        <div class="col-md-8">
-            <table class="table table-bordered align-middle">
-                <thead>
-                <tr>
-                    <th class="text-center">Sản phẩm</th>
-                    <th class="text-center">Đơn giá</th>
-                    <th class="text-center">Số lượng</th>
-                    <th class="text-center">Thành tiền</th>
-                    <th class="text-center">Thao tác</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="cart : ${carts}">
-                    <td class="d-flex align-items-center">
-                        <div class="bg-danger d-flex justify-content-center align-items-center me-2"
-                             style="height: 80px; width: 80px; overflow: hidden;">
-                            <img src="https://nguonlaodong.edu.vn/wp-content/uploads/2024/12/anh-anime-gai-xinh-mac-bikini-10.webp"
-                                 alt="ảnh" style="height: 100%; width: 100%; object-fit: cover;">
-                        </div>
-                        <div class="pl-2">
-                            <div><strong>Tên:</strong><p th:text="${cart.name}"></p></div>
-                            <div><strong>Màu:</strong><p th:text="${cart.color}"></p></div>
-                            <div><strong>Size:</strong><p th:text="${cart.size}"></p></div>
-                        </div>
-                    </td>
-                    <td class="text-center text-nowrap" th:text="${cart.priceAfterDiscount}"></td>
-                    <td class="text-center">
-                        <input type="number" class="form-control mx-auto text-center" value="2" min="1"
-                               style="width: 80px;" th:text="${cart.quantity}">
-                    </td>
-                    <td class="text-center text-nowrap" th:text="${cart.totalPrice}"></td>
-                    <td class="text-center"><button class="btn btn-danger btn-sm">Xóa</button></td>
-                </tr>
-                </tbody>
-            </table>
-            <button class="btn btn-outline-danger">Xóa tất cả sản phẩm</button>
+    <body layout:fragment="content">
+    <div class="container-fluid my-4">
+        <div class="py-3 d-flex justify-content-between align-content-center">
+            <h3 class="font-weight-bold ml-5">Giỏ Hàng</h3>
+            <span class="font-weight-bold text-danger" th:text="${thongbao}"></span>
         </div>
-        <div class="col-md-4">
-            <div class="card p-3">
-                <h5>Đơn hàng</h5>
-                <p>Voucher: <a href="#">Chọn hoặc nhập mã</a></p>
-                <p>Tạm tính: <strong>64.600.000đ</strong></p>
-                <p>Voucher: PGG174017502450</p>
-                <p>Giảm: <strong>1.000.000đ</strong></p>
-                <hr>
-                <h4>Tổng tiền: <strong>63.600.000đ</strong></h4>
-                <button class="btn btn-warning w-100">Tiến hành thanh toán</button>
+        <div class="row">
+            <div class="col-md-8">
+                <table class="table table-hover text-center align-middle bg-white shadow-sm rounded">
+                    <thead class="table-dark">
+                    <tr>
+                        <th style="width: 5%;"><input type="checkbox" id="chonall" style="width: 20px; height: 20px;"></th>
+                        <th style="width: 40%;">Sản phẩm</th>
+                        <th style="width: 15%;">Đơn giá</th>
+                        <th style="width: 15%;">Số lượng</th>
+                        <th style="width: 15%;">Thành tiền</th>
+                        <th style="width: 10%;">Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="cart : ${carts}">
+                        <td style="position: relative">
+                            <input type="hidden" class="idGioHang" th:value="${cart.id}">
+                            <input type="checkbox" class="chon"
+                                   style="width: 20px; height: 20px; position: absolute; left: 20px; bottom:  45px">
+                        </td>
+                        <td class="d-flex align-items-center justify-content-center">
+                            <div class="border rounded me-3 d-flex align-items-center justify-content-center"
+                                 style="height: 80px; width: 80px; overflow: hidden;">
+                                <img src="https://product.hstatic.net/1000088324/product/viet_nam_1ca0d3366ad84dc68a91652dce4dbd3d_master.png"
+                                     alt="ảnh" class="w-100 h-100 object-fit-cover">
+                            </div>
+                            <div class="ml-5">
+                                <h6 class="m-0" th:text="${cart.name}"></h6>
+                                <p class="text-muted small m-0">Màu: <span th:text="${cart.color}"></span></p>
+                                <p class="text-muted small m-0">Kích Thước: <span th:text="${cart.size}"></span></p>
+                            </div>
+                        </td>
+                        <td class="text-nowrap">
+                            <del class="text-danger mt-5"
+                                 th:text="${#numbers.formatDecimal(cart.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></del>
+                            <span class="text-danger mt-5"
+                                  th:text="${#numbers.formatDecimal(cart.priceAfterDiscount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></span>
+                        </td>
+                        <td>
+                            <div class="d-flex justify-content-around align-items-center m-auto w-100 ">
+                                <a th:href="@{'/cart/increase/'+${cart.id}}" class="btn btn-outline-danger">+</a>
+                                <form id="formUpdateQuantity">
+                                    <input type="hidden" id="idCart" name="idCart" th:value="${cart.id}">
+                                    <input id="inputQuantity" type="text" th:value="${cart.quantity}"
+                                           class="form-control h-100"
+                                           style="width: 50px;">
+                                </form>
+
+                                <a th:href="@{'/cart/decrease/'+${cart.id}}" class="btn btn-outline-danger">-</a>
+                            </div>
+                        </td>
+                        <td class="text-nowrap tongtien" th:value="${cart.totalPrice}"
+                            th:text="${#numbers.formatDecimal(cart.totalPrice, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></td>
+                        <td>
+                            <a th:href="@{'/cart/delete/'+${cart.id}}" class="btn btn-danger btn-sm px-3">🗑 Xóa</a>
+                            <input type="hidden" id="customerid" th:value="${cart.customerId}">
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="text-center my-3">
+                    <a id="removeAllLink" class="btn btn-outline-danger px-4 py-2 ">🗑 Xóa tất cả sản phẩm</a>
+                </div>
+            </div>
+            <!-- Order Summary -->
+            <div class="col-md-4">
+                <div class="card p-3 shadow-sm">
+                    <h4 class="font-weight-bold text-dark">Đơn hàng</h4>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="text-warning">
+                            <i class="fa-solid fa-ticket"></i> <span>voucher</span>
+                        </h4>
+                        <a id="btnChonVouchers" type="button" class="" data-bs-toggle="modal" data-bs-target="#customModal">
+                            Chọn phiếu giảm giá
+                        </a>
+                    </div>
+
+                    <!--Modal-->
+                    <div class="modal fade" id="customModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="modalLabel">Danh Sách voucher</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <table class="table modal-table">
+                                        <thead>
+                                        <tr>
+                                            <th>Tên</th>
+                                            <th>Giảm tối da</th>
+                                            <th>Thao tác</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody id="showDanhSachVouCher">
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">trở lại</button>
+                                    <button id="confirmVoucher" class="btn" style="background-color: orange"
+                                            data-bs-dismiss="modal">OK
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--Modal-->
+                    <hr>
+                    <form method="post" th:action="@{/cart/trang-thanh-toan}">
+                        <input type="text" id="idKhachHang" name="idKH" th:value="${idCustomer}">
+                        <input type="text" id="cartIds" name="cartIds" value="">
+                        <input type="text" id="voucherId" name="voucherId" value="">
+                        <span id="soTienGiam" style="display: none; color: red"></span>
+                        <h4 class="fw-bold text-dark">Tổng Tiền: <span id="showTongTien"
+                                                                       class="text-danger font-weight-bold">0 ₫</span>
+                        </h4>
+                        <button id="btnThanToan" class="btn w-100 py-2 fw-bold mt-2" style="background-color: orange; display: none">Tến
+                            Hành Thanh Toán
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
-</body>
+    </body>
 
-<th:block layout:fragment="bottom_link">
-    <!-- jQuery and Bootstrap JS -->
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
-    <script src="/js/client/iphone.js"></script>
-
-</th:block>
-</html>
+    <th:block layout:fragment="bottom_link">
+        <script src="/js/client/cart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </th:block>
+    </html>

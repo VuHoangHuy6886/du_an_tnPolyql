@@ -8,8 +8,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CartDetailResponseDTO {
-    private String customerId;
-    private String productId;
+    private Integer id;
+    private Integer customerId;
+    private Integer productDetailId;
     private String name;
     private String color;
     private String size;
@@ -18,4 +19,5 @@ public class CartDetailResponseDTO {
     private String totalPrice;
     private String url;
     private String priceAfterDiscount;
+    private Integer discountId;
 }

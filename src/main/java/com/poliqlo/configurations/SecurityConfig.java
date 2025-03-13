@@ -105,7 +105,7 @@ public class SecurityConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**") // Cho phép CORS cho tất cả các đường dẫn
                         .allowedOrigins("http://localhost:8080",
-                                "http://127.0.0.1:5500") // Thay bằng nguồn gốc của bạn
+                                "http://192.168.9.100:5500") // Thay bằng nguồn gốc của bạn
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                         .allowedHeaders("*") // Cho phép tất cả các header
                         .allowCredentials(true); // Cho phép gửi cookie

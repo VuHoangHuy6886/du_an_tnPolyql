@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -43,4 +44,9 @@ public interface PhieuGiamGiaRepository extends JpaRepository<PhieuGiamGia, Inte
     @Query(value = "SELECT * FROM khach_hang", nativeQuery = true)
     List<KhachHang> findAllCustomers();
 
+    @Query(value = "SELECT p FROM PhieuGiamGia p " +
+            "INNER JOIN PhieuGiamGiaKhachHang pg ON pg.phieuGiamGia.id = p.id " +
+            "INNER JOIN KhachHang kh ON kh.id = pg.khachHang.id " +
+            "WHERE p.trangThai = 'DANG_DIEN_RA' AND kh.id = :idKH AND p.hoaDonToiThieu <= :tongTien")
+    List<PhieuGiamGia> hienThiPhieuGiamBangIdKhachHang(@Param("idKH") Integer idKH, @Param("tongTien") BigDecimal tongTien);
 }
