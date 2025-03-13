@@ -10,17 +10,19 @@ import com.poliqlo.repositories.PhieuGiamGiaRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,7 +31,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RequestMapping("/admin/phieu-giam-gia")
 public class PhieuGiamGiaController {
-
+    private final PhieuGiamGiaRepository repository;
 
     private final PhieuGiamGiaService service;
 
@@ -111,18 +113,40 @@ public class PhieuGiamGiaController {
 
 
     @GetMapping("/form-add")
-    public String formAdd(Model model) {
-        //lay len du lieu khach hang
-        List<KhachHang> khachHangList = service.getAllCustomers();
-        model.addAttribute("listKH", khachHangList);
-        model.addAttribute("request", new AddPhieuGiamGiaRequest());
-        return "admin/phieu-giam-gia/form-add";
+    public String formAdd(@RequestParam(value = "page", defaultValue = "0") int page,
+                          @RequestParam(value = "size", defaultValue = "5") int size,
+                          @RequestParam(value = "name", required = false) String search,
+                          Model model) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<KhachHang> khachHangPage;
+        System.out.println("ten : " + search);
+        // Lọc khách hàng theo tên nếu có search
+        if (search != null && !search.trim().isEmpty()) {
+            khachHangPage = service.timKhachHangTheoTen(search, pageable);
+            model.addAttribute("listKH", khachHangPage.getContent());
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", khachHangPage.getTotalPages());
+            model.addAttribute("request", new AddPhieuGiamGiaRequest());
+            return "/admin/phieu-giam-gia/form-add";
+        } else {
+            khachHangPage = service.getAllCustomers(pageable);
+            model.addAttribute("listKH", khachHangPage.getContent());
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", khachHangPage.getTotalPages());
+            model.addAttribute("request", new AddPhieuGiamGiaRequest());
+            return "/admin/phieu-giam-gia/form-add";
+        }
     }
 
 
     @PostMapping("/save")
     public String add(@ModelAttribute("request") AddPhieuGiamGiaRequest request,
-                      @RequestParam("listIdCustomer") String ids) {
+                      @RequestParam("listIdCustomer") String ids,
+                      Model model
+    ) {
+
+
         List<Integer> listCustomer;
         if (!ids.isEmpty() && ids != null) {
             listCustomer = Arrays.stream(ids.split(","))
@@ -131,6 +155,18 @@ public class PhieuGiamGiaController {
         } else {
             listCustomer = null;
         }
+
+        if (repository.existsByTen(request.getTen())) {
+            model.addAttribute("checkTrungTen", "ten da ton tai");
+            return "/admin/phieu-giam-gia/form-add";
+        }
+
+        if (repository.existsByGiaTriGiam(BigDecimal.valueOf(Double.parseDouble(request.getGiaTriGiam())))) {
+            model.addAttribute("checktrungGTG", "Gia tri giam nay da ton tai");
+            return "/admin/phieu-giam-gia/form-add";
+        }
+
+
         service.save(request, listCustomer);
         return "redirect:/admin/phieu-giam-gia/all";
     }
@@ -180,7 +216,7 @@ public class PhieuGiamGiaController {
         if (inputGiaTriGiam == null || inputGiaTriGiam.trim().isEmpty() || bindingResult.hasErrors()) {
             model.addAttribute("message", "Vui lòng nhập đúng dữ liệu");
             model.addAttribute("request", request);
-            return "admin/phieu-giam-gia/form-add";
+            return "admin/phieu-giam-gia/form-update";
         }
 
         // Kiểm tra loại hình giảm giá hợp lệ (phải là "phantram" hoặc "giatien")
@@ -188,7 +224,7 @@ public class PhieuGiamGiaController {
                 !inputGiaTriGiam.trim().equalsIgnoreCase("giatien")) {
             model.addAttribute("validLoaiHinhGiam", request);
             model.addAttribute("message", "Loại hình giảm phải là 'phantram' hoặc 'giatien'");
-            return "admin/phieu-giam-gia/form-add";
+            return "admin/phieu-giam-gia/form-update";
         }
 
         // Kiểm tra ngày bắt đầu và ngày kết thúc
@@ -199,22 +235,45 @@ public class PhieuGiamGiaController {
         if (ngayBatDau == null || ngayKetThuc == null) {
             model.addAttribute("messages", "Ngày bắt đầu và ngày kết thúc không được để trống");
             model.addAttribute("message", "");
-            return "admin/phieu-giam-gia/form-add";
+            return "admin/phieu-giam-gia/form-update";
         }
 
         if (ngayBatDau.isBefore(now)) {
             model.addAttribute("messages", "Ngày bắt đầu phải lớn hơn thời gian hiện tại");
-            return "admin/phieu-giam-gia/form-add";
+            return "admin/phieu-giam-gia/form-update";
         }
 
         if (ngayBatDau.isAfter(ngayKetThuc)) {
             model.addAttribute("message", "");
             model.addAttribute("messages", "Ngày bắt đầu phải nhỏ hơn ngày kết thúc");
-            return "admin/phieu-giam-gia/form-add";
+            return "admin/phieu-giam-gia/form-update";
         }
 
         // Nếu hợp lệ, tiến hành cập nhật dữ liệu
         String result = service.update(request);
+        return "redirect:/admin/phieu-giam-gia/all";
+    }
+
+//delete
+//    @PostMapping("/delete{id}")
+//    public String delete(@Valid @ModelAttribute("request") UpdatePhieuGiamGiaRequest request,
+//                         BindingResult bindingResult,
+//                         Model model) {
+//
+//
+//        return "redirect:/admin/phieu-giam-gia/all";
+//    }
+
+    @GetMapping("/form-detail/{id}")
+    public String detail(@PathVariable("id") Integer id, Model model) {
+        PhieuGiamGia phieuGiamGia = service.findById(id);
+        model.addAttribute("phieuGiamGia", phieuGiamGia);
+        return "admin/phieu-giam-gia/form-detail";
+    }
+
+    @GetMapping("/change-status/{id}")
+    public String changeStatus(@PathVariable("id") Integer id) {
+        service.changeStatus(id);
         return "redirect:/admin/phieu-giam-gia/all";
     }
 
