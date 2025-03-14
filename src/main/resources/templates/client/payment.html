@@ -22,7 +22,7 @@
 <body layout:fragment="content">
 <!--container-->
 <div class="container-fluid d-flex justify-content-around">
-    <div class="w-50 p-4  d-flex flex-column" style="height: 500px">
+    <div class="w-50 p-4  d-flex flex-column" style="height: 600px">
         <div class="w-100 card p-3 mb-4 shadow">
             <div class="w-100 font-weight-bold" style="color: brown">
                 <span><i class="fa-solid fa-location-dot"></i></span>
@@ -30,6 +30,7 @@
             </div>
             <div>
                 <input type="hidden" id="customerid" th:value="${customerId}">
+                <input type="hidden" id="idAddress" th:value="${diachi.id}">
                 <input id="tenNguoiNhan" type="hidden" class="text-danger" th:value="${diachi.hoTenNguoiNhan}">
                 <input id="soDienThoaiNN" type="hidden" class="text-warning" th:value="${diachi.soDienThoai}">
                 <input id="defaultMD" type="hidden" class="text-warning" th:value="${diachi.isDefault}">
@@ -67,6 +68,16 @@
                         </div>
                         <div class="modal-body">
                             <div class="mb-3">
+                                <label for="tenNguoiNhanCreate" class="form-label">Tên người nhận :</label>
+                                <input type="text" id="tenNguoiNhanCreate" class="form-control"
+                                       placeholder="Nhập tên người nhận...">
+                            </div>
+                            <div class="mb-3">
+                                <label for="phoneNumberCreate" class="form-label">Số điện thoại:</label>
+                                <input type="text" id="phoneNumberCreate" class="form-control"
+                                       placeholder="Nhập số điện thoại...">
+                            </div>
+                            <div class="mb-3">
                                 <label for="tinhCreate" class="form-label">Tỉnh/Thành phố:</label>
                                 <select id="tinhCreate" class="form-select" required>
                                     <option value="">Chọn tỉnh/thành phố</option>
@@ -95,13 +106,15 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button id="submit" type="button" class="btn btn-success" data-bs-dismiss="modal">Create</button>
+                            <button id="submit" type="button" class="btn btn-success" data-bs-dismiss="modal">Create
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="w-100 m-2">
                 <h5>
+                    <span id="addressID"></span>
                     <span class="font-weight-bold" id="viewTen"></span> -
                     <span class="font-weight-bold" id="viewSDT"></span> :
                     <span id="ward"></span> -
@@ -139,6 +152,15 @@
                 </tbody>
             </table>
         </div>
+        <div class="w-100 card p-5 shadow mt-3">
+            <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                <input type="radio" class="btn-check" name="btnradio" id="btnradio1" value="COD" autocomplete="off" checked>
+                <label class="btn btn-outline-warning" for="btnradio1">COD</label>
+                <input type="radio" class="btn-check" name="btnradio" id="btnradio2" value="VNPAY" autocomplete="off">
+                <label class="btn btn-outline-warning" for="btnradio2">VNPAY</label>
+            </div>
+           <input type="text" class="form-control" placeholder="Ghi chu cho shop" id="ghiChuText">
+        </div>
     </div>
     <div class="w-25 p-4">
         <div class="w-100 mx-auto bg-light p-4 rounded shadow-sm">
@@ -150,22 +172,32 @@
                 </h5>
 
                 <h5 class="mb-2">Giảm:
-                    <span th:if="${voucher != null and voucher.giamToiDa != null and voucher.giamToiDa > 0}"
-                          class="fw-bold text-success"
+                    <span th:if="${voucher != null and voucher.giamToiDa != null and voucher.giamToiDa > 0}" id="giamGia"
+                          class="fw-bold text-primary"
                           th:text="${#numbers.formatDecimal(voucher.giamToiDa, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}"></span>
                 </h5>
-                <h5>Phí vận chuyển: <span id="phiship" class="fw-bold text-secondary"></span></h5>
-                <h5 class="mb-2">Tạm Tính: <span class="fw-bold text-danger"
+                <h5>Phí vận chuyển: <span id="phiship" class="fw-bold text-warning"></span></h5>
+                <h5 class="mb-2">Tạm Tính: <span class="fw-bold text-primary"
                                                  th:text="${#numbers.formatDecimal(tongTienSauKhiApDungVoucher, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}"></span>
                 </h5>
             </div>
 
             <div class="border bg-white text-dark p-3 rounded-3 shadow-sm mb-3">
                 <input type="hidden" id="tongTien" th:value="${tongTienSauKhiApDungVoucher}">
-                <h4 class="mt-2">Tổng Tiền: <span id="totalPrice" class="fw-bold text-primary"></span></h4>
+                <h4 class="mt-2">Tổng Tiền: <span id="totalPrice" class="fw-bold text-danger"></span></h4>
             </div>
-
-            <button class="btn btn-success btn-lg w-100 fw-bold shadow-sm">Đặt Hàng</button>
+            <form method="post" th:action="@{/cart/save-bill}" th:object="${bill}">
+                <input type="hidden" id="billCustomerID" name="customerId" th:field="*{customerId}">
+                <input type="hidden" id="billVoucherID" name="voucherId" th:field="*{voucherId}">
+                <input type="hidden" id="billCartDetailID" name="cartDetailIds" th:field="*{cartDetailIds}">
+                <input type="hidden" id="billTotalPrice" name="totalPrice" th:field="*{totalPrice}">
+                <input type="hidden" id="billAddressID" name="addressId" th:field="*{addressId}">
+                <input type="hidden" id="billShipping" name="shipping" th:field="*{shipping}">
+                <input type="hidden" id="billPaymentMethod" name="paymentMethod" th:field="*{paymentMethod}">
+                <input type="hidden" id="billNote" name="note" th:field="*{note}">
+                <input type="hidden" id="billCoupon" name="note" th:field="*{coupon}">
+                <button class="btn btn-success btn-lg w-100 fw-bold shadow-sm">Đặt Hàng</button>
+            </form>
         </div>
     </div>
 </div>

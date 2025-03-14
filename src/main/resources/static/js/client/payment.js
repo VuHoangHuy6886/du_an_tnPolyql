@@ -1,6 +1,7 @@
 const API_KEY = "568f0428-ff0b-11ef-968a-1659e6af139f"; // 🔥 Thay bằng API Key thật của bạn
 const shopDistrictId = 1452;
 const shopId = 5680488;
+const addressId = document.getElementById("idAddress").value;
 const tinh = document.getElementById("tinh").value;
 const huyen = document.getElementById("huyen").value;
 const xa = document.getElementById("xa").value;
@@ -12,7 +13,9 @@ const canNang = totalQuantity * 100
 const chieuCao = totalQuantity * 5
 const customerId = document.getElementById("customerid").value;
 const apiBase = "https://online-gateway.ghn.vn/shiip/public-api/master-data";
+// object fill dia chi
 const addressData = {
+    id: addressId,
     province: tinh,
     district: huyen,
     ward: xa,
@@ -20,9 +23,6 @@ const addressData = {
     sdt: soDienThoai,
     defaultValue: defaultView
 };
-displayAddress(addressData)
-console.log("address default : ", addressData)
-
 // Hàm định dạng số thành tiền VNĐ
 function formatToVND(amount) {
     return new Intl.NumberFormat("vi-VN").format(amount).replace(/\./g, ',') + " VNĐ";
@@ -109,6 +109,7 @@ async function displayAddress(addressData) {
     document.getElementById("ward").textContent = wardName;
     document.getElementById("viewTen").textContent = addressData.ten;
     document.getElementById("viewSDT").textContent = addressData.sdt;
+    document.getElementById("addressID").textContent = addressData.id
     let macDinh = addressData.defaultValue;
     let theSpan = document.getElementById("Default");
     if (macDinh) {
@@ -120,7 +121,8 @@ async function displayAddress(addressData) {
         theSpan.style.color = "white"
         theSpan.textContent = "Mới Chọn"
     }
-
+    // hien  thi len bill
+    document.getElementById("billAddressID").value = addressData.id
 }
 
 function handlerClickAddress(e) {
@@ -137,6 +139,7 @@ async function findDiaChiById(id) {
     }).then(response => response.json())
         .then(result => {
             let newAddress = {
+                id: result.id,
                 province: result.provinceId,
                 district: result.districtId,
                 ward: result.wardId,
@@ -144,9 +147,7 @@ async function findDiaChiById(id) {
                 sdt: result.soDienThoai,
                 defaultValue: result.defaultValue
             }
-            console.log("địa chỉ mới call về ", newAddress)
             Object.assign(addressData, newAddress)
-            console.log("du lieu truyen vao ham displayAddress : ", addressData)
             displayAddress(addressData)
             calculateShippingFee()
         })
@@ -156,6 +157,7 @@ async function findDiaChiById(id) {
 }
 
 async function findAllListDiaChiById(id) {
+    console.log("hàm find all địa chỉ")
     try {
         const response = await fetch("/api/cart/list-dia-chi", {
             method: "POST",
@@ -203,7 +205,6 @@ function renderAddressList(addresses) {
             <span>${ad.defaultValue ? " - mặc định" : ""}</span> 
             <input type="radio" value="${ad.id}" name="checkedAddress" onchange="handlerClickAddress(this.value)">
         `;
-        console.log("ad : ", ad)
         addressContainer.appendChild(addressElement);
     });
     renderTextDiaChi()
@@ -242,6 +243,10 @@ async function calculateShippingFee() {
         let tongTien = tien + phiShip;
         //console.log("tong tien : ",formatToVND(500000000))
         document.getElementById("totalPrice").innerText = formatToVND(tongTien)
+
+        // hien thi bill
+        document.getElementById("billShipping").value = phiShip;
+        document.getElementById("billTotalPrice").value = tongTien;
     } else {
         // document.getElementById("shippingFee").textContent = `Lỗi: ${data.message || "Không thể tính phí!"}`;
         console.error("Lỗi API GHN:", data);
@@ -308,17 +313,21 @@ $(document).ready(function () {
             return;
         }
         let diaChi = document.getElementById("diaChiChiTietCreate").value;
-        // Chỉ log mã của tỉnh, huyện, xã
-        console.log("TinhCreate ID:", tinhCreate);
-        console.log("HuyenCreate ID:", huyenCreate);
-        console.log("XaCreate ID:", xaCreate);
-        console.log("địa chỉ chi tiết : ", diaChi);
+        let tenNguoiNhan = document.getElementById("tenNguoiNhanCreate").value;
+        let phone = document.getElementById("phoneNumberCreate").value;
 
+        if (diaChi === '' || tenNguoiNhan === '' || phone === '') {
+            alert("vui lòng nhập đầy đủ thông tin địa chỉ")
+            return;
+        }
         let data = {
             provinceID: tinhCreate,
             districtID: huyenCreate,
             wardID: xaCreate,
-            addressStr: diaChi
+            addressStr: diaChi,
+            customerID: customerId,
+            tenNguoiNhan: tenNguoiNhan,
+            phone: phone
         }
         // call api add địa chỉ
         addAddress(data);
@@ -382,14 +391,47 @@ function addAddress(data) {
             "Content-Type": "application/json"
         },
         body: JSON.stringify(data)
-    }).then(response => response.json())
+    }).then(response => response.text())
         .then(result => {
             console.log("add địa chỉ : ", result)
         })
         .catch(error => {
             console.error("Lỗi:", error);
         });
+    setTimeout(() => {
+        console.log("load lại data !!!!")
+        window.location.reload(true);
+    }, 1000)
 }
 
+// su ly note cho shop
+document.getElementById("ghiChuText").addEventListener("input", function () {
+    let text = document.getElementById("ghiChuText").value
+    document.getElementById("billNote").value = text
+})
+// SY LY PHUONG THUC THANH TOAN CHO BILL
+document.addEventListener("DOMContentLoaded", () => {
+    const btnChecks = document.querySelectorAll(".btn-check");
+    const billPaymentMethod = document.getElementById("billPaymentMethod");
+    const giamGiaElement = document.getElementById("giamGia");
+    const soTienGiam = giamGiaElement
+        ? convertVNDToNumber(giamGiaElement.textContent.trim()) || 0
+        : 0;
+    document.getElementById("billCoupon").value = soTienGiam;
+
+    if (btnChecks.length > 0) {
+        btnChecks[0].checked = true;  // Chọn mặc định nút đầu tiên
+        billPaymentMethod.value = btnChecks[0].value; // Cập nhật giá trị
+    }
+
+    btnChecks.forEach(item => {
+        item.addEventListener("change", () => {
+            if (item.checked) {
+                billPaymentMethod.value = item.value;
+            }
+        });
+    });
+});
+displayAddress(addressData)
 calculateShippingFee()
 findAllListDiaChiById(customerId);

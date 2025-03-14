@@ -1,8 +1,10 @@
 package com.poliqlo.controllers.client.carts;
 
 import com.poliqlo.controllers.client.carts.dto.*;
+import com.poliqlo.controllers.client.carts.mapper.CartDetailMapper;
 import com.poliqlo.controllers.client.carts.service.CartDetailService;
 import com.poliqlo.models.DiaChi;
+import com.poliqlo.models.KhachHang;
 import com.poliqlo.models.PhieuGiamGia;
 import com.poliqlo.repositories.DiaChiRepository;
 import com.poliqlo.repositories.KhachHangRepository;
@@ -115,6 +117,13 @@ public class CartClientController {
         }
 
         // Đảm bảo `voucher` luôn được truyền vào Model, ngay cả khi không có voucher hợp lệ
+        // set up bill
+        BillRequestDTO billRequestDTO = new BillRequestDTO();
+        billRequestDTO.setCartDetailIds(ids);
+        billRequestDTO.setCustomerId(String.valueOf(customerId));
+        billRequestDTO.setVoucherId(String.valueOf(voucherId));
+
+        model.addAttribute("bill",billRequestDTO);
         model.addAttribute("voucher", phieuGiamGia);
         model.addAttribute("customerId", customerId);
         model.addAttribute("listAddress", diaChiList);
@@ -142,7 +151,22 @@ public class CartClientController {
 
     @PostMapping("/api/cart/add-address")
     public ResponseEntity<?> createAddress(@RequestBody AddressRequestDTO requestDTO) {
-        System.out.println("address : " + requestDTO.toString());
+        KhachHang khachHang = khachHangRepository.findById(requestDTO.getCustomerID()).get();
+        DiaChi diaChi = CartDetailMapper.requestToDiaChi(requestDTO, khachHang);
+        diaChiRepository.save(diaChi);
+        System.out.printf("Thêm thành công");
         return ResponseEntity.ok("thêm thành công");
+    }
+    @PostMapping("/cart/save-bill")
+    public String saveBill (@ModelAttribute("bill") BillRequestDTO billRequestDTO, Model model) {
+        try{
+            service.saveBill(billRequestDTO);
+        }
+        catch (Exception e) {
+            System.out.printf("lỗi thanh toán");
+            e.printStackTrace();
+        }
+
+        return "redirect:/";
     }
 }
