@@ -10,6 +10,16 @@
 
     </th:block>
 
+    <style>
+        .pagination li {
+            border: 1px solid #ccc; /* Màu viền xám nhạt */
+            padding: 5px 10px; /* Thêm khoảng cách bên trong */
+            margin: 3px; /* Khoảng cách giữa các nút */
+            display: inline-block; /* Giữ các thẻ li trên cùng một hàng */
+            border-radius: 5px; /* Bo góc nhẹ */
+        }
+    </style>
+
 </head>
 
 <!-- Custom styles for this page -->
@@ -18,6 +28,11 @@
 <div class="row d-flex justify-content-center align-items-center p-4 border rounded shadow bg-white">
     <h3>Thêm Mới Đợt Giảm Giá</h3>
 </div>
+<a class="btn btn-info btn-sm" th:href="@{'/admin/phieu-giam-gia/all'}">
+    <i class="fa-solid fa-reply"></i>
+    Back
+</a>
+
 <div class="row d-flex justify-content-between ">
     <form method="post" th:action="@{/admin/phieu-giam-gia/save}" th:object="${request}"
           onsubmit="return validateForm()"
@@ -26,6 +41,7 @@
             <label class="form-label">Tên Phiếu Giảm Giá</label>
             <input type="hidden" id="listIdCustomer" name="listIdCustomer" value="">
             <input type="text" class="form-control" id="ten" th:field="*{ten}">
+            <span th:if="${checkTrungTen}" th:text="${checkTrungTen}" style="color: red"></span>
         </div>
         <div class="row mb-3">
             <div class="col-md-6">
@@ -35,6 +51,7 @@
                     <input type="text" class="form-control" name="giaTriGiam" id="loaiHinhGiam"
                            th:field="*{giaTriGiam}"
                            placeholder="Vui lòng nhập">
+                    <span th:if="${checktrungGTG}" th:text="${checktrungGTG}" style="color: red"></span>
                 </section>
                 <!-- End input  -->
                 <!-- Start radio -->
@@ -82,37 +99,57 @@
             <span th:text="${messages}" style="color: red"></span>
         </div>
         <button type="submit" class="btn btn-primary w-100 fw-bold">Lưu</button>
+
     </form>
-    <div class="w-50 p-4 border rounded shadow bg-white" id="formKhachHang">
-        <form id="formKhachHang">
-            <h6>Chọn khách hàng</h6>
 
-            <div class="input-group">
-                <input type="text" class="form-control" placeholder="Nhập mã hoặc tên">
-                <button class="input-group-text">search</button>
-            </div>
-        </form>
-        <br>
-        <table class="table table-bordered">
-            <thead>
-            <tr>
-                <th></th>
-                <th>Tên khách hàng</th>
-                <!--                    <th>Số điện thoại</th>-->
-                <th>Ngày sinh</th>
-            </tr>
-            </thead>
+        <div class="w-50 p-4 border rounded shadow bg-white" id="formKhachHang">
+            <form id="formKhachHang">
+                <h6>Chọn khách hàng</h6>
 
-            <tbody>
-            <tr th:each="kh: ${listKH}">
-                <td><input type="checkbox" th:value="${kh.id}" onclick="toggleCheckbox(this)"></td>
-                <td th:text="${kh.ten}"></td>
-                <td th:text="${kh.ngaySinh}"></td>
-                <!--                <td th:text="${kh.sdt}"></td>-->
-            </tr>
-            </tbody>
-        </table>
-    </div>
+                <div class="input-group">
+                    <input type="text" name="name" class="form-control" placeholder="Nhập tên" th:value="${tenkh}">
+                    <button class="input-group-text">search</button>
+                </div>
+            </form>
+            <br>
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th></th>
+                    <th>Tên khách hàng</th>
+                    <!--                    <th>Số điện thoại</th>-->
+                    <th>Ngày sinh</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="kh: ${listKH}">
+                    <td><input type="checkbox" th:value="${kh.id}" onclick="toggleCheckbox(this)"></td>
+                    <td th:text="${kh.ten}"></td>
+                    <td th:text="${kh.ngaySinh}"></td>
+                    <!--                <td th:text="${kh.sdt}"></td>-->
+                </tr>
+                </tbody>
+            </table>
+
+            <section>
+<!--                PHÂN TRANG-->
+                <div>
+                    <ul class="pagination">
+                        <li th:if="${currentPage > 0}" >
+                            <a th:href="@{/admin/phieu-giam-gia/form-add(page=${currentPage - 1}, size=${size})}">Trước</a>
+                        </li>
+                        <li  th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                            <a th:href="@{/admin/phieu-giam-gia/form-add(page=${i}, size=${size})}" th:text="${i + 1}"></a>
+                        </li>
+                        <li th:if="${currentPage < totalPages - 1}">
+                            <a th:href="@{/admin/phieu-giam-gia/form-add(page=${currentPage + 1}, size=${size})}">Sau</a>
+                        </li>
+                    </ul>
+                </div>
+
+            </section>
+        </div>
 </div>
 </body>
 

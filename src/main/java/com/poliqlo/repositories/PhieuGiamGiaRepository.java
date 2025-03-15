@@ -2,6 +2,8 @@ package com.poliqlo.repositories;
 
 import com.poliqlo.models.KhachHang;
 import com.poliqlo.models.PhieuGiamGia;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,8 +11,10 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface PhieuGiamGiaRepository extends JpaRepository<PhieuGiamGia, Integer>, JpaSpecificationExecutor<PhieuGiamGia> {
 
@@ -18,7 +22,7 @@ public interface PhieuGiamGiaRepository extends JpaRepository<PhieuGiamGia, Inte
     @Query(value = "SELECT COALESCE(MAX(ma), 'PGG000') FROM phieu_giam_gia", nativeQuery = true)
     String findMaxMa();
 
-    @Query("SELECT CASE WHEN COUNT(d) > 0 THEN true ELSE false END FROM PhieuGiamGia d WHERE d.ten = :ten AND d.id <> :id")
+    @Query("SELECT CASE WHEN COUNT(d) > 0 THEN true ELSE false END FROM PhieuGiamGia d WHERE d.ten = :ten AND (:id = 0 OR d.id <> :id)")
     boolean existsByTenAndNotId(@Param("ten") String ten, @Param("id") Integer id);
 
     default String generateMaPhieuGiamGia() {
@@ -40,7 +44,18 @@ public interface PhieuGiamGiaRepository extends JpaRepository<PhieuGiamGia, Inte
                                        @Param("ngayBatDau") LocalDateTime ngayBatDau,
                                        @Param("ngayKetThuc") LocalDateTime ngayKetThuc);
 
+    @Query("SELECT k FROM KhachHang k WHERE LOWER(k.ten) LIKE LOWER(CONCAT('%', :ten, '%'))")
+    Page<KhachHang> searchByTen(@Param("ten") String ten, Pageable pageable);
+
     @Query(value = "SELECT * FROM khach_hang", nativeQuery = true)
     List<KhachHang> findAllCustomers();
+
+    @Query("SELECT p FROM PhieuGiamGia p WHERE p.id = :id")
+    Optional<PhieuGiamGia> findby(@Param("id") Long id);
+
+    boolean existsByTen(@Size(max = 255) @NotNull String ten);
+
+    boolean existsByGiaTriGiam(@NotNull BigDecimal giaTriGiam);
+
 
 }

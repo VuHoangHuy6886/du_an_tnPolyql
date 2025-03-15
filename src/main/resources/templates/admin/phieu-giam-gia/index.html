@@ -45,7 +45,7 @@
                     <!--                    </a>-->
 
 
-                    <a th:href="@{'/admin/phieu-giam-gia/form-add'}" class="btn btn-primary btn-icon-split mr-2"
+                    <a th:href="@{'/admin/phieu-giam-gia/form-add'}" class="btn btn-info btn-icon-split mr-2"
                        id="btn-add">
                                         <span class="icon text-white-50">
                                             <i class="fas fa-plus"></i>
@@ -55,7 +55,7 @@
                 </div>
 
 
-                <!--form fillter-->
+                <!--form filter-->
                 <div class="container mt-4">
                     <div class="card p-4">
                         <form class="row g-3 align-items-center">
@@ -98,23 +98,24 @@
                                 </div>
                             </div>
                             <button class="btn btn-secondary">
+<!--                                <i class="fa-solid fa-magnifying-glass"></i>-->
                                 Tìm Kiếm
                             </button>
-                            <button class="btn btn-secondary"  id="ClearForm">
+                            <button class="btn btn-secondary" id="ClearForm">
                                 Clear
                             </button>
                         </form>
-<!--                        <div class="row g-3 align-items-center mt-3">-->
-<!--                            <div class="col-md-2 text-end">-->
-<!--                                <button class="btn btn-secondary">-->
-<!--                                    Tìm Kiếm-->
-<!--                                </button>-->
-<!--                            </div>-->
-<!--                        </div>-->
+                        <!--                        <div class="row g-3 align-items-center mt-3">-->
+                        <!--                            <div class="col-md-2 text-end">-->
+                        <!--                                <button class="btn btn-secondary">-->
+                        <!--                                    Tìm Kiếm-->
+                        <!--                                </button>-->
+                        <!--                            </div>-->
+                        <!--                        </div>-->
 
                     </div>
                 </div>
-
+<!--                form phieu giam gia-->
                 <div class="card-body">
                     <div>
                         <table class="table table-bordered" id="dataTable">
@@ -140,37 +141,48 @@
                                 </td>
 
                                 <td class="d-flex ">
-                                    <a th:href="@{'/admin/phieu-giam-gia/form-update/'+ ${phieuGiamGia.id}}"
-                                       class="d-flex justify-content-center text-dark"
+                                    <a class="btn btn-info btn-sm"
+                                       th:href="@{'/admin/phieu-giam-gia/form-detail/'+ ${phieuGiamGia.id}}"
+                                       style="text-decoration: none; margin: 10px">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </a>
+
+                                    <a th:href="@{'/admin/phieu-giam-gia/form-update/'+${phieuGiamGia.id}}"
+                                       class="btn btn-info btn-sm"
                                        style="text-decoration: none; margin: 10px">
                                         <i class="fa-solid fa-pen-to-square"></i>
                                     </a>
-
-                                    <a class="d-flex justify-content-center text-dark"
+                                    <a class="btn btn-info btn-sm"
+                                       th:href="@{'/admin/phieu-giam-gia/change-status/'+ ${phieuGiamGia.id}}"
                                        style="text-decoration: none; margin: 10px">
-                                        <i class="fa-solid fa-trash"></i>
+                                        <i class="fa-solid fa-repeat"></i>
                                     </a>
+
                                 </td>
 
                             </tr>
                         </table>
                         <!--  Phân Trang-->
 
-                        <nav class="d-flex justify-content-center mt-3" aria-label="Page navigation" th:if="${totalPages > 1}">
+                        <nav class="d-flex justify-content-center mt-3" aria-label="Page navigation"
+                             th:if="${totalPages > 1}">
                             <ul class="pagination">
                                 <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                                    <a class="page-link" th:href="@{/admin/phieu-giam-gia/all(page=${currentPage - 1}, size=5)}">
+                                    <a class="page-link"
+                                       th:href="@{/admin/phieu-giam-gia/all(page=${currentPage - 1}, size=5)}">
                                         &laquo;
                                     </a>
                                 </li>
 
                                 <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
                                     th:classappend="${i == currentPage} ? 'active'">
-                                    <a class="page-link" th:href="@{/admin/phieu-giam-gia/all(page=${i}, size=5)}" th:text="${i + 1}"></a>
+                                    <a class="page-link" th:href="@{/admin/phieu-giam-gia/all(page=${i}, size=5)}"
+                                       th:text="${i + 1}"></a>
                                 </li>
 
                                 <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
-                                    <a class="page-link" th:href="@{/admin/phieu-giam-gia/all(page=${currentPage + 1}, size=5)}">
+                                    <a class="page-link"
+                                       th:href="@{/admin/phieu-giam-gia/all(page=${currentPage + 1}, size=5)}">
                                         &raquo;
                                     </a>
                                 </li>

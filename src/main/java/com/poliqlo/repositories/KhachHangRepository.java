@@ -16,4 +16,6 @@ public interface KhachHangRepository extends JpaRepository<KhachHang, Integer>, 
     Optional<KhachHang> findByIdAndIsDeletedFalse(Integer id);
 
     List<KhachHang> findByIsDeletedTrue();
+    Page<KhachHang> findAll(Pageable pageable);
+
 }
