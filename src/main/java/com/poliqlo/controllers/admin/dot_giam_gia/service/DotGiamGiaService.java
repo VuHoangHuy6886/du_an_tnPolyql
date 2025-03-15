@@ -116,47 +116,26 @@ public class DotGiamGiaService {
     // function update status discount by scheduler
     public void updateStatusDiscount(List<DotGiamGia> dotGiamGiaList) {
         LocalDateTime timeNow = LocalDateTime.now();
-        // Định dạng thời gian để hiển thị
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd-MM-yyyy");
-        String formattedTime = timeNow.format(formatter);
-        System.out.println("Thời gian hiện tại: " + formattedTime);
-
-        // Duyệt qua từng đợt giảm giá
         for (DotGiamGia dgg : dotGiamGiaList) {
             LocalDateTime startTime = dgg.getThoiGianBatDau();
             LocalDateTime endTime = dgg.getThoiGianKetThuc();
-
-            System.out.println("\nID đợt giảm giá: " + dgg.getId());
-            System.out.println("Thời gian bắt đầu: " + startTime.format(formatter));
-            System.out.println("Thời gian kết thúc: " + endTime.format(formatter));
-
-            // set trạng thái
             if (timeNow.isBefore(startTime) && !dgg.getTrangThai().equals(DiscountStatusUtil.DA_KET_THUC)) {
-                // check trạng thái
                 String status = DiscountStatusUtil.getStatus(startTime, endTime, false);
                 if (!status.equals(dgg.getTrangThai())) {
                     dgg.setTrangThai(DiscountStatusUtil.getStatus(startTime, endTime, false));
                     dotGiamGiaRepository.save(dgg);
-                } else {
-                    System.out.println("sắp diễn ra ko có j thay đổi");
                 }
             } else if (timeNow.isAfter(endTime)) {
-                // check trạng thái
                 String status = DiscountStatusUtil.getStatus(startTime, endTime, false);
                 if (!status.equals(dgg.getTrangThai())) {
                     dgg.setTrangThai(DiscountStatusUtil.DA_KET_THUC);
                     dotGiamGiaRepository.save(dgg);
-                } else {
-                    System.out.println("đã kết thúc ra ko có j thay đổi");
                 }
             } else {
-                // check trạng thái
                 String status = DiscountStatusUtil.getStatus(startTime, endTime, false);
                 if (!status.equals(dgg.getTrangThai()) && !dgg.getTrangThai().equals(DiscountStatusUtil.DA_KET_THUC)) {
                     dgg.setTrangThai(DiscountStatusUtil.getStatus(startTime, endTime, false));
                     dotGiamGiaRepository.save(dgg);
-                } else {
-                    System.out.println(" đang diễn ra ko có j thay đổi");
                 }
             }
         }

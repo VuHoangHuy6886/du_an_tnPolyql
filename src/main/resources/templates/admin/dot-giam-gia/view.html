@@ -49,13 +49,17 @@
                             </div>
                             <div class="w-50 d-flex justify-content-around align-items-center">
                                 <div class="mt-2">
-                                    <input type="radio" th:field="*{loaiChietKhau}" id="ckPercent" value="Phần trăm"
-                                           onclick="resetInput()" readonly>
+                                    <input type="radio" th:field="*{loaiChietKhau}" name="" id="ckPercent"
+                                           value="PHAN_TRAM"
+                                           onclick="resetInput()"
+                                           th:checked="${loaiChietKhau == 'SO_TIEN'}">
+
                                     <label for="ckPercent">%</label>
                                 </div>
                                 <div class="mt-2">
-                                    <input type="radio" th:field="*{loaiChietKhau}" id="ckDollar" value="Số tiền"
-                                           onclick="resetInput()" readonly>
+                                    <input type="radio" th:field="*{loaiChietKhau}" id="ckDollar" value="SO_TIEN"
+                                           onclick="resetInput()"
+                                           th:checked="${loaiChietKhau == 'SO_TIEN'}">
                                     <label for="ckDollar">$</label>
                                 </div>
                             </div>
