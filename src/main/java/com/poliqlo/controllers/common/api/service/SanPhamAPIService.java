@@ -73,7 +73,7 @@ public class SanPhamAPIService {
                 if (request.getTen() != null && !request.getTen().isEmpty()) {
                     Predicate orCondition = cb.disjunction();
                     for (String ten : request.getTen()) {
-                        orCondition = cb.or(orCondition, cb.like(root.get("ten"), "%" + ten + "%"));
+                        orCondition = cb.or(orCondition, cb.like(cb.lower(root.get("ten")), "%" + ten.toLowerCase() + "%"));
                     }
                     predicate = cb.and(predicate, orCondition);
                 }
@@ -143,7 +143,10 @@ public class SanPhamAPIService {
                 if (dgg.isPresent()) {
                     BigDecimal giaChietKhau = applyPromotion(spct.getGiaBan(), dgg.get().getLoaiChietKhau(), dgg.get().getGiaTriGiam(), dgg.get().getGiamToiDa());
                     spct.setGiaChietKhau(giaChietKhau);
+                }else{
+                    spct.setGiaChietKhau(spct.getGiaBan());
                 }
+
                 sanPhamAPIResponse.setIsPromotionProduct(dgg.isPresent());
                 spct.setDotGiamGia(dgg.orElse(null));
                 spct.setIsPromotionProduct(dgg.isPresent());
@@ -176,7 +179,14 @@ public class SanPhamAPIService {
                 ).max(Comparator.comparing(SanPhamChiTietAPIResponse.DotGiamGiaDto::getId));
         resp.setTen(resp.getSanPham().getTen()+" " +resp.getMauSac().getTen()+ " "+resp.getKichThuoc().getTen());
         resp.setDotGiamGia(dgg.orElse(null));
-        resp.setGiaChietKhau(BigDecimal.valueOf(9999999999.99));
+        if(dgg.isPresent()){
+            BigDecimal giaChietKhau = applyPromotion(resp.getGiaBan(), dgg.get().getLoaiChietKhau(), dgg.get().getGiaTriGiam(), dgg.get().getGiamToiDa());
+            resp.setGiaChietKhau(giaChietKhau);
+
+
+        }else{
+            resp.setGiaChietKhau(resp.getGiaBan());
+        }
         resp.setIsPromotionProduct(dgg.isPresent());
         return ResponseEntity.ok(resp);
     }
@@ -289,6 +299,8 @@ public class SanPhamAPIService {
             if(dgg.isPresent()){
                 BigDecimal giaChietKhau=applyPromotion(spct.getGiaBan(),dgg.get().getLoaiChietKhau(),dgg.get().getGiaTriGiam(),dgg.get().getGiamToiDa());
                 sanPhamAPIResponse.setGiaChietKhau(giaChietKhau);
+            }else{
+                sanPhamAPIResponse.setGiaChietKhau(sanPhamAPIResponse.getGiaBan());
             }
 
 

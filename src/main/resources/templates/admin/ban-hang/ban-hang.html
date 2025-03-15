@@ -13,7 +13,7 @@
 
 <!-- Custom styles for this page -->
 
-<body>
+<body style="background-color: #F0F1F3">
 
 <div class="container-fluid" style="background-color: #F0F1F3">
 
@@ -21,18 +21,18 @@
 
         <form class="form-inline col-4 d-flex">
             <input class="form-control me-sm-2 flex-grow-1" type="search" placeholder="Tìm hàng hóa (F3)"
-                   aria-label="Search">
+                   aria-label="Search" >
 
             <a check="true" class="btn btn-outline-light my-2 my-sm-0" onclick="chuyenCheDoNhap(this)"
                data-bs-toggle="collapse" href="#collapseExample" role="button"
                aria-expanded="false" aria-controls="collapseExample"><i class="fa-solid fa-barcode"></i></a>
         </form>
         <div class="nav nav-tabs col-4" id="nav-invoice" role="tablist">
-            <button class="nav-link active" id="invoice-tab" data-toggle="tab" type="button"
+            <button class="nav-link" id="invoice-tab" data-toggle="tab" type="button"
                     role="tab" aria-controls="invoice" aria-selected="true">Hóa đơn <span>1</span> <i
                     class="fa fa-x ms-2 p-1 rounded-circle" style="font-size: 10px"></i>
             </button>
-            <button class="nav-link" id="add-new-invoice"><i
+            <button class="nav-link active" id="add-new-invoice"><i
                     class="fa fa-plus text-dark bg-light p-1 rounded-circle"></i>
             </button>
         </div>
@@ -50,13 +50,15 @@
 
     </nav>
 
-    <div class="content m-2 d-flex  flex-wrap" style="height: 84vh">
-        <div class="flex-grow-1 me-2">
-            <div class="table-responsive" style="height: 75vh">
-                <table class="table table-bordered table-borderless table-data" id="tbl-invoice">
-                    <tbody>
-                    </tbody>
-                </table>
+    <div class="content mt-4 d-flex" style="height: 84vh">
+        <div class="d-flex flex-column justify-content-between" style="width: 50%;height: 84vh">
+            <div style="border-radius: 10px">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-borderless table-data m-0" id="tbl-invoice">
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
             </div>
             <div class="">
                 <div class="form-group">
@@ -67,16 +69,11 @@
         </div>
 
 
-        <div class="tab-pane fade ms-2 rounded-lg bg-white" style="width: 45%; height: 80vh;"
-             id="nav-qick-sale" role="tabpanel"
-             aria-labelledby="nav-qick-sale-tab">
 
-        </div>
-        <div class="tab-pane fade show active p-2 ms-2 rounded-lg bg-white" id="nav-nomal-sale" style="width: 40%;"
+        <div class="tab-pane fade show active p-2 ms-2 bg-white rounded-lg" id="nav-nomal-sale" style="width: 48%;border-radius: 10px;     height: 590px;"
              role="tabpanel"
              aria-labelledby="nav-nomal-sale-tab">
             <div class="row">
-
             </div>
             <div class="row">
                 <form class="form-inline col-12 d-flex justify-content-between">
@@ -98,8 +95,8 @@
                 </form>
             </div>
 
-            <div style="height: 500px; overflow-y: auto;">
-                <div class="row m-2" id="tbl-san-pham"></div>
+            <div style="height: 480px; overflow-y: auto;">
+                <div class="row m-2" id="tbl-san-pham" ></div>
                 <div class="w-100 text-center">
                     <button class="text-center show-more">Xem thêm <span></span></button>
                 </div>
@@ -116,20 +113,7 @@
         </div>
 
     </div>
-    <div class="bottom">
-        <nav>
-            <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                <button class="nav-link active" id="nav-nomal-sale-tab" data-toggle="tab" data-target="#nav-nomal-sale"
-                        type="button" role="tab" aria-controls="nav-nomal-sale" aria-selected="true"><i
-                        class="fa-solid fa-bolt"></i> Bán nhanh</i> Bán thường
-                </button>
-                <button class="nav-link" id="nav-deli-sale-tab" data-toggle="tab" data-target="#nav-deli-sale"
-                        type="button" role="tab" aria-controls="nav-deli-sale" aria-selected="false"><i
-                        class="fa-solid fa-truck-fast"></i> Bán giao hàng
-                </button>
-            </div>
-        </nav>
-    </div>
+
 
 
 </div>
@@ -141,7 +125,11 @@
         <h5 class="offcanvas-title" id="sp-add-to-cartLabel"></h5>
         <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
-    <div class="offcanvas-body">
+    <div class="offcanvas-body mt-0 pt-1" >
+        <div class="d-flex justify-content-center px-4 pb-4" style="text-align: center">
+            <img style="height: 270px;border-radius: 13px" src="https://media3.coolmate.me/cdn-cgi/image/width=672,height=990,quality=85/uploads/December2024/ao-dai-tay-the-thao-1699-trang_(3).jpg">
+
+        </div>
 
         <h5 name="so-luong">Tổng số lượng : <span></span></h5>
         <div>
@@ -161,39 +149,23 @@
         <div id="detail-sp">
             <div id="sp-gia"></div>
             <div class="form-group">
-                <label for="container-btn-rom">Dung lượng</label>
-                <div class="" id="container-btn-rom">
+                <label for="container-btn-mauSac">Màu</label>
+                <div class="" id="container-btn-mauSac">
                     <div class="btn-group" role="group">
-                        <label class="btn btn-secondary active">
-                            <input type="radio" name="options" checked> Active
-                        </label>
-                        <label class="btn btn-secondary">
-                            <input type="radio" name="options"> Radio
-                        </label>
-                        <label class="btn btn-secondary">
-                            <input type="radio" name="options"> Radio
-                        </label>
+
                     </div>
                 </div>
             </div>
             <!--                btn mau sac-->
             <div class="form-group">
-                <label for="container-btn-mau-sac">Màu sắc: <span id="ten-mau-sac">Tên màu sắc</span></label>
-                <div class="flex-wrap my-3" style="width: 400px" id="container-btn-mau-sac">
+                <label for="container-btn-kichThuoc">Kích thước: <span id="ten-mau-sac"></span></label>
+                <div class="flex-wrap my-3" style="width: 400px" id="container-btn-kichThuoc">
                     <div class="btn-group" role="group">
                     </div>
                 </div>
             </div>
 
-            <!--                Khuyen mai-->
-            <div class="container p-4"
-                 style="border-radius: 20px; background-color: #2F3033; height: 40vh; overflow-y: auto">
-                <h5 class="font-weight-bold text-light h5">Khuyến mãi</h5>
-                <hr class="border-light">
-                <ul class="khuyen-mai-ap-dung ml-4"></ul>
-                <hr>
 
-            </div>
 
             <a check="true" class="btn btn-primary my-4 w-100" id="add-to-cart">
                 Thêm vào giỏ hàng
@@ -212,31 +184,22 @@
     </div>
     <div class="offcanvas-body">
         <form class="needs-validation" id="form-check-out" novalidate>
-            <div class="row">
-                <!--                <div class="form-group position-relative col-12">-->
-                <!--                    <select class="form-control position-relative" id="hd-khach-hang" multiple="multiple">-->
-                <!--                        <option></option>-->
-                <!--                    </select>-->
-                <!--                    <a class="position-absolute" id="btn-add-khuyen-mai" style="right: 25px;top: 8px"><i-->
-                <!--                            class="fa fa-plus"-->
-                <!--                            aria-hidden="true"></i></a>-->
-                <!--                    <div class="invalid-feedback">-->
-                <!--                        Vui lòng chọn khuyến mại-->
-                <!--                    </div>-->
-                <!--                </div>-->
-                <!--                <div class="form-group col-12">-->
-                <!--                    <div class="my-3">-->
-                <!--                        <input type="email" class="form-control" placeholder="Địa chỉ email" id="hd-kh-email" aria-describedby="emailHelp">-->
-                <!--                    </div>-->
-                <!--                    <div class="mb-3">-->
-                <!--                        <input type="text" class="form-control" placeholder="Số điện thoại" id="hd-kh-sdt">-->
-                <!--                    </div>-->
-                <!--                </div>-->
+            <div style="height: 80vh">
 
-                <div class="row my-2" id="tbl-imei" style="height: 45vh; overflow-y: auto;">
 
+                <div class="table-responsive" >
+                    <table class="table-responsive table my-2"style="max-height: 45vh; overflow-y: auto; width: 100%">
+                        <thead>
+                        <th>Mã sản phẩm</th>
+                        <th>Số lượng</th>
+                        <th>Thành tiền</th>
+                        </thead>
+                        <tbody  id="tbl-imei">
+
+                        </tbody>
+                    </table>
                 </div>
-                <div class="table-responsive" style="height: 18vh">
+                <div class="table-responsive mt-4" style="height: 20vh">
                     <table class="table table-borderless table-data w-100" id="tbl-hoa-don">
                         <tbody>
                         <tr>
@@ -260,17 +223,40 @@
                 </div>
 
                 <div class="form-group position-relative col-12">
-                    <select class="form-control js-data-example-ajax" id="hd-voucher" multiple="multiple">
+                    <select class="form-control position-relative" id="hd-khach-hang" multiple="multiple">
                         <option></option>
                     </select>
-                    <a class="position-absolute" id="add-hd-voucher" style="right: 25px;top: 8px"><i
-                            class="fa fa-plus"
-                            aria-hidden="true"></i></a>
-                    <div class="invalid-feedback">
-                        Vui lòng chọn khuyến mại
-                    </div>
+                    <div class="form-text">Bạn có thể cập nhật thông tin đối với khách hàng này hoặc tạo mới</div>
+
+                    <fieldset>
+                        <legend>Khách hàng</legend>
+                        <div class="mb-3">
+                            <input type="text" class="form-control" placeholder="Tên khách hàng"
+                                   id="hd-kh-ten">
+                            <div class="invalid-feedback">
+                                Vui lòng nhập tên khách hàng
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <input type="email" class="form-control" placeholder="Địa chỉ email"
+                                   id="hd-kh-email">
+                            <div class="invalid-feedback">
+                                Vui lòng nhập địa chỉ email khách hàng
+                            </div>
+                        </div>
+                        <div class="">
+                            <input type="tel" class="form-control" placeholder="Số điện thoại" id="hd-kh-sdt">
+                            <div class="invalid-feedback">
+                                Vui lòng nhập số điện thoại khách hàng
+                            </div>
+                        </div>
+                    </fieldset>
+
                 </div>
 
+
+            </div>
+            <div class="row">
                 <button type="submit" class="btn btn-primary btn-xl w-100 mt-2 py-2" id="check-out-finish"
                         tabindex="3071">Thanh toán
                 </button>
@@ -290,6 +276,17 @@
     <div class="offcanvas-body">
 
 
+        <div class="mb-3">
+            <label for="filter-series" class="form-label">Kích thước</label>
+            <select class="form-control position-relative" name="kichThuocIds" multiple="multiple">
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="filter-series" class="form-label">Series</label>
+            <select class="form-control position-relative" id="filter-series" multiple="multiple">
+            </select>
+        </div>
         <div class="mb-3">
             <label for="filter-series" class="form-label">Series</label>
             <select class="form-control position-relative" id="filter-series" multiple="multiple">
@@ -318,37 +315,59 @@
         <form id="form-check-out-step-2" novalidate>
             <div class="row">
                 <div class="form-group position-relative col-12">
-                    <select class="form-control position-relative" id="hd-khach-hang" multiple="multiple">
+                    <select class="form-control js-data-example-ajax" id="hd-voucher" multiple="multiple">
                         <option></option>
                     </select>
-                    <div class="form-text">Bạn có thể cập nhật thông tin đối với khách hàng này hoặc tạo mới</div>
+                    <a class="position-absolute" id="add-hd-voucher" style="right: 25px;top: 8px"><i
+                            class="fa fa-plus"
+                            aria-hidden="true"></i></a>
+                    <div class="invalid-feedback">
+                        Vui lòng chọn khuyến mại
+                    </div>
+
+                    <fieldset>
+                        <legend>Thông tin giảm giá</legend>
+                        <details style="border-bottom: 1px solid #ddd;">
+                            <summary style="background: #969696; color: white; padding: 10px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: space-between; list-style: none;">
+                                Thông về phiếu giảm giá
+                            </summary>
+                            <div class="row">
+                                <div class="mb-3">
+                                    <label for="hd-pgg-ma">Tên</label>
+                                    <input class="form-control"
+                                           id="hd-pgg-ma" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="hd-pgg-loaiHinhGiam">Loại hình giảm</label>
+                                    <input class="form-control"
+                                           id="hd-pgg-loaiHinhGiam" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="hd-pgg-hoaDonToiThieu">Hóa đơn tối thiểu</label>
+                                    <input class="form-control"
+                                           id="hd-pgg-hoaDonToiThieu" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="hd-pgg-giamToiDa">Giảm tối đa</label>
+                                    <input class="form-control"
+                                           id="hd-pgg-giamToiDa" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="hd-pgg-giaTriGiam">Giá trị giảm</label>
+                                    <input class="form-control"
+                                           id="hd-pgg-giaTriGiam" readonly>
+                                </div>
+                            </div>
+                        </details>
+
+
+
+
+                    </fieldset>
 
 
                 </div>
                 <div class="form-group mt-4 col-12">
-                    <fieldset>
-                        <legend>Khách hàng</legend>
-                        <div class="mb-3">
-                            <input type="text" class="form-control" required placeholder="Tên khách hàng"
-                                   id="hd-kh-ten">
-                            <div class="invalid-feedback">
-                                Vui lòng nhập tên khách hàng
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <input type="email" class="form-control" required placeholder="Địa chỉ email"
-                                   id="hd-kh-email">
-                            <div class="invalid-feedback">
-                                Vui lòng nhập địa chỉ email khách hàng
-                            </div>
-                        </div>
-                        <div class="">
-                            <input type="tel" class="form-control" required placeholder="Số điện thoại" id="hd-kh-sdt">
-                            <div class="invalid-feedback">
-                                Vui lòng nhập số điện thoại khách hàng
-                            </div>
-                        </div>
-                    </fieldset>
                     <fieldset>
                         <legend>Thanh toán</legend>
                         <nav>
@@ -360,9 +379,12 @@
                             </div>
                         </nav>
                         <div class="tab-content" id="hinhThucTTContent">
-                            <div class="tab-pane fade show active" id="httt-tien-mat" role="tabpanel"
-                                 aria-labelledby="httt-tien-mat-tab">
-                                <span class="h3 ps-1"><span>Số tiền:</span>  <span></span></span>
+                            <div style="font-size: 14px" class="tab-pane fade show active" id="httt-tien-mat" role="tabpanel" aria-labelledby="httt-tien-mat-tab">
+                                <span class="h3 ps-1 d-flex flex-column  " style="gap: 10px">
+                                    <span style="font-size: 16px;font-weight: 200">Tổng hóa đơn:</span>
+                                    <span style="font-size: 16px;font-weight: 200">Phiếu giảm giá:</span>
+                                    <span style="font-size: 23px;">Thanh toán</span>
+                                </span>
                             </div>
                             <div class="tab-pane qrcode-container fade" id="httt-chuyen-khoan" role="tabpanel"
                                  aria-labelledby="httt-chuyen-khoan-tab">

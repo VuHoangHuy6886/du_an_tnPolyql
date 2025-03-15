@@ -8,6 +8,8 @@ import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Builder
 @AllArgsConstructor
@@ -80,5 +82,12 @@ public class HoaDon {
     @ColumnDefault("b'0'")
     @Column(name = "IS_DELETED", nullable = false)
     private Boolean isDeleted = false;
+
+
+    @OneToMany(mappedBy = "hoaDon")
+    private List<HoaDonChiTiet> hoaDonChiTiets = new ArrayList<>();
+
+    @OneToMany(mappedBy = "hoaDon")
+    private List<LichSuHoaDon> lichSuHoaDons = new ArrayList<>();
 
 }

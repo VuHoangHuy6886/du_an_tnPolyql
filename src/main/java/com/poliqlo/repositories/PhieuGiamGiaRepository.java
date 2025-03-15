@@ -60,4 +60,27 @@ public interface PhieuGiamGiaRepository extends JpaRepository<PhieuGiamGia, Inte
             "INNER JOIN KhachHang kh ON kh.id = pg.khachHang.id " +
             "WHERE p.trangThai = 'DANG_DIEN_RA' AND kh.id = :idKH AND p.hoaDonToiThieu <= :tongTien")
     List<PhieuGiamGia> hienThiPhieuGiamBangIdKhachHang(@Param("idKH") Integer idKH, @Param("tongTien") BigDecimal tongTien);
+
+    @Query("SELECT pgg FROM PhieuGiamGia pgg " +
+            "LEFT JOIN pgg.khachHangs kh " +
+            "WHERE CURRENT_TIMESTAMP BETWEEN pgg.ngayBatDau AND pgg.ngayKetThuc " +
+            "AND pgg.soLuong > 0 " +
+            "AND  kh IS NULL " +
+            "AND (pgg.hoaDonToiThieu<= :price or pgg.hoaDonToiThieu=null) " +
+            "AND pgg.isDeleted = false "
+    )
+    Page<PhieuGiamGia> findAllActive(Double price,Pageable page);
+
+    @Query("SELECT pgg FROM PhieuGiamGia pgg " +
+            "LEFT JOIN pgg.khachHangs kh " +
+            "WHERE CURRENT_TIMESTAMP BETWEEN pgg.ngayBatDau AND pgg.ngayKetThuc " +
+            "AND pgg.soLuong > 0 " +
+            "AND (kh.id = :khachHangId OR kh IS NULL )" +
+            "AND (pgg.hoaDonToiThieu<= :price or pgg.hoaDonToiThieu=null) " +
+            "AND pgg.isDeleted = false "
+            )
+
+
+    Page<PhieuGiamGia> findAllActive(Integer khachHangId, Double price, Pageable page);
+
 }

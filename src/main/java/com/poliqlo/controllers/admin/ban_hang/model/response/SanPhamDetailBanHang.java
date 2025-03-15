@@ -18,7 +18,7 @@ import java.io.Serializable;
 public class SanPhamDetailBanHang implements Serializable {
     @Id
     private Integer id;
-    private String rom;
+    private String kichThuoc;
     private String mauSacId;
     @Transient
     private DotGiamGia dotGiamGia;
