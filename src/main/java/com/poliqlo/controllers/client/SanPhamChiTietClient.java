@@ -22,6 +22,12 @@ public class SanPhamChiTietClient {
             @PathVariable("id") int id, // Lấy id từ URL
             Model model
     ) {
+
+
+        return "client/trang-san-pham-chi-tiet";
+    }
+    @GetMapping("/san-pham")
+    public String demoClient4(Model model) {
         List<ThuongHieu> listThuongHieu = thuongHieuRepository.findAll();
         List<ChatLieu> listChatLieu = chatLieuRepository.findAll();
         List<DanhMuc> listDanhMuc = danhMucRepository.findAll();
@@ -32,12 +38,6 @@ public class SanPhamChiTietClient {
         model.addAttribute("listDanhMuc", listDanhMuc);
         model.addAttribute("listKieuDang", listKieuDang);
         model.addAttribute("listMauSac", listMauSac);
-
-        return "client/trang-san-pham-chi-tiet";
-    }
-    @GetMapping("/san-pham")
-    public String demoClient4(Model model) {
-
         return "client/trang-san-pham";
     }
 }
