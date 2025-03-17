@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Builder
 @AllArgsConstructor
@@ -40,7 +40,7 @@ public class LichSuHoaDon {
 
     @NotNull
     @Column(name = "THOI_GIAN", nullable = false)
-    private Instant thoiGian;
+    private LocalDateTime thoiGian;
 
     @NotNull
     @ColumnDefault("b'0'")

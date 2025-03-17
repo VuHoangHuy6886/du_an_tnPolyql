@@ -2,11 +2,14 @@ package com.poliqlo.controllers.admin.ban_hang.model.request;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -36,7 +39,7 @@ public class HoaDonDto implements Serializable {
     @NotNull
     @Size(max = 255)
     String tenNguoiNhan;
-    LocalDate ngayNhanHang;
+    LocalDateTime ngayNhanHang;
     String ghiChu;
     @Size(max = 255)
     String loaiHoaDon;

@@ -7,7 +7,7 @@ import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +24,6 @@ public class HoaDon {
     @Column(name = "ID", nullable = false)
     private Integer id;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "KHACH_HANG_ID", nullable = false)
     private KhachHang khachHang;
@@ -49,22 +48,19 @@ public class HoaDon {
     private BigDecimal giamMaGiamGia;
 
     @Size(max = 20)
-    @NotNull
     @Column(name = "SO_DIEN_THOAI", nullable = false, length = 20)
     private String soDienThoai;
 
     @Size(max = 255)
-    @NotNull
     @Column(name = "DIA_CHI", nullable = false)
     private String diaChi;
 
     @Size(max = 255)
-    @NotNull
     @Column(name = "TEN_NGUOI_NHAN", nullable = false)
     private String tenNguoiNhan;
 
     @Column(name = "NGAY_NHAN_HANG")
-    private LocalDate ngayNhanHang;
+    private LocalDateTime ngayNhanHang;
 
     
     @Column(name = "GHI_CHU",columnDefinition = "TEXT")
@@ -78,7 +74,6 @@ public class HoaDon {
     @Column(name = "TRANG_THAI")
     private String trangThai;
 
-    @NotNull
     @ColumnDefault("b'0'")
     @Column(name = "IS_DELETED", nullable = false)
     private Boolean isDeleted = false;
@@ -89,5 +84,10 @@ public class HoaDon {
 
     @OneToMany(mappedBy = "hoaDon")
     private List<LichSuHoaDon> lichSuHoaDons = new ArrayList<>();
+
+    @Size(max = 20)
+    @ColumnDefault("'DA_THANH_TOAN'")
+    @Column(name = "TRANG_THAI_THANH_TOAN", length = 20)
+    private String trangThaiThanhToan;
 
 }

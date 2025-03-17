@@ -6,21 +6,27 @@ import com.poliqlo.controllers.admin.ban_hang.model.response.KhachHangDto;
 import com.poliqlo.controllers.admin.ban_hang.model.response.PhieuGiamGiaDto;
 import com.poliqlo.controllers.admin.ban_hang.repository.impl.SanPhamRepositoryImpl;
 import com.poliqlo.models.KhachHang;
+import com.poliqlo.models.LichSuHoaDon;
 import com.poliqlo.repositories.HoaDonRepository;
 import com.poliqlo.repositories.KhachHangRepository;
 import com.poliqlo.repositories.PhieuGiamGiaRepository;
+import com.poliqlo.repositories.SanPhamChiTietRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -31,6 +37,7 @@ public class BanHangController {
     private final KhachHangRepository khachHangRepository;
     private final PhieuGiamGiaRepository phieuGiamGiaRepository;
     private final HoaDonRepository hoaDonRepository;
+    private final SanPhamChiTietRepository sanPhamChiTietRepository;
 //    private final MaGiamGiaRepository maGiamGiaRepository;
 //    private final ImeiRepository imeiRepository;
 //    private final SanPhamChiTietRepository sanPhamChiTietRepository;
@@ -97,13 +104,28 @@ public class BanHangController {
         var newHoaDon=modelMapper.map(req, com.poliqlo.models.HoaDon.class);
         var pgg=req.getPhieuGiamGiaId();
         if(pgg!=null){
-           var newPggg=hoaDonRepository.findById(req.getPhieuGiamGiaId()).get().getPhieuGiamGia();
+           var newPggg=phieuGiamGiaRepository.findById(req.getPhieuGiamGiaId()).get();
             newPggg.setSoLuong(newPggg.getSoLuong()-1);
-            newHoaDon.setPhieuGiamGia(newPggg);
+            phieuGiamGiaRepository.save(newPggg);
         }
-        req.getHoaDonChiTiets().stream().map((element) -> modelMapper.map(element, com.poliqlo.models.HoaDonChiTiet.class)).forEach(newHoaDon.getHoaDonChiTiets()::add);
+        newHoaDon.setNgayNhanHang(LocalDateTime.now());
+        var lshd=new LichSuHoaDon();
+        lshd.setMoTa("Hóa đơn mua hàng tại quầy");
+        lshd.setTieuDe("Hóa đơn mua hàng tại quầy");
+        lshd.setThoiGian(LocalDateTime.now());
 
-//        hoaDonRepository.save(newHoaDon);
-        return ResponseEntity.ok(newHoaDon);
+        newHoaDon.setLichSuHoaDons(List.of(lshd));
+        newHoaDon.getHoaDonChiTiets().forEach((element) -> {
+            var newSPCT=sanPhamChiTietRepository.findById(element.getSanPhamChiTiet().getId()).get();
+            newSPCT.setSoLuong(newSPCT.getSoLuong()-element.getSoLuong());
+            if(newSPCT.getSoLuong()<0){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Số lượng sản phẩm trong kho không còn đủ : "+newSPCT.getSanPham().getTen()+" "+newSPCT.getMauSac().getTen()+" "+newSPCT.getKichThuoc().getTen()+" thiếu "+Math.abs(newSPCT.getSoLuong())+" sản phẩm");
+            }
+            sanPhamChiTietRepository.save(newSPCT);
+        });
+
+
+        var resp=hoaDonRepository.save(newHoaDon);
+        return ResponseEntity.ok(resp);
     }
 }

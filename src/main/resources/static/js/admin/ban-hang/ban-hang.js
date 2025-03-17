@@ -1750,6 +1750,7 @@ function addToCart(spctId, soLuongThem, tenSanPham) {
     }
     if (_mapProductDetail.get(spctId).soLuong < soLuongThem) {
         showWarnToast("Lỗi", "Đã vượt quá số lượng tồn kho bạn cần bổ sung sản phẩm này");
+        return;
     }
     if (danhSachSanPhamDaThem.get(spctId)) {
         danhSachSanPhamDaThem.set(spctId, (danhSachSanPhamDaThem.get(spctId) + soLuongThem));
@@ -1860,77 +1861,8 @@ function checkout(invoice) {
 
 
 
-    let showVoucher = (response) => {
-        if (response) {
-            $('#hd-pgg-ma').val(response.ma);
-            $('#hd-pgg-loaiHinhGiam').val(response.loaiHinhGiam=='PHAN_TRAM'?'Phần trần':'Số tiền');
-            $('#hd-pgg-hoaDonToiThieu').val(toCurrency(response.hoaDonToiThieu));
-            $('#hd-pgg-ngayBatDau').val(response.ngayBatDau);
-            $('#hd-pgg-ngayKetThuc').val(response.ngayKetThuc);
-            if(response.loaiHinhGiam=='PHAN_TRAM'){
-               $('#hd-pgg-giamToiDa').val(toCurrency(response.giamToiDa)).show();
-               $('#hd-pgg-giamToiDa').parent().show();
-               $('#hd-pgg-giaTriGiam').val(response.giaTriGiam+'%');
-           }else{
-                $('#hd-pgg-giaTriGiam').val(toCurrency(response.giaTriGiam));
-                $('#hd-pgg-giamToiDa').val(toCurrency(response.giamToiDa));
-                $('#hd-pgg-giamToiDa').val(toCurrency(response.giamToiDa));
-                $('#hd-pgg-giamToiDa').parent().hide();
-
-            }
-
-        }else {
-            $('#hd-pgg-ma').val('');
-            $('#hd-pgg-loaiHinhGiam').val('');
-            $('#hd-pgg-hoaDonToiThieu').val('');
-            $('#hd-pgg-ngayBatDau').val('');
-            $('#hd-pgg-ngayKetThuc').val('');
-            $('#hd-pgg-giamToiDa').val('');
-            $('#hd-pgg-giaTriGiam').val('');
-        }
-
-    }
-    function applyVoucher(response) {
-        showVoucher(response)
-        if(!response){
-            $('#hd-giam-gia').text(toCurrency(0))
-            $('#hd-khach-tra').text(toCurrency(tongTien));
-            updateBillStep2(tongTien);
-            return;
-        }
-
-        let voucher = {
-            "id": "1",
-            "ma": "PGG001",
-            "ten": "Phiếu giảm giá 50k",
-            "soLuong": 100,
-            "hoaDonToiThieu": 500000,
-            "loaiHinhGiam": "TUY_CHON",
-            "giaTriGiam": 50000,
-            "giamToiDa": 50000,
-            "ngayBatDau": "2025-03-15T04:03:34",
-            "ngayKetThuc": "2025-08-15T04:03:34",
-            "trangThai": "Đã kết thúc",
-            "isDeleted": false,
-            "text": "PGG001"
-        }
-        voucher = response;
 
 
-        function getGiaTriGiam(tongTien) {
-            if (voucher.loaiHinhGiam === "PHAN_TRAM") {
-                return tongTien * voucher.giaTriGiam / 100 > voucher.giamToiDa ? voucher.giamToiDa : tongTien * voucher.giaTriGiam /100
-
-            }else{
-                return voucher.giaTriGiam > tongTien?tongTien : voucher.giaTriGiam;
-
-            }
-        }
-
-        $('#hd-giam-gia').text(toCurrency(getGiaTriGiam(tongTien)))
-        $('#hd-khach-tra').text(toCurrency(tongTien - getGiaTriGiam(tongTien)));
-        updateBillStep2(tongTien,getGiaTriGiam(tongTien));
-    }
 }
 
 $(document).ready(function () {
@@ -1966,6 +1898,77 @@ $(document).ready(function () {
             })
     })
 })
+let showVoucher = (response) => {
+    if (response) {
+        $('#hd-pgg-ma').val(response.ma);
+        $('#hd-pgg-loaiHinhGiam').val(response.loaiHinhGiam=='PHAN_TRAM'?'Phần trần':'Số tiền');
+        $('#hd-pgg-hoaDonToiThieu').val(toCurrency(response.hoaDonToiThieu));
+        $('#hd-pgg-ngayBatDau').val(response.ngayBatDau);
+        $('#hd-pgg-ngayKetThuc').val(response.ngayKetThuc);
+        if(response.loaiHinhGiam=='PHAN_TRAM'){
+            $('#hd-pgg-giamToiDa').val(toCurrency(response.giamToiDa)).show();
+            $('#hd-pgg-giamToiDa').parent().show();
+            $('#hd-pgg-giaTriGiam').val(response.giaTriGiam+'%');
+        }else{
+            $('#hd-pgg-giaTriGiam').val(toCurrency(response.giaTriGiam));
+            $('#hd-pgg-giamToiDa').val(toCurrency(response.giamToiDa));
+            $('#hd-pgg-giamToiDa').val(toCurrency(response.giamToiDa));
+            $('#hd-pgg-giamToiDa').parent().hide();
+
+        }
+
+    }else {
+        $('#hd-pgg-ma').val('');
+        $('#hd-pgg-loaiHinhGiam').val('');
+        $('#hd-pgg-hoaDonToiThieu').val('');
+        $('#hd-pgg-ngayBatDau').val('');
+        $('#hd-pgg-ngayKetThuc').val('');
+        $('#hd-pgg-giamToiDa').val('');
+        $('#hd-pgg-giaTriGiam').val('');
+    }
+
+}
+function applyVoucher(response) {
+    showVoucher(response)
+    if(!response){
+        $('#hd-giam-gia').text(toCurrency(0))
+        $('#hd-khach-tra').text(toCurrency(totalPrice));
+        updateBillStep2(totalPrice);
+        return;
+    }
+
+    let voucher = {
+        "id": "1",
+        "ma": "PGG001",
+        "ten": "Phiếu giảm giá 50k",
+        "soLuong": 100,
+        "hoaDonToiThieu": 500000,
+        "loaiHinhGiam": "TUY_CHON",
+        "giaTriGiam": 50000,
+        "giamToiDa": 50000,
+        "ngayBatDau": "2025-03-15T04:03:34",
+        "ngayKetThuc": "2025-08-15T04:03:34",
+        "trangThai": "Đã kết thúc",
+        "isDeleted": false,
+        "text": "PGG001"
+    }
+    voucher = response;
+
+
+    function getGiaTriGiam(tongTien) {
+        if (voucher.loaiHinhGiam === "PHAN_TRAM") {
+            return totalPrice * voucher.giaTriGiam / 100 > voucher.giamToiDa ? voucher.giamToiDa : totalPrice * voucher.giaTriGiam /100
+
+        }else{
+            return voucher.giaTriGiam > totalPrice?totalPrice : voucher.giaTriGiam;
+
+        }
+    }
+
+    $('#hd-giam-gia').text(toCurrency(getGiaTriGiam(totalPrice)))
+    $('#hd-khach-tra').text(toCurrency(totalPrice - getGiaTriGiam(totalPrice)));
+    updateBillStep2(totalPrice,getGiaTriGiam(totalPrice));
+}
 function updateVoucherSelect(){
     console.log(selectedKhachHang)
     $('#hd-voucher').select2({
@@ -1997,6 +2000,8 @@ function updateVoucherSelect(){
 
     });
     $('#hd-voucher').val([]).trigger('change');
+    applyVoucher(undefined)
+
 
 
 
@@ -2109,13 +2114,16 @@ $(document).ready(()=>{
             let formData = {
                 "khachHangId": $('#hd-khach-hang').val()?$('#hd-khach-hang').val()[0]:null,
                 "phieuGiamGiaId": $('#hd-voucher').val()?$('#hd-voucher').val()[0]:null,
-                "phuongThucThanhToan": $('#hinhThucTT .active').index()?"TIEN_MAT":"CHUYEN_KHOAN",
+                "phuongThucThanhToan": $('#hinhThucTT .active').index()?"CHUYEN_KHOAN":"TIEN_MAT",
                 "tongTien": totalPrice,
                 "giamMaGiamGia": maGiamGiaGiam,
                 "ngayNhanHang": new Date(),
                 "ghiChu": $('#hd-ghi-chu').val(),
                 "loaiHoaDon": "TAI_QUAY",
+                "soDienThoai": $('#hd-kh-ten').val(),
+                "tenNguoiNhan": $('#hd-kh-sdt').val(),
                 "trangThai": "THANH_CONG",
+                "phiVanChuyen": 0,
                 "hoaDonChiTiets": Array.from(_mapInvoice.get(_selectedInvoice) || [], ([key,val]) => ({
                     sanPhamChiTietId: val.spct.id,
                     dotGiamGiaId: val.spct.dotGiamGia?.id ?? null,
@@ -2139,7 +2147,7 @@ $(document).ready(()=>{
                     console.log(response);
                 },
                 error: function (xhr, status, error) {
-                    showErrToast('Lỗi không xác định',xhr.responseJSON.message)
+                    showErrToast('Có lỗi xảy ra',xhr.responseJSON.message||xhr.responseJSON.error)
                     reloadDataTable();
                     console.log(response);
                     console.error(xhr.responseText);
