@@ -232,11 +232,52 @@ function renderProductDetail(prod) {
             return;
         }
         console.log("Thêm vào giỏ hàng:", { variant, quantity });
-        Swal.fire({
-            icon: 'success',
-            title: 'Thêm thành công',
-            text: 'Sản phẩm đã được thêm vào giỏ hàng (demo).'
-        });
+        fetch("http://localhost:8080/api/gio-hang", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                idSanPhamChiTiet: parseInt(variant.id),
+                soLuong: parseInt(quantity),
+                idKhachHang:1
+            }),
+        })
+            .then(response => {
+                console.log("Response status:", response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log("Phản hồi từ API:", data);
+
+                // Kiểm tra nếu API trả về một đối tượng có ID (hoặc dữ liệu hợp lệ khác)
+                if (data.id) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Thành công!",
+                        text: "Sản phẩm đã được thêm vào giỏ hàng.",
+                        showConfirmButton: false,
+                        timer: 1500,
+                    });
+                    $("#addCartModal").modal("hide");
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Lỗi",
+                        text: "Không thể thêm sản phẩm vào giỏ hàng.",
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Lỗi API giỏ hàng:", error);
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi hệ thống",
+                    text: "Vui lòng thử lại sau.",
+                });
+            });
+
+
     });
     const buyBtn = document.createElement("button");
     buyBtn.className = "btn-buy";
