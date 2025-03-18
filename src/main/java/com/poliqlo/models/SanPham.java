@@ -71,7 +71,6 @@ public class SanPham {
             joinColumns = @JoinColumn(name = "SAN_PHAM_ID"),
             inverseJoinColumns = @JoinColumn(name = "DANH_MUC_ID"))
     private Set<DanhMuc> danhMucs = new LinkedHashSet<>();
-
     @OneToMany(mappedBy = "sanPham", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Anh> anhs = new ArrayList<>();
 

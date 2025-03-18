@@ -33,13 +33,12 @@ public class SecurityConfig {
     private final PasswordEncoder passwordEncoder;
     private final UserDetailsService userDetailsService;
 
-    public static String[] unAuthURL = {"/**","/sign-in/**", "/sign-in", "/sign-up", "/error", "/logout", "/vendor/**", "/js/**", "/css/**", "/fonts/**", "/iphone/**", "/img/**", "/api/v1/admin/data-list-add-san-pham/**", "/api/v2/san-pham/**", "/api/v2/**", "/iphone/**", "/client/**", "/img/**", "/api/v2/san-pham/**", "/unauth-home", "/verify-account", "/reset-otp"
+    public static String[] unAuthURL = {"/**", "/sign-in/**", "/sign-in", "/sign-up", "/error", "/logout", "/vendor/**", "/js/**", "/css/**", "/fonts/**", "/iphone/**", "/img/**", "/api/v1/admin/data-list-add-san-pham/**", "/api/v2/san-pham/**", "/api/v2/**", "/iphone/**", "/client/**", "/img/**", "/api/v2/san-pham/**", "/unauth-home", "/verify-account", "/reset-otp"
     };
     private final TaiKhoanRepository taiKhoanRepository;
     String[] adminURL = {
             "/admin/**"
     };
-
 
 
     @Bean
@@ -67,7 +66,6 @@ public class SecurityConfig {
             }
         };
     }
-
 
 
     @Bean
@@ -98,6 +96,7 @@ public class SecurityConfig {
 
         return http.build();
     }
+
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
@@ -105,7 +104,7 @@ public class SecurityConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**") // Cho phép CORS cho tất cả các đường dẫn
                         .allowedOrigins("http://localhost:8080",
-                                "http://127.0.0.1:5500") // Thay bằng nguồn gốc của bạn
+                                "http://127.0.0.1:5500")// Thay bằng nguồn gốc của bạn
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                         .allowedHeaders("*") // Cho phép tất cả các header
                         .allowCredentials(true); // Cho phép gửi cookie

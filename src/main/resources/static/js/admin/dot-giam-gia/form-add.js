@@ -40,10 +40,10 @@ function sendListIdProducts(listIdProducts) {
             tablebodys.innerHTML = '';
             //
             if (data.length >= 1) {
+                console.log(data)
                 data.map(item => {
                     let row = `<tr scope="row">
                             <td><input type="checkbox" value="${item.id}" onclick="handlerGetIdProductDetail(this)"></td>
-                            <td>${item.sanPham.ten}</td>
                             <td>${item.kichThuoc.ten}</td>
                             <td>${item.mauSac.ten}</td>
                             <td>${item.giaBan}</td></tr>`;
@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function handleRadioChange() {
         const selectedValue = document.querySelector('input[name="loaiChietKhau"]:checked').value;
         ipValues.value = ""; // Reset giá trị khi chuyển đổi
-        if (selectedValue === "Phần trăm") {
+        if (selectedValue === "PHAN_TRAM") {
             ipValues.placeholder = "phần trăm giảm";
             ipValues.removeEventListener("input", validateDollar);
             ipValues.addEventListener("input", validatePercentage);

@@ -50,12 +50,26 @@ public interface PhieuGiamGiaRepository extends JpaRepository<PhieuGiamGia, Inte
     @Query(value = "SELECT * FROM khach_hang", nativeQuery = true)
     List<KhachHang> findAllCustomers();
 
-    @Query("SELECT p FROM PhieuGiamGia p WHERE p.id = :id")
-    Optional<PhieuGiamGia> findby(@Param("id") Long id);
-
     boolean existsByTen(@Size(max = 255) @NotNull String ten);
 
     boolean existsByGiaTriGiam(@NotNull BigDecimal giaTriGiam);
+    @Query(value = "SELECT p FROM PhieuGiamGia p " +
+            "INNER JOIN PhieuGiamGiaKhachHang pg ON pg.phieuGiamGia.id = p.id " +
+            "INNER JOIN KhachHang kh ON kh.id = pg.khachHang.id " +
+            "WHERE p.trangThai = 'DANG_DIEN_RA' AND kh.id = :idKH AND p.hoaDonToiThieu <= :tongTien")
+    List<PhieuGiamGia> hienThiPhieuGiamBangIdKhachHang(@Param("idKH") Integer idKH, @Param("tongTien") BigDecimal tongTien);
 
+    @Query("SELECT p FROM PhieuGiamGia p " +
+            "LEFT JOIN PhieuGiamGiaKhachHang pg ON pg.phieuGiamGia.id = p.id " +
+            "WHERE p.trangThai = 'DANG_DIEN_RA' " +
+            "AND pg.id IS NULL " +
+            "AND p.hoaDonToiThieu <= :tongTien")
+    List<PhieuGiamGia> findCouponsNotApplied(@Param("tongTien") BigDecimal tongTien);
 
+    @Query("SELECT CASE WHEN COUNT(p) > 0 THEN TRUE ELSE FALSE END " +
+            "FROM PhieuGiamGia p " +
+            "LEFT JOIN PhieuGiamGiaKhachHang pg ON pg.phieuGiamGia.id = p.id " +
+            "WHERE p.trangThai = 'DANG_DIEN_RA' " +
+            "AND pg.id IS NULL")
+    Boolean existsCouponsNotApplied();
 }
