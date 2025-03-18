@@ -29,14 +29,15 @@
     <h3>Thêm Mới Đợt Giảm Giá</h3>
 </div>
 <a class="btn btn-info btn-sm" th:href="@{'/admin/phieu-giam-gia/all'}">
-    <i class="fa-solid fa-reply"></i>
+    <i class="fa-solid fa-house"></i>
     Back
 </a>
-
 <div class="row d-flex justify-content-between ">
     <form method="post" th:action="@{/admin/phieu-giam-gia/save}" th:object="${request}"
           onsubmit="return validateForm()"
           class=" w-50 p-4 border rounded shadow bg-white">
+        <span th:if="${thongBao}" th:text="${thongBao}" style="font-weight: bold; color: red"></span>
+
         <div class="mb-3">
             <label class="form-label">Tên Phiếu Giảm Giá</label>
             <input type="hidden" id="listIdCustomer" name="listIdCustomer" value="">
@@ -102,54 +103,62 @@
 
     </form>
 
-        <div class="w-50 p-4 border rounded shadow bg-white" id="formKhachHang">
-            <form id="formKhachHang">
-                <h6>Chọn khách hàng</h6>
+    <div class="w-50 p-4 border rounded shadow bg-white" id="formKhachHang">
+        <form id="formKhachHang">
+            <h6>Chọn khách hàng</h6>
 
-                <div class="input-group">
-                    <input type="text" name="name" class="form-control" placeholder="Nhập tên" th:value="${tenkh}">
-                    <button class="input-group-text">search</button>
-                </div>
-            </form>
-            <br>
-            <table class="table table-bordered">
-                <thead>
-                <tr>
-                    <th></th>
-                    <th>Tên khách hàng</th>
-                    <!--                    <th>Số điện thoại</th>-->
-                    <th>Ngày sinh</th>
-                </tr>
-                </thead>
+            <div class="input-group">
+                <input type="text" name="name" class="form-control" placeholder="Nhập tên" th:value="${tenkh}">
+                <button class="input-group-text">search</button>
+            </div>
+        </form>
+        <br>
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th></th>
+                <th>Tên khách hàng</th>
+                <!--                    <th>Số điện thoại</th>-->
+                <th>Ngày sinh</th>
+            </tr>
+            </thead>
 
-                <tbody>
-                <tr th:each="kh: ${listKH}">
-                    <td><input type="checkbox" th:value="${kh.id}" onclick="toggleCheckbox(this)"></td>
-                    <td th:text="${kh.ten}"></td>
-                    <td th:text="${kh.ngaySinh}"></td>
-                    <!--                <td th:text="${kh.sdt}"></td>-->
-                </tr>
-                </tbody>
-            </table>
+            <tbody>
+            <tr th:each="kh: ${listKH}">
+                <td><input type="checkbox" th:value="${kh.id}" onclick="toggleCheckbox(this)"></td>
+                <td th:text="${kh.ten}"></td>
+                <td th:text="${kh.ngaySinh}"></td>
+                <!--                <td th:text="${kh.sdt}"></td>-->
+            </tr>
+            </tbody>
+        </table>
 
-            <section>
-<!--                PHÂN TRANG-->
-                <div>
-                    <ul class="pagination">
-                        <li th:if="${currentPage > 0}" >
-                            <a th:href="@{/admin/phieu-giam-gia/form-add(page=${currentPage - 1}, size=${size})}">Trước</a>
-                        </li>
-                        <li  th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
-                            <a th:href="@{/admin/phieu-giam-gia/form-add(page=${i}, size=${size})}" th:text="${i + 1}"></a>
-                        </li>
-                        <li th:if="${currentPage < totalPages - 1}">
-                            <a th:href="@{/admin/phieu-giam-gia/form-add(page=${currentPage + 1}, size=${size})}">Sau</a>
-                        </li>
-                    </ul>
-                </div>
+        <section>
+            <!--                PHÂN TRANG-->
+            <div>
+                <ul class="pagination">
+                    <!-- Nút về trang trước -->
+                    <li th:if="${currentPage > 0}">
+                        <a th:href="@{/admin/phieu-giam-gia/form-add(page=${currentPage - 1}, size=${size}, name=${search})}">Trước</a>
+                    </li>
 
-            </section>
-        </div>
+                    <!-- Hiển thị số trang -->
+                    <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                        th:classappend="${currentPage == i} ? 'active'">
+                        <a th:href="@{/admin/phieu-giam-gia/form-add(page=${i}, size=${size}, name=${search})}"
+                           th:text="${i + 1}"></a>
+                    </li>
+
+                    <!-- Nút trang sau -->
+                    <li th:if="${currentPage < totalPages - 1}">
+                        <a th:href="@{/admin/phieu-giam-gia/form-add(page=${currentPage + 1}, size=${size}, name=${search})}">Sau</a>
+                    </li>
+                </ul>
+            </div>
+
+
+        </section>
+    </div>
 </div>
 </body>
 

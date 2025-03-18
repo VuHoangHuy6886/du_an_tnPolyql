@@ -2,6 +2,8 @@ document.addEventListener("DOMContentLoaded", function () {
     let inputGiaTriGiam = document.querySelector("input[name='giaTriGiam']");
     let radioPhanTram = document.getElementById("phantram");
     let radioGiaTien = document.getElementById("giatien");
+    let inputGiamToiDa = document.querySelector("input[name='giamToiDa']");
+
 
     inputGiaTriGiam.addEventListener("input", function () {
         let giaTri = parseFloat(inputGiaTriGiam.value);
@@ -10,6 +12,16 @@ document.addEventListener("DOMContentLoaded", function () {
         if (radioPhanTram.checked && giaTri > 99) {
             alert("Giá Trị Giảm không được lớn hơn 99%.");
             inputGiaTriGiam.value = 99; // Set về 99 nếu nhập quá
+        }
+    });
+
+    // Kiểm tra giá trị của inputGiamToiDa
+    inputGiamToiDa.addEventListener("input", function () {
+        let giamToiDaValue = parseFloat(inputGiamToiDa.value);
+
+        if (giamToiDaValue > 100000) {
+            alert("Giảm tối đa 100000.");
+            inputGiamToiDa.value = 100000; // Gán lại giá trị về 100000
         }
     });
 
@@ -56,15 +68,11 @@ function validateForm() {
         return false;
     }
 
-
-
-    if(giamToiDa>100000.00){
-        alert("Chỉ giảm tối đa 100000.00");
-        return giamToiDa==100000.00;
-    }
-
-
-
+//check giam toi da
+//     if (giamToiDa > 100000.00) {
+//         alert("Chỉ giảm tối đa 100000.00");
+//         return giamToiDa == 100000.00;
+//     }
 
 
 // Kiểm tra giá trị giảm

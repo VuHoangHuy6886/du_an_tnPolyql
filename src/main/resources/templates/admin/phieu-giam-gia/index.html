@@ -86,24 +86,26 @@
                                     <label for="status" class="form-label font-weight-bold">Trạng Thái</label>
                                     <select id="status" class="form-control" name="status">
                                         <option value="">Select</option>
-                                        <option value="Sắp diễn ra" th:selected="${status == 'Sắp diễn ra'}">Sắp diễn
+                                        <option value="SAP_DIEN_RA" th:selected="${status == 'SAP_DIEN_RA'}">Sắp diễn
                                             ra
                                         </option>
-                                        <option value="Đang diễn ra" th:selected="${status == 'Đang diễn ra'}">Đang diễn
+                                        <option value="DANG_DIEN_RA" th:selected="${status == 'DANG_DIEN_RA'}">Đang diễn
                                             ra
                                         </option>
-                                        <option value="Đã kết thúc" th:selected="${status == 'Đã kết thúc'}">Đã kết thúc
+                                        <option value="DA_KET_THUC" th:selected="${status == 'DA_KET_THUC'}">Đã kết thúc
                                         </option>
                                     </select>
                                 </div>
                             </div>
-                            <button class="btn btn-secondary">
+                            <button class="btn btn-info" id="ClearForm">
+                                <i class="fas fa-rotate-right"></i>
+                                                                Clear
+                            </button>
+                            <button class="form-control btn-secondary">
 <!--                                <i class="fa-solid fa-magnifying-glass"></i>-->
                                 Tìm Kiếm
                             </button>
-                            <button class="btn btn-secondary" id="ClearForm">
-                                Clear
-                            </button>
+
                         </form>
                         <!--                        <div class="row g-3 align-items-center mt-3">-->
                         <!--                            <div class="col-md-2 text-end">-->
@@ -152,10 +154,11 @@
                                        style="text-decoration: none; margin: 10px">
                                         <i class="fa-solid fa-pen-to-square"></i>
                                     </a>
-                                    <a class="btn btn-info btn-sm"
+                                    <a class="btn btn-danger btn-sm"
                                        th:href="@{'/admin/phieu-giam-gia/change-status/'+ ${phieuGiamGia.id}}"
                                        style="text-decoration: none; margin: 10px">
-                                        <i class="fa-solid fa-repeat"></i>
+<!--                                        <i class="fa-solid fa-repeat"></i>-->
+                                        <i class="fa-solid fa-power-off"></i>
                                     </a>
 
                                 </td>

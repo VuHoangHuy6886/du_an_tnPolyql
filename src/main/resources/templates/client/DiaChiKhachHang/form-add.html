@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/client/layout/layout-client.html"
+>
+<head>
+    <!--    Custom link-->
+    <th:block layout:fragment="head_link">
+        <!-- Bootstrap CSS -->
+        <link href="/css/client/client.css" rel="stylesheet">
+        </style>
+    </th:block>
+
+</head>
+
+<!-- Custom styles for this page -->
+<body layout:fragment="content">
+
+
+
+<section class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+    <form class="p-4 border rounded shadow bg-light" style="width: 350px;">
+        <h2 class="text-center mb-4">Thêm địa chỉ</h2>
+
+        <div class="mb-3">
+            <label class="form-label">Tỉnh/Thành phố:</label>
+            <select class="form-select">
+                <option value="">Chọn tỉnh/thành phố</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Quận/Huyện:</label>
+            <select class="form-select">
+                <option value="">Chọn quận/huyện</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Phường/Xã:</label>
+            <select class="form-select">
+                <option value="">Chọn phường/xã</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Địa chỉ cụ thể:</label>
+            <input class="form-control" type="text">
+        </div>
+
+        <div class="text-center">
+            <button type="button" class="btn btn-primary w-100">Lưu địa chỉ</button>
+        </div>
+    </form>
+</section>
+</body>
+
+<th:block layout:fragment="bottom_link">
+    <!-- jQuery and Bootstrap JS -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
+    <script src="/js/client/iphone.js"></script>
+
+</th:block>
+</html>

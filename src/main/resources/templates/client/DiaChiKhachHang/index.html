@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/client/layout/layout-client.html"
+>
+<head>
+    <!--    Custom link-->
+    <th:block layout:fragment="head_link">
+        <!-- Bootstrap CSS -->
+        <link href="/css/client/client.css" rel="stylesheet">
+        </style>
+    </th:block>
+
+</head>
+
+<!-- Custom styles for this page -->
+
+<body layout:fragment="content">
+<div class="container mt-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3">
+            <div class="card p-3 shadow-sm">
+                <div class="text-center">
+<!--                    <p>Xin chào !</p>-->
+<!--                    <p class="fw-bold">Ten Tai Khoan</p>-->
+                </div>
+                <ul class="nav flex-column">
+                    <li class="nav-item"><a th:href="@{'/client/tai-khoan-khach-hang/all'}" class="nav-link">Thông tin
+                        tài khoản</a></li>
+                    <li class="nav-item"><a th:href="@{'/client/dia-chi-khach-hang/all'}"
+                                            class="nav-link text-primary fw-bold">Số địa chỉ</a></li>
+                    <li class="nav-item"><a href="#" class="nav-link">Đơn hàng của bạn</a></li>
+                    <li class="nav-item"><a href="#" class="nav-link">Kho voucher</a></li>
+                    <li class="nav-item"><a href="#" class="nav-link text-danger fw-bold">Đăng xuất</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <div class="card p-4 shadow-sm">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="fw-bold">Số địa chỉ</h4>
+                    <button class="btn btn-success">
+                        <a href="/client/dia-chi-khach-hang/add" style="color: white">+ Thêm địa chỉ mới</a>
+                    </button>
+                </div>
+                <div class="d-flex">
+                    <h5>Ten tai Khoan</h5>
+                    <p>|</p>
+                    <h5>sdt</h5>
+                </div>
+
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Mặc định</th>
+                        <th>Địa chỉ</th>
+                        <th>Phường/Xã</th>
+                        <th>Quận/Huyện</th>
+                        <th>Tỉnh/Thành Phố</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="dc : ${diaChikhachHang}">
+                        <td>
+                            <input type="radio">
+                        </td>
+                        <td th:text="${dc.address}"></td>
+                        <td th:text="${dc.wardCode}"></td>
+                        <td th:text="${dc.districtId}"></td>
+                        <td th:text="${dc.provinceId}"></td>
+                        <!--                            <td>Co Nhue 1</td>-->
+                        <!--                            <td>Bac Tu Liem</td>-->
+                        <!--                            <td>Ha Noi</td>-->
+                        <td>
+                            <button class="btn btn-primary">Cập Nhật</button>
+                            <button class="btn btn-danger">Xóa</button>
+                        </td>
+                    </tr>
+                    </tbody>
+
+                </table>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+
+<th:block layout:fragment="bottom_link">
+    <!-- jQuery and Bootstrap JS -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
+    <script src="/js/client/iphone.js"></script>
+
+</th:block>
+</html>

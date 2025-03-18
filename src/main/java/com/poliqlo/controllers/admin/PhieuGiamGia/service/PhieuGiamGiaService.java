@@ -43,7 +43,8 @@ public class PhieuGiamGiaService {
         Pageable pageable = PageRequest.of(page, size);
         return phieuGiamGiaRepository.filterAllCoupon(pageable, name, status, startTime, endTime);
     }
-    public Page<KhachHang> timKhachHangTheoTen(String ten,Pageable pageable) {
+
+    public Page<KhachHang> timKhachHangTheoTen(String ten, Pageable pageable) {
         return phieuGiamGiaRepository.searchByTen(ten, pageable);
 
     }
@@ -171,15 +172,6 @@ public class PhieuGiamGiaService {
                 PhieuGiamGiaKhachHang pggKH = new PhieuGiamGiaKhachHang();
                 pggKH.setPhieuGiamGia(phieuGiamGia);
                 pggKH.setKhachHang(kh);
-                pggKH.setIsUsed(false);
-                phieuGiamGiaKhachHangRepository.save(pggKH);
-            }
-        } else {
-            List<KhachHang> kh = khachHangRepository.findAll();
-            for (KhachHang khAdd : kh) {
-                PhieuGiamGiaKhachHang pggKH = new PhieuGiamGiaKhachHang();
-                pggKH.setPhieuGiamGia(phieuGiamGia);
-                pggKH.setKhachHang(khAdd);
                 pggKH.setIsUsed(false);
                 phieuGiamGiaKhachHangRepository.save(pggKH);
             }

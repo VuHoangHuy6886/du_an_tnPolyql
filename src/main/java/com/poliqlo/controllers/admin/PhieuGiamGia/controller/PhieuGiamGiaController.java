@@ -32,9 +32,8 @@ import java.util.stream.Collectors;
 @RequestMapping("/admin/phieu-giam-gia")
 public class PhieuGiamGiaController {
     private final PhieuGiamGiaRepository repository;
-
     private final PhieuGiamGiaService service;
-
+    private String thongBao = "";
 
     @GetMapping("/all")
     public String showAll(@RequestParam(value = "page", defaultValue = "0", required = false) String pageStr,
@@ -120,23 +119,21 @@ public class PhieuGiamGiaController {
 
         Pageable pageable = PageRequest.of(page, size);
         Page<KhachHang> khachHangPage;
-        System.out.println("ten : " + search);
-        // Lọc khách hàng theo tên nếu có search
+
         if (search != null && !search.trim().isEmpty()) {
             khachHangPage = service.timKhachHangTheoTen(search, pageable);
-            model.addAttribute("listKH", khachHangPage.getContent());
-            model.addAttribute("currentPage", page);
-            model.addAttribute("totalPages", khachHangPage.getTotalPages());
-            model.addAttribute("request", new AddPhieuGiamGiaRequest());
-            return "/admin/phieu-giam-gia/form-add";
         } else {
             khachHangPage = service.getAllCustomers(pageable);
-            model.addAttribute("listKH", khachHangPage.getContent());
-            model.addAttribute("currentPage", page);
-            model.addAttribute("totalPages", khachHangPage.getTotalPages());
-            model.addAttribute("request", new AddPhieuGiamGiaRequest());
-            return "/admin/phieu-giam-gia/form-add";
         }
+        model.addAttribute("thongBao",thongBao);
+        model.addAttribute("listKH", khachHangPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("size", size);
+        model.addAttribute("totalPages", khachHangPage.getTotalPages());
+        model.addAttribute("search", search); // thêm để giữ từ khóa tìm kiếm trên view
+        model.addAttribute("request", new AddPhieuGiamGiaRequest());
+
+        return "/admin/phieu-giam-gia/form-add";
     }
 
 
@@ -157,13 +154,13 @@ public class PhieuGiamGiaController {
         }
 
         if (repository.existsByTen(request.getTen())) {
-            model.addAttribute("checkTrungTen", "ten da ton tai");
-            return "/admin/phieu-giam-gia/form-add";
+            thongBao= "ten da ton tai";
+            return "redirect:/admin/phieu-giam-gia/form-add";
         }
 
         if (repository.existsByGiaTriGiam(BigDecimal.valueOf(Double.parseDouble(request.getGiaTriGiam())))) {
-            model.addAttribute("checktrungGTG", "Gia tri giam nay da ton tai");
-            return "/admin/phieu-giam-gia/form-add";
+            thongBao= "gia tri giam da ton tai";
+            return "redirect:/admin/phieu-giam-gia/form-add";
         }
 
 
@@ -210,20 +207,81 @@ public class PhieuGiamGiaController {
                          BindingResult bindingResult,
                          Model model) {
 
-        String inputGiaTriGiam = request.getLoaiHinhGiam();
+        String inputGiaTriGiam = request.getGiaTriGiam();
+        String inputGiamToiDa = request.getGiamToiDa();
+        String inputLoaiHinhGiam = request.getLoaiHinhGiam();
+        String tenPhieu = request.getTen();
 
         // Kiểm tra lỗi chung và loại hình giảm giá rỗng
-        if (inputGiaTriGiam == null || inputGiaTriGiam.trim().isEmpty() || bindingResult.hasErrors()) {
+        if (inputLoaiHinhGiam == null || inputLoaiHinhGiam.trim().isEmpty() || bindingResult.hasErrors()) {
             model.addAttribute("message", "Vui lòng nhập đúng dữ liệu");
             model.addAttribute("request", request);
             return "admin/phieu-giam-gia/form-update";
         }
 
+        // Validate Tên phiếu giảm giá (Không trống, không ký tự đặc biệt)
+        if (tenPhieu == null || tenPhieu.trim().isEmpty()) {
+            model.addAttribute("messageTen", "Tên phiếu giảm giá không được để trống");
+            return "admin/phieu-giam-gia/form-update";
+        }
+        if (!tenPhieu.matches("[a-zA-Z0-9\\sÀ-ỹ]+")) {
+            model.addAttribute("messageTen", "Tên phiếu giảm giá không được chứa ký tự đặc biệt");
+            return "admin/phieu-giam-gia/form-update";
+        }
+
+
+        // Kiểm tra giá trị giảm hợp lệ dựa trên loại hình giảm giá
+        try {
+            if (inputGiaTriGiam != null && !inputGiaTriGiam.trim().isEmpty()) {
+                int giaTriGiam = Integer.parseInt(inputGiaTriGiam.trim());
+
+                if ("phantram".equalsIgnoreCase(inputLoaiHinhGiam)) {
+                    if (giaTriGiam < 1 || giaTriGiam > 99) {
+                        model.addAttribute("message", "Giá trị giảm theo % chỉ được nhập từ 1 đến 99");
+                        model.addAttribute("request", request);
+                        return "admin/phieu-giam-gia/form-update";
+                    }
+                } else if ("giatien".equalsIgnoreCase(inputLoaiHinhGiam)) {
+                    if (giaTriGiam < 1 || giaTriGiam > 100000) {
+                        model.addAttribute("message", "Giá trị giảm theo tiền chỉ được nhập từ 1 đến 100000");
+                        model.addAttribute("request", request);
+                        return "admin/phieu-giam-gia/form-update";
+                    }
+                } else {
+                    model.addAttribute("message", "Loại hình giảm không hợp lệ");
+                    model.addAttribute("request", request);
+                    return "admin/phieu-giam-gia/form-update";
+                }
+            }
+        } catch (NumberFormatException e) {
+            model.addAttribute("message", "Giá trị giảm phải là số hợp lệ");
+            model.addAttribute("request", request);
+            return "admin/phieu-giam-gia/form-update";
+        }
+
+        // Kiểm tra giá trị giảm tối đa không được vượt quá 100.000
+        try {
+            if (inputGiamToiDa != null && !inputGiamToiDa.trim().isEmpty()) {
+                int giamToiDa = Integer.parseInt(inputGiamToiDa.trim());
+
+                if (giamToiDa > 100000) {
+                    model.addAttribute("messageGiamToiDa", "Chỉ được giảm tối đa 100000");
+                    request.setGiamToiDa("100000"); // Gán lại giá trị cho ô input
+                    model.addAttribute("request", request);
+                    return "admin/phieu-giam-gia/form-update";
+                }
+            }
+        } catch (NumberFormatException e) {
+            model.addAttribute("messageGiamToiDa", "Giá trị giảm tối đa phải là số hợp lệ");
+            model.addAttribute("request", request);
+            return "admin/phieu-giam-gia/form-update";
+        }
+
         // Kiểm tra loại hình giảm giá hợp lệ (phải là "phantram" hoặc "giatien")
-        if (!inputGiaTriGiam.trim().equalsIgnoreCase("phantram") &&
-                !inputGiaTriGiam.trim().equalsIgnoreCase("giatien")) {
-            model.addAttribute("validLoaiHinhGiam", request);
+        if (!"phantram".equalsIgnoreCase(inputLoaiHinhGiam) &&
+                !"giatien".equalsIgnoreCase(inputLoaiHinhGiam)) {
             model.addAttribute("message", "Loại hình giảm phải là 'phantram' hoặc 'giatien'");
+            model.addAttribute("request", request);
             return "admin/phieu-giam-gia/form-update";
         }
 
@@ -234,18 +292,23 @@ public class PhieuGiamGiaController {
 
         if (ngayBatDau == null || ngayKetThuc == null) {
             model.addAttribute("messages", "Ngày bắt đầu và ngày kết thúc không được để trống");
-            model.addAttribute("message", "");
+            model.addAttribute("request", request);
             return "admin/phieu-giam-gia/form-update";
         }
 
         if (ngayBatDau.isBefore(now)) {
             model.addAttribute("messages", "Ngày bắt đầu phải lớn hơn thời gian hiện tại");
+            model.addAttribute("request", request);
             return "admin/phieu-giam-gia/form-update";
         }
 
         if (ngayBatDau.isAfter(ngayKetThuc)) {
-            model.addAttribute("message", "");
-            model.addAttribute("messages", "Ngày bắt đầu phải nhỏ hơn ngày kết thúc");
+            model.addAttribute("messages", "Ngày kết thúc phải sau ngày bắt đầu");
+            model.addAttribute("request", request);
+            return "admin/phieu-giam-gia/form-update";
+        }
+        if (ngayBatDau.isEqual(ngayKetThuc)) {
+            model.addAttribute("messages", "Ngày bắt đầu và ngày kết thúc không được trùng nhau");
             return "admin/phieu-giam-gia/form-update";
         }
 
@@ -253,6 +316,7 @@ public class PhieuGiamGiaController {
         String result = service.update(request);
         return "redirect:/admin/phieu-giam-gia/all";
     }
+
 
 //delete
 //    @PostMapping("/delete{id}")
