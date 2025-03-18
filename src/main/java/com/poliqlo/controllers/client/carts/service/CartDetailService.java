@@ -2,7 +2,8 @@ package com.poliqlo.controllers.client.carts.service;
 
 import com.poliqlo.controllers.client.carts.dto.BillRequestDTO;
 import com.poliqlo.controllers.client.carts.dto.CartDetailResponseDTO;
-import com.poliqlo.controllers.client.carts.dto.AddressResponseDTO;
+import com.poliqlo.controllers.client.address.dto.AddressResponseDTO;
+import com.poliqlo.controllers.client.carts.dto.MessageResponse;
 import com.poliqlo.controllers.client.carts.mapper.BillMapper;
 import com.poliqlo.controllers.client.carts.mapper.CartDetailMapper;
 import com.poliqlo.models.*;
@@ -26,9 +27,9 @@ public class CartDetailService {
     private final DiaChiRepository diaChiRepository;
     private final KhachHangRepository khachHangRepository;
     public static String thongBao = "";
+    public static MessageResponse messageResponse = new MessageResponse();
     private final HoaDonRepository hoaDonRepository;
     private final HoaDonChiTietRepository hoaDonChiTietRepository;
-    private final DotGiamGiaRepository  dotGiamGiaRepository;
 
     // show card detail by id customer
     public List<CartDetailResponseDTO> getCartDetailByIdCustomer(Integer id) {
@@ -104,16 +105,17 @@ public class CartDetailService {
 
     public void deCreaseByOne(Integer id) {
         GioHangChiTiet cartDetail = gioHangChiTietRepository.findById(id).orElse(null);
-        thongBao = "";
         if (cartDetail != null) {
             Integer newQuantity = cartDetail.getSoLuong() - 1;
             if (newQuantity < 1) {
-                thongBao = "số lượng trong giỏ hàng tối thiểu là 1";
-                return;
+                messageResponse.setMessage("số lượng trong giỏ hàng tối thiểu là 1");
+                messageResponse.setSuccess(false);
             } else {
                 cartDetail.setSoLuong(newQuantity);
                 gioHangChiTietRepository.save(cartDetail);
                 thongBao = "Giảm Số lượng thành công";
+                messageResponse.setMessage(thongBao);
+                messageResponse.setSuccess(true);
             }
         }
     }
@@ -126,13 +128,24 @@ public class CartDetailService {
             Integer defaultQuantity = sanPhamChiTiet.getSoLuong();
 
             Integer newQuantity = cartDetail.getSoLuong() + 1;
-
-            if (newQuantity >= defaultQuantity) {
+            // tong tien
+            BigDecimal totalMoney = BigDecimal.valueOf(newQuantity).multiply(sanPhamChiTiet.getGiaBan());
+            // So sánh với 5,000,000
+            BigDecimal limit = BigDecimal.valueOf(5000000);
+            if (newQuantity > defaultQuantity) {
                 thongBao = "số thêm đã vượt quá số luong của cửa hàng";
+                messageResponse.setMessage(thongBao);
+                messageResponse.setSuccess(false);
+            } else if (totalMoney.compareTo(limit) >= 0) {
+                thongBao = "số thêm không được vượt quá 5 triệu đồng !";
+                messageResponse.setMessage(thongBao);
+                messageResponse.setSuccess(false);
             } else {
                 cartDetail.setSoLuong(newQuantity);
                 gioHangChiTietRepository.save(cartDetail);
                 thongBao = "Thêm Số Lượng Thành Công";
+                messageResponse.setMessage(thongBao);
+                messageResponse.setSuccess(true);
             }
         }
     }
@@ -143,14 +156,28 @@ public class CartDetailService {
         if (cartDetail != null) {
             SanPhamChiTiet sanPhamChiTiet = sanPhamChiTietRepository.findById(cartDetail.getSanPhamChiTiet().getId()).orElse(null);
             Integer defaultQuantity = sanPhamChiTiet.getSoLuong();
+            // tong tien
+            BigDecimal totalMoney = BigDecimal.valueOf(quantity).multiply(sanPhamChiTiet.getGiaBan());
+            // So sánh với 5,000,000
+            BigDecimal limit = BigDecimal.valueOf(5000000);
             if (quantity > defaultQuantity) {
-                thongBao = "số thêm đã vượt quá số luong của cửa hàng";
+                thongBao = "số thêm đã quá số lượng trong kho - số lượng kho là : " + sanPhamChiTiet.getSoLuong();
+                messageResponse.setMessage(thongBao);
+                messageResponse.setSuccess(false);
             } else if (quantity < 1) {
                 thongBao = "số sản phẩm trong giỏ hang phải lơn  hơn hoặc bằng 1";
+                messageResponse.setMessage(thongBao);
+                messageResponse.setSuccess(false);
+            } else if (totalMoney.compareTo(limit) >= 0) {
+                thongBao = "số thêm không được vượt quá 5 triệu đồng !";
+                messageResponse.setMessage(thongBao);
+                messageResponse.setSuccess(false);
             } else {
                 cartDetail.setSoLuong(quantity);
                 gioHangChiTietRepository.save(cartDetail);
                 thongBao = "Thêm Số Lượng Thành Công";
+                messageResponse.setMessage(thongBao);
+                messageResponse.setSuccess(true);
             }
         }
     }
@@ -175,6 +202,14 @@ public class CartDetailService {
         return phieuGiamGiaRepository.hienThiPhieuGiamBangIdKhachHang(id, tongTien);
     }
 
+    public List<PhieuGiamGia> couponForAllCustomer(BigDecimal tongTien) {
+        return phieuGiamGiaRepository.findCouponsNotApplied(tongTien);
+    }
+
+    public Boolean existsCouponsNotApplied() {
+        return phieuGiamGiaRepository.existsCouponsNotApplied();
+    }
+
     // ham tỉnh tổng tền của các giỏ hàng mà khách hàng mua
     public BigDecimal totalPriceCartDetails(List<CartDetailResponseDTO> lists) {
         BigDecimal total = BigDecimal.ZERO;
@@ -184,25 +219,9 @@ public class CartDetailService {
         return total;
     }
 
-    // get dia chi
-    public AddressResponseDTO findDiaChi(Integer id) {
-        DiaChi diaChi = diaChiRepository.findById(id).get();
-        return CartDetailMapper.diaChiToAddress(diaChi);
-    }
-
-    public List<AddressResponseDTO> findAllDiaChi(Integer id) {
-        List<DiaChi> diachiEntity = diaChiRepository.timKiemDiaChiTheoIdKhachHang(id);
-        List<AddressResponseDTO> addressResponseDTOList = new ArrayList<>();
-        for (DiaChi dc : diachiEntity) {
-            AddressResponseDTO addressDTO = CartDetailMapper.diaChiToAddress(dc);
-            addressResponseDTOList.add(addressDTO);
-        }
-        return addressResponseDTOList;
-    }
-
     // thanh toán tao hoa don
     @Transactional
-    public String saveBill (BillRequestDTO billRequestDTO) {
+    public String saveBill(BillRequestDTO billRequestDTO) {
         // list cart detail id
         List<Integer> cartIDs = Arrays.stream(billRequestDTO.getCartDetailIds().split(","))
                 .map(Integer::parseInt)
@@ -216,22 +235,22 @@ public class CartDetailService {
         System.out.println(voucherIdStr);
         if (voucherIdStr != null && Integer.parseInt(voucherIdStr) != 0) {
             PhieuGiamGia check = phieuGiamGiaRepository.findById(Integer.parseInt(voucherIdStr)).get();
-            if (check.getSoLuong() < 1){
+            if (check.getSoLuong() < 1) {
                 throw new RuntimeException("phiếu giảm giá số lượng không đủ");
-            }else {
+            } else {
                 phieuGiamGia = check;
             }
         }
         // 2. kiem tra so luong san pham trong gio hang trc
         for (GioHangChiTiet check : gioHangChiTietList) {
             SanPhamChiTiet sanPhamChiTiet = sanPhamChiTietRepository.findById(check.getId()).get();
-            if (check.getSoLuong() > sanPhamChiTiet.getSoLuong()){
+            if (check.getSoLuong() > sanPhamChiTiet.getSoLuong()) {
                 throw new RuntimeException("số lượng sản phẩm không đủ không đủ");
             }
         }
         // dia chi
         DiaChi diaChi = diaChiRepository.findById(Integer.parseInt(billRequestDTO.getAddressId())).get();
-        HoaDon hoaDon = BillMapper.BillRequestToBill(billRequestDTO,phieuGiamGia,khachHang,diaChi);
+        HoaDon hoaDon = BillMapper.BillRequestToBill(billRequestDTO, phieuGiamGia, khachHang, diaChi);
         hoaDonRepository.save(hoaDon);
         // tru di 1 phieu giam gia va save
         if (phieuGiamGia != null) {
@@ -239,6 +258,9 @@ public class CartDetailService {
             phieuGiamGia.setSoLuong(soLuongVoucherNew);
             phieuGiamGiaRepository.save(phieuGiamGia);
         }
+        // su ly lich su hoa don
+
+
 
         // su ly gio hang va san pham + dot giam gia
         for (GioHangChiTiet gh : gioHangChiTietList) {
@@ -247,10 +269,10 @@ public class CartDetailService {
             // dot giam gia
             DotGiamGia dotGiamGia = this.getLatestDiscountForProductDetail(sanPhamChiTiet.getId());
             // lay gia sau khi giam
-            BigDecimal giaKhuyenMai ;
+            BigDecimal giaKhuyenMai;
             if (dotGiamGia != null) {
-                giaKhuyenMai = this.calculatingPriceOfProductDetail(sanPhamChiTiet,dotGiamGia);
-            }else {
+                giaKhuyenMai = this.calculatingPriceOfProductDetail(sanPhamChiTiet, dotGiamGia);
+            } else {
                 giaKhuyenMai = sanPhamChiTiet.getGiaBan();
             }
             BigDecimal giaGoc = gh.getSanPhamChiTiet().getGiaBan();
@@ -275,5 +297,9 @@ public class CartDetailService {
             gioHangChiTietRepository.save(gh);
         }
         return "Thêm Thành Công";
+    }
+
+    public MessageResponse getMessageResponse() {
+        return messageResponse;
     }
 }
