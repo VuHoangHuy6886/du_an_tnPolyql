@@ -8,11 +8,14 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface DiaChiRepository extends JpaRepository<DiaChi, Integer> , JpaSpecificationExecutor<DiaChi> {
+public interface DiaChiRepository extends JpaRepository<DiaChi, Integer>, JpaSpecificationExecutor<DiaChi> {
 
     @Query("select d from DiaChi d where d.khachHang.id = :id")
     List<DiaChi> timKiemDiaChiTheoIdKhachHang(@Param("id") Integer id);
+
     @Query("select d from DiaChi d where d.khachHang.id = :id and d.isDefault = true ")
     DiaChi findAddressDefault(@Param("id") Integer id);
 
-  }
+    @Query("select d from DiaChi d where d.id = :id ")
+    DiaChi findDiaChiById(@Param("id") Integer id);
+}

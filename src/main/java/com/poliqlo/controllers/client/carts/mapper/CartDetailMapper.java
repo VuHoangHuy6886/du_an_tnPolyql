@@ -1,12 +1,8 @@
 package com.poliqlo.controllers.client.carts.mapper;
 
-import com.poliqlo.controllers.client.carts.dto.AddressRequestDTO;
 import com.poliqlo.controllers.client.carts.dto.CartDetailResponseDTO;
-import com.poliqlo.controllers.client.carts.dto.AddressResponseDTO;
-import com.poliqlo.models.DiaChi;
 import com.poliqlo.models.DotGiamGia;
 import com.poliqlo.models.GioHangChiTiet;
-import com.poliqlo.models.KhachHang;
 
 import java.math.BigDecimal;
 
@@ -32,34 +28,5 @@ public class CartDetailMapper {
         responseDTO.setTotalPrice(String.valueOf(tongTien));
 
         return responseDTO;
-    }
-
-    public static AddressResponseDTO diaChiToAddress(DiaChi diaChi) {
-        AddressResponseDTO addressDTO = AddressResponseDTO.builder()
-                .id(diaChi.getId())
-                .ten(diaChi.getHoTenNguoiNhan())
-                .provinceId(diaChi.getProvinceId())
-                .districtId(diaChi.getDistrictId())
-                .wardId(diaChi.getWardCode())
-                .soDienThoai(diaChi.getSoDienThoai())
-                .defaultValue(diaChi.getIsDefault())
-                .build();
-        return addressDTO;
-    }
-
-    public static DiaChi requestToDiaChi(AddressRequestDTO requestDTO, KhachHang khachHang) {
-        DiaChi diaChi = DiaChi.builder()
-                .provinceId(Integer.parseInt(requestDTO.getProvinceID()))
-                .districtId(Integer.parseInt(requestDTO.getDistrictID()))
-                .wardCode(requestDTO.getWardID())
-                .address(requestDTO.getAddressStr())
-                .khachHang(khachHang)
-                .hoTenNguoiNhan(requestDTO.getTenNguoiNhan())
-                .soDienThoai(requestDTO.getPhone())
-                .isDeleted(false)
-                .isDefault(false)
-                .build();
-
-        return diaChi;
     }
 }

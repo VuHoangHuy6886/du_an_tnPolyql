@@ -170,3 +170,24 @@ function handlerVoucher() {
     });
 }
 
+document.addEventListener("DOMContentLoaded", function () {
+    let message = document.getElementById("messageRP")?.innerText;
+    let success = document.getElementById("successRP")?.innerText;
+
+    if (message && success) {
+        console.log("message : ",message)
+        Swal.fire({
+            position: "top-end",
+            icon: success.trim() === "true" ? "success" : "error",
+            width: '400px',
+            title: message,
+            showConfirmButton: false,
+            timer: 2000,
+            customClass: {
+                title: 'small-title', // Áp dụng CSS để giảm kích thước chữ
+                popup: 'small-popup' // Áp dụng CSS để điều chỉnh padding
+            }
+        });
+    }
+});
+

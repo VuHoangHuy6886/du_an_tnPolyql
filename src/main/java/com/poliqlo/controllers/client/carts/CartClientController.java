@@ -16,6 +16,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +34,7 @@ public class CartClientController {
     public String showCart(Model model) {
         List<CartDetailResponseDTO> responseDTOList = service.getCartDetailByIdCustomer(1);
         model.addAttribute("idCustomer", 1);
-        model.addAttribute("thongbao", service.thongBao);
+        model.addAttribute("messageResponse", service.getMessageResponse());
         model.addAttribute("carts", responseDTOList);
         return "client/cart";
     }
@@ -71,7 +72,22 @@ public class CartClientController {
     @PostMapping("/api/cart/get-voucher")
     public ResponseEntity<?> updateQuantity(@RequestBody DataRequest request) {
         BigDecimal tongTien = new BigDecimal(request.getTongTien());
-        List<PhieuGiamGia> phieuGiamGias = service.timPhieuGiamGiaChoKhachHang(request.getId(), tongTien);
+        List<PhieuGiamGia> phieuGiamGias = new ArrayList<>();
+
+        // Lấy danh sách phiếu giảm giá áp dụng cho khách hàng
+        List<PhieuGiamGia> DaApDungChoKhachHang = service.timPhieuGiamGiaChoKhachHang(request.getId(), tongTien);
+
+        if (service.existsCouponsNotApplied()) {
+            // Lấy danh sách phiếu giảm giá chưa áp dụng cho khách hàng nào
+            List<PhieuGiamGia> PhieuGiamGiaAll = service.couponForAllCustomer(tongTien);
+
+            // Thêm tất cả phiếu giảm giá vào danh sách
+            phieuGiamGias.addAll(PhieuGiamGiaAll);
+        }
+
+        // Thêm các phiếu giảm giá áp dụng riêng cho khách hàng (nếu có)
+        phieuGiamGias.addAll(DaApDungChoKhachHang);
+
         return ResponseEntity.ok(phieuGiamGias);
     }
 
@@ -123,7 +139,7 @@ public class CartClientController {
         billRequestDTO.setCustomerId(String.valueOf(customerId));
         billRequestDTO.setVoucherId(String.valueOf(voucherId));
 
-        model.addAttribute("bill",billRequestDTO);
+        model.addAttribute("bill", billRequestDTO);
         model.addAttribute("voucher", phieuGiamGia);
         model.addAttribute("customerId", customerId);
         model.addAttribute("listAddress", diaChiList);
@@ -136,37 +152,14 @@ public class CartClientController {
         return "client/payment";
     }
 
-
-    @PostMapping("/api/cart/dia-chi")
-    public ResponseEntity<?> getDiaChiById(@RequestBody Integer id) {
-        AddressResponseDTO addressDTO = service.findDiaChi(id);
-        return ResponseEntity.ok(addressDTO);
-    }
-
-    @PostMapping("/api/cart/list-dia-chi")
-    public ResponseEntity<?> geListtDiaChiById(@RequestBody Integer id) {
-        List<AddressResponseDTO> addressDTO = service.findAllDiaChi(id);
-        return ResponseEntity.ok(addressDTO);
-    }
-
-    @PostMapping("/api/cart/add-address")
-    public ResponseEntity<?> createAddress(@RequestBody AddressRequestDTO requestDTO) {
-        KhachHang khachHang = khachHangRepository.findById(requestDTO.getCustomerID()).get();
-        DiaChi diaChi = CartDetailMapper.requestToDiaChi(requestDTO, khachHang);
-        diaChiRepository.save(diaChi);
-        System.out.printf("Thêm thành công");
-        return ResponseEntity.ok("thêm thành công");
-    }
     @PostMapping("/cart/save-bill")
-    public String saveBill (@ModelAttribute("bill") BillRequestDTO billRequestDTO, Model model) {
-        try{
+    public String saveBill(@ModelAttribute("bill") BillRequestDTO billRequestDTO, Model model) {
+        try {
             service.saveBill(billRequestDTO);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.out.printf("lỗi thanh toán");
             e.printStackTrace();
         }
-
         return "redirect:/";
     }
 }

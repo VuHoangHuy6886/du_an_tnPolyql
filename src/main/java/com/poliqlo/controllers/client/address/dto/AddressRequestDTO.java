@@ -1,4 +1,4 @@
-package com.poliqlo.controllers.client.carts.dto;
+package com.poliqlo.controllers.client.address.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
