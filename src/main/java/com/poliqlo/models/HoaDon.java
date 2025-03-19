@@ -78,8 +78,8 @@ public class HoaDon {
     @Column(name = "IS_DELETED", nullable = false)
     private Boolean isDeleted = false;
 
-
-    @OneToMany(mappedBy = "hoaDon")
+    @NotNull
+    @OneToMany(mappedBy = "hoaDon", cascade = CascadeType.ALL,orphanRemoval = true)
     private List<HoaDonChiTiet> hoaDonChiTiets = new ArrayList<>();
 
     @OneToMany(mappedBy = "hoaDon")

@@ -11,7 +11,7 @@ function showSuccessToast(title, message) {
                 <strong class="me-auto">${title}</strong>
             </div>
             <div class="toast-body ">
-                ${message}
+                ${message||""}
             </div>
         </div>
     `);
@@ -63,38 +63,124 @@ var _uniqueProductMauSac;
 //Chứa đuôi của url filter sản phẩm
 let _mapParamFilters= new Map();
 
+function indexInvoice() {
+    if ($('#nav-invoice').find('button span').length == 0) {
+        $('#add-new-invoice').trigger('click');
+    }
 
-$(document).ready(() => {
-    $('.collapse').collapse()
+    $('#nav-invoice').find('button span').each((index, item) => {
+        $(item).text(index + 1)
+    })
+}
 
-    function indexInvoice() {
-        if ($('#nav-invoice').find('button span').length == 0) {
-            $('#add-new-invoice').trigger('click');
+function deleteInvoice(invoiceID) {
+    let $iv = $(`#nav-invoice [invoice-id='${invoiceID}']`);
+    let $closestSibling = $iv.parent().next().find('.fa-x').length != 0 ? $iv.parent().next() : $iv.parent().prev();
+    $iv.parent().remove();
+    indexInvoice();
+    _mapInvoice.delete(invoiceID);
+    updateDSSPDC();
+    selectInvoice($closestSibling.find('.fa-x').attr('invoice-id'));
+
+}
+
+function selectInvoice(invoiceId) {
+    updateDSSPDC();
+    let $selectInvoice = $(`#nav-invoice .fa-x[invoice-id='${invoiceId}']`);
+    $selectInvoice.parent().parent().find('.active').removeClass('active').attr('aria-selected', 'false');
+    $selectInvoice.parent().addClass('active').attr('aria-selected', 'true');
+    _selectedInvoice = invoiceId?.toString()||_selectedInvoice;
+    loadInvoice();
+}
+const doSearch=()=>{
+    clearTimeout(timeOut);
+    timeOut = setTimeout(()=>{
+        const searchParams = new URLSearchParams();
+        const pageSize = 10; // Nên định nghĩa hằng số
+
+        $('#filter select').each((_, e) => {
+            const $e = $(e); // Cache jQuery object
+            const name = $e.attr('name');
+            const value = $e.val();
+
+            // Kiểm tra giá trị rỗng đơn giản hơn
+            if (!value || (Array.isArray(value) && value.length === 0)) {
+                searchParams.delete(name);
+            } else {
+                if (Array.isArray(value)) {
+                    value.forEach(id => {
+                        searchParams.append(name, id); // Sử dụng append
+                    });
+                } else {
+                    searchParams.set(name, value);
+                }
+            }
+        });
+
+        const searchTerm = $('#input-search').val().trim();
+        if (searchTerm !== '') {
+            searchParams.set('ten', searchTerm);
+        } else {
+            searchParams.delete('ten');
         }
 
-        $('#nav-invoice').find('button span').each((index, item) => {
-            $(item).text(index + 1)
+        const orderByValue = $('#filter-order').val();
+        const [orderBy, sortDirection] = orderByValue.split(':');
+
+        searchParams.delete('orderBy');
+        searchParams.delete('sortDirection');
+        // searchParams.set('orderBy', orderBy);
+        // searchParams.set('sortDirection', sortDirection);
+        // searchParams.set('page', '0'); // Hoặc ép kiểu number: searchParams.set('page', 0);
+        // searchParams.set('pageSize', String(pageSize)); // Hoặc ép kiểu number: searchParams.set('pageSize', pageSize);
+
+
+        window.history.pushState({}, "", '/admin/sale?'+searchParams.toString());
+        $.get(`/api/san-pham?${searchParams.toString()}`)
+            .done((data) => {
+                fillDataToTableSanPham(data)
+            })
+    }, 500);
+
+}
+$(document).ready(() => {
+    $('.collapse').collapse()
+    // Load data to filter
+    {
+        $.ajax('/api/v1/admin/data-list-add-san-pham').then((resp)=>{
+            $('#filter-kichThuoc').select2({
+                placeholder:"Tất cả",
+                data:resp.kichThuoc
+            });
+            $('#filter-danhMuc').select2({
+                placeholder:"Tất cả",
+                data:resp.danhMuc
+            });
+            $('#filter-mauSac').select2({
+                placeholder:"Tất cả",
+                data:resp.mauSac
+            });
+            $('#filter-thuongHieu').select2({
+                placeholder:"Tất cả",
+                data:resp.thuongHieu
+            });
+            $('#filter-kieuDang').select2({
+                placeholder:"Tất cả",
+                data:resp.kieuDang
+            });
+            $('#filter-chatLieu').select2({
+                placeholder:"Tất cả",
+                data:resp.chatLieu
+            });
+            $('#filter').on('change','select',function (){
+                doSearch();
+            })
+
         })
     }
 
-    function deleteInvoice(invoiceID) {
-        let $iv = $(`#nav-invoice [invoice-id='${invoiceID}']`);
-        let $closestSibling = $iv.parent().next().find('.fa-x').length != 0 ? $iv.parent().next() : $iv.parent().prev();
-        $iv.parent().remove();
-        indexInvoice();
-        _mapInvoice.delete(invoiceID);
-        updateDSSPDC();
-        selectInvoice($closestSibling.find('.fa-x').attr('invoice-id'));
 
-    }
 
-    function selectInvoice(invoiceId) {
-        let $selectInvoice = $(`#nav-invoice .fa-x[invoice-id='${invoiceId}']`);
-        $selectInvoice.parent().parent().find('.active').removeClass('active').attr('aria-selected', 'false');
-        $selectInvoice.parent().addClass('active').attr('aria-selected', 'true');
-        _selectedInvoice = invoiceId.toString();
-        loadInvoice();
-    }
 
     //Tạo id cho hóa đơn đầu tiên
     $('#nav-invoice').find('button .fa-x').first().attr('invoice-id', Date.now())
@@ -182,31 +268,14 @@ $(document).ready(()=>{
         })
 
 
-    let timeout;
     $('#input-search').on('input', function () {
-        let searchKey = $(this).val();
-        clearTimeout(timeout);
-        _mapParamFilters.set('ten',searchKey)
-        _mapParamFilters.set('page', 0)
-        _mapParamFilters.set('pageSize', 10)
-        timeout = setTimeout(applyFilter(), 500); // Thay đổi giá trị này đ
+        doSearch()
+        // Thay đổi giá trị này đ
     })
-    $('#filter-thuongHieu').on('change', function () {
-            _mapParamFilters.set('thuongHieuFilter',$(this).val())
-            _mapParamFilters.set('pageNo', 0)
-            applyFilter()
 
-
-    })
-    $('#filter-order').on('change', function () {
-        _mapParamFilters.set('orderBy',$(this).val())
-        _mapParamFilters.set('pageNo', 0)
-
-        applyFilter()
-    })
 
 })
-
+var timeOut;
 
 function applyFilter() {
 
@@ -1557,12 +1626,18 @@ function loadToOffcanvas(idSp) {
     updateDSSPDC()
     $.get('/api/san-pham/' + idSp).then(function (sanPham) {
         currentProduct=sanPham
+        sanPham.sanPhamChiTiets.forEach(spct=>{
+            updateDSSPDC();
+            spct.soLuong=spct.soLuong-(danhSachSanPhamDaThem.get(spct.id+"")||0)
+            _mapProductDetail.set(spct.id+"",spct)
+        })
         $('#sp-add-to-cartLabel').text(sanPham.ten)
         let danhSachMauSac=new Map();
-            sanPham.sanPhamChiTiets.forEach(spct=>
+            sanPham.sanPhamChiTiets.sort(((ct1,ct2)=>ct1.mauSac.ten.localeCompare(ct2.mauSac.ten))).forEach(spct=>
                 danhSachMauSac.set(spct.mauSac.id,spct.mauSac.ten)
             )
         let romBtnHtml=''
+        danhSachMauSac.sor
         danhSachMauSac.forEach((name, id) => {
             romBtnHtml += `
                 <input type="radio" class="btn-check" ms-id="${id}" id="ms-${id}" name="selected-mauSac" autocomplete="off"/>
@@ -1575,8 +1650,8 @@ function loadToOffcanvas(idSp) {
             let mauSacId = $(this).attr('ms-id');
             
             let imgSP=currentProduct.anhs.find(img=>img.mauSacId==mauSacId&img.isDefault)?.url||currentProduct.anhUrl
-            $('.offcanvas-body img:first-child').attr('src',imgSP)
-            currentProduct.sanPhamChiTiets.filter(spct=>spct.mauSac.id==mauSacId).forEach(
+            $('#offcanvas-check-out img:first-child').attr('src',imgSP)
+            currentProduct.sanPhamChiTiets.filter(spct=>spct.mauSac.id==mauSacId).sort((ct1,ct2)=>ct1.kichThuoc.ten.localeCompare(ct2.kichThuoc.ten)).forEach(
                 spct=>{
                     btnKichThuoc += `
                         <input type="radio" class="btn-check" id="spct-${spct.id}" kt-id="${spct.kichThuoc.id}" spct-id='${spct.id}' name="selected-kichThuoc" kt-id="${spct.mauSac.id}" autocomplete="off"/>
@@ -1585,6 +1660,7 @@ function loadToOffcanvas(idSp) {
                 }
             )
             $('#container-btn-kichThuoc').find('.btn-group').html(btnKichThuoc);
+            $('#container-btn-kichThuoc').off('input')
             $('#container-btn-kichThuoc').on('click', 'input', function () {
 
                 let sanPhamChiTietId=$(this).attr('spct-id')
@@ -1650,17 +1726,15 @@ function loadToOffcanvas(idSp) {
     $canvas.find('[name="so-luong"] span').text(_mapProduct.get(idSp).soLuong)
 }
 
-function deleteInvoice(invoiceId) {
-    _mapInvoice.delete(invoiceId)
 
-}
 
 function loadInvoice() {
     let dataRow = '';
     let count = 1;
     _mapInvoice.forEach((value, key) => {
         if ($(`#nav-invoice [invoice-id='${key}']`).length == 0) {
-            deleteInvoice(key)
+            _mapInvoice.delete(key)
+            updateDSSPDC()
         }
     })
     let revertMap = new Map([...(_mapInvoice.get(_selectedInvoice) || [])].reverse())
@@ -2006,6 +2080,23 @@ function updateVoucherSelect(){
 
 
 }
+document.addEventListener("keydown", function (event) {
+    if (event.key === "F2") {
+        event.preventDefault();
+        const element = document.getElementById("barcodeInput");
+        if (element) {
+            element.value = "";
+            element.focus();
+        }
+    }
+});
+$(document).ready(() => {
+    document.getElementById('barcodeInput').addEventListener("input", function () {
+        console.log(this.value);
+    });
+});
+
+
 function updateBillStep2(soTienThanhToan,soTienGiam){
     totalPrice=soTienThanhToan;
     maGiamGiaGiam=soTienGiam?soTienGiam:0;
@@ -2020,7 +2111,7 @@ function updateBillStep2(soTienThanhToan,soTienGiam){
         $('#httt-tien-mat > span > span:nth-child(3)').text("Thanh toán: "+toCurrency(soTienThanhToan-soTienGiam));
 
     }else{
-        let imgSrc=`https://img.vietqr.io/image/tpbank-${stk}-compact2.jpg?amount=${soTienThanhToan}&addInfo=${noiDung}&accountName=${tenTaiKhoan}`
+        imgSrc=`https://img.vietqr.io/image/tpbank-${stk}-compact2.jpg?amount=${soTienThanhToan}&addInfo=${noiDung}&accountName=${tenTaiKhoan}`
         $('#httt-tien-mat > span > span:nth-child(1)').text("")
         $('#httt-tien-mat > span > span:nth-child(2)').text("")
         $('#httt-tien-mat > span > span:nth-child(3)').text("Thanh toán: "+toCurrency(soTienThanhToan));
@@ -2107,8 +2198,10 @@ $(document).ready(()=>{
         let form=$(this);
         if (!form[0].checkValidity()) {
             event.stopPropagation();
+            form.addClass('was-validated')
+
+            return;
         }
-        form.addClass('was-validated')
         if(form.find('.is-invalid').length === 0){
             //Tạo đối tượng từ form
             let formData = {
@@ -2140,16 +2233,15 @@ $(document).ready(()=>{
                 data: JSON.stringify(formData),
                 contentType: 'application/json',
                 success: function (response) {
-                    showSuccessToast('Thanh toán thành công')
-
-                    $('#modal-add').modal('hide');
-                    reloadDataTable();
+                    showSuccessToast('Thanh toán thành công','Đã thanh toán thành công')
+                    deleteInvoice(_selectedInvoice)
+                    $('#offcanvas-check-out').offcanvas('hide');
+                    $('#offcanvas-check-out-step-2').offcanvas('hide');
+                    $('#offcanvas-check-out-step-2').find('form').removeClass('was-validated');
                     console.log(response);
                 },
                 error: function (xhr, status, error) {
                     showErrToast('Có lỗi xảy ra',xhr.responseJSON.message||xhr.responseJSON.error)
-                    reloadDataTable();
-                    console.log(response);
                     console.error(xhr.responseText);
                 }
             });
@@ -2158,6 +2250,7 @@ $(document).ready(()=>{
 
         }
     });
+
 
 
 })

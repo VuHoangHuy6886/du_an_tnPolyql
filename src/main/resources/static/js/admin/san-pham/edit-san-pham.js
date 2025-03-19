@@ -551,6 +551,7 @@ const fillData = (spTemp) => {
     dataTemp = spTemp;
     console.log(dataTemp)
     $('#sp-thuongHieu').val(dataTemp.thuongHieuId).trigger('change');
+    $('#sp-img').val(dataTemp.anhUrl).trigger('change');
     $('#sp-chatLieu').val(dataTemp.chatLieuId).trigger('change');
     $('#sp-danhMuc').val(dataTemp.danhMucIds).trigger('change');
     $('#sp-kieuDang').val(dataTemp.kieuDangId).trigger('change');
@@ -907,7 +908,7 @@ $(document).ready(() => {
         if (variantChangeFlagForStep3) {
 
             let lstRoms = $('#sp-kichThuoc').select2('data'),
-                lstMauSacs = $('#sp-mau-sac').select2('data'),
+                lstMauSacs = $('#sp-mauSac').select2('data'),
                 tenSP = $('#sp-ten').val();
 
             let columnSP = '';
