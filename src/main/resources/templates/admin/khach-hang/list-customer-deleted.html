@@ -53,6 +53,10 @@
             .table thead th {
                 text-align: center;
             }
+
+            .pagination {
+                margin-top: 20px;
+            }
         </style>
     </th:block>
 </head>
@@ -100,12 +104,39 @@
                     <td th:text="${khachHang.isDeleted ? 'Đã xóa ' : 'Hoạt động'}"></td>
                     <td>
                         <button class="btn btn-warning" onclick="confirmRestore(this)" th:data-id="${khachHang.id}">
-                        <i class="bi bi-arrow-clockwise"></i> Khôi phục
-                    </button>
+                            <i class="bi bi-arrow-clockwise"></i> Khôi phục
+                        </button>
                     </td>
                 </tr>
                 </tbody>
             </table>
+
+            <!-- Phân trang -->
+            <div class="d-flex justify-content-center mt-3">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination" th:if="${totalPages > 0}">
+                        <!-- Previous button -->
+                        <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/admin/khach-hang/list-customer-deleted(page=${currentPage - 1})}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+
+                        <!-- Page numbers -->
+                        <li class="page-item" th:each="i: ${#numbers.sequence(0, totalPages - 1)}"
+                            th:classappend="${currentPage == i ? 'active' : ''}">
+                            <a class="page-link" th:href="@{/admin/khach-hang/list-customer-deleted(page=${i})}" th:text="${i + 1}"></a>
+                        </li>
+
+                        <!-- Next button -->
+                        <li class="page-item" th:classappend="${currentPage == totalPages - 1 ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/admin/khach-hang/list-customer-deleted(page=${currentPage + 1})}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
         </div>
     </div>
 </div>

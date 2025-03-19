@@ -79,17 +79,17 @@ public class NhanVienController {
                               @RequestParam("anhUrl") MultipartFile file,
                               RedirectAttributes redirectAttributes) {
 
-        // Kiểm tra email đã tồn tại
-        if (taiKhoanService.existsByEmail(email)) {
-            redirectAttributes.addFlashAttribute("errorEmail", "Email đã tồn tại, vui lòng nhập email khác.");
-            return "redirect:/admin/nhan-vien/add-nhan-vien";
-        }
-
-        // Kiểm tra số điện thoại đã tồn tại
-        if (taiKhoanService.existsBySoDienThoai(soDienThoai)) {
-            redirectAttributes.addFlashAttribute("errorPhone", "Số điện thoại đã tồn tại, vui lòng nhập số khác.");
-            return "redirect:/admin/nhan-vien/add-nhan-vien";
-        }
+//        // Kiểm tra email đã tồn tại
+//        if (taiKhoanService.existsByEmail(email)) {
+//            redirectAttributes.addFlashAttribute("errorEmail", "Email đã tồn tại, vui lòng nhập email khác.");
+//            return "redirect:/admin/nhan-vien/add-nhan-vien";
+//        }
+//
+//        // Kiểm tra số điện thoại đã tồn tại
+//        if (taiKhoanService.existsBySoDienThoai(soDienThoai)) {
+//            redirectAttributes.addFlashAttribute("errorPhone", "Số điện thoại đã tồn tại, vui lòng nhập số khác.");
+//            return "redirect:/admin/nhan-vien/add-nhan-vien";
+//        }
 
         // Tạo tài khoản mới
         TaiKhoan taiKhoan = new TaiKhoan();
@@ -149,9 +149,17 @@ public class NhanVienController {
     }
     // Danh sách nhân viên bị xóa
     @GetMapping("/list-deleted")
-    public String listDeletedNhanVien(Model model) {
-        List<NhanVien> danhSachNhanVienDaXoa = nhanVienService.getAllNhanVienDeleted();
-        model.addAttribute("nhanViens", danhSachNhanVienDaXoa);
+    public String listDeletedNhanVien(Model model,
+                                      @RequestParam(defaultValue = "0") int page,
+                                      @RequestParam(defaultValue = "5") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<NhanVien> pageNhanVien = nhanVienService.getAllNhanVienDeleted(pageable);
+
+        model.addAttribute("nhanViens", pageNhanVien.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", pageNhanVien.getTotalPages());
+        model.addAttribute("totalItems", pageNhanVien.getTotalElements());
+
         return "admin/nhan-vien/list-deleted";
     }
     // Khôi phục nhân viên đã bị xóa

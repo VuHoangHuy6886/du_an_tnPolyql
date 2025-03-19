@@ -18,7 +18,7 @@ public interface NhanVienRepository extends JpaRepository<NhanVien, Integer> , J
     // Tìm nhân viên theo ID, chỉ lấy nhân viên chưa bị xóa
     Optional<NhanVien> findByIdAndIsDeletedFalse(Integer id);
 
-    List<NhanVien> findByIsDeletedTrue();
+    Page<NhanVien> findByIsDeletedTrue(Pageable pageable);
 
 
 
