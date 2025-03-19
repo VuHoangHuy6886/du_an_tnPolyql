@@ -32,8 +32,8 @@ public interface HoaDonChiTietRepository extends JpaRepository<HoaDonChiTiet, In
             "WHERE h.hoaDon.id = :hoaDonId ")
     List<HoaDonChiTietDTO> findByHoaDonId(@Param("hoaDonId") Integer hoaDonId);
 
-    @Query("SELECT hdct FROM HoaDonChiTiet hdct WHERE hdct.hoaDon.id = :hoaDonId AND hdct.isDeleted = false")
-    List<HoaDonChiTiet> findAllByHoaDonId(@Param("hoaDonId") Integer hoaDonId);
+//    @Query("SELECT hdct FROM HoaDonChiTiet hdct WHERE hdct.hoaDon.id = :hoaDonId AND hdct.isDeleted = false")
+//    List<HoaDonChiTiet> findAllByHoaDonId(@Param("hoaDonId") Integer hoaDonId);
 
     @Query("SELECT hdct FROM HoaDonChiTiet hdct JOIN FETCH hdct.sanPhamChiTiet spct JOIN FETCH spct.sanPham sp " +
             "JOIN FETCH spct.kichThuoc kt JOIN FETCH spct.mauSac ms " +
@@ -49,13 +49,14 @@ public interface HoaDonChiTietRepository extends JpaRepository<HoaDonChiTiet, In
   @Query("SELECT hdct FROM HoaDonChiTiet hdct WHERE hdct.hoaDon.id = :hoaDonId AND hdct.isDeleted = false")
   List<HoaDonChiTiet> findAllByHoaDonId(@Param("hoaDonId") Integer hoaDonId);
 
-  @Query("SELECT hdct FROM HoaDonChiTiet hdct JOIN FETCH hdct.sanPhamChiTiet spct JOIN FETCH spct.sanPham sp " +
-          "JOIN FETCH spct.kichThuoc kt JOIN FETCH spct.mauSac ms " +
-          "WHERE hdct.hoaDon.id = :hoaDonId AND hdct.isDeleted = false")
-  List<HoaDonChiTiet> findAllDetailsByHoaDonId(@Param("hoaDonId") Integer hoaDonId);
+//  @Query("SELECT hdct FROM HoaDonChiTiet hdct JOIN FETCH hdct.sanPhamChiTiet spct JOIN FETCH spct.sanPham sp " +
+//          "JOIN FETCH spct.kichThuoc kt JOIN FETCH spct.mauSac ms " +
+//          "WHERE hdct.hoaDon.id = :hoaDonId AND hdct.isDeleted = false")
+//  List<HoaDonChiTiet> findAllDetailsByHoaDonId(@Param("hoaDonId") Integer hoaDonId);
 
 //  List<HoaDonChiTiet> findByHoaDonAndIsDeletedFalse(HoaDon hoaDon);
 
-  @Query("SELECT hdct FROM HoaDonChiTiet hdct WHERE hdct.hoaDon.id = :hoaDonId AND hdct.isDeleted = false")
-  List<HoaDonChiTiet> findByHoaDonIdAndIsDeletedFalse(@Param("hoaDonId") Integer hoaDonId);
+//  @Query("SELECT hdct FROM HoaDonChiTiet hdct WHERE hdct.hoaDon.id = :hoaDonId AND hdct.isDeleted = false")
+//  List<HoaDonChiTiet> findByHoaDonIdAndIsDeletedFalse(@Param("hoaDonId") Integer hoaDonId);
+
 }
