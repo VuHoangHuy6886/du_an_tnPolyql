@@ -8,10 +8,10 @@ document.addEventListener("DOMContentLoaded", function () {
     let statusElements = document.querySelectorAll("#DGGstatus"); // Lấy tất cả các phần tử có id là DGGstatus
     statusElements.forEach(function (statusElement) {
         let statusText = statusElement.textContent.trim(); // Lấy nội dung văn bản và loại bỏ khoảng trắng thừa
-        if (statusText === "Đã kết thúc") {
+        if (statusText === "DA_KET_THUC") {
             statusElement.style.color = "black";
             statusElement.style.fontWeight = "bold";
-        } else if (statusText === "Đang diễn ra") {
+        } else if (statusText === "DANG_DIEN_RA") {
             statusElement.style.color = "red";
             statusElement.style.fontWeight = "bold";
         } else {

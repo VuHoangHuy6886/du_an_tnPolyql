@@ -56,6 +56,17 @@ function validateForm() {
         return false;
     }
 
+
+
+    if(giamToiDa>100000.00){
+        alert("Chỉ giảm tối đa 100000.00");
+        return giamToiDa==100000.00;
+    }
+
+
+
+
+
 // Kiểm tra giá trị giảm
     if (isNaN(giaTriGiam) || giaTriGiam <= 0) {
         alert("Giá Trị Giảm phải là số dương.");
@@ -63,8 +74,8 @@ function validateForm() {
     }
 
 // Kiểm tra giảm tối đa
-    if (isNaN(giamToiDa) || giamToiDa < 0) {
-        alert("Giảm Tối Đa phải là số dương.");
+    if (isNaN(giamToiDa) || giamToiDa <= 0 || !Number.isInteger(parseFloat(giamToiDa))) {
+        alert("Giảm tối đa phải là số nguyên dương.");
         return false;
     }
 

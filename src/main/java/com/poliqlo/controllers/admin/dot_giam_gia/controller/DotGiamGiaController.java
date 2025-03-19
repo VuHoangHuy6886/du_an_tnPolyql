@@ -165,8 +165,7 @@ public class DotGiamGiaController {
             model.addAttribute("message", "Tên đã tồn tại");
             return "admin/dot-giam-gia/form-update";
         }
-
-        if (!request.getLoaiChietKhau().trim().equals("Phần trăm") && !request.getLoaiChietKhau().trim().equals("Số tiền")) {
+        if (!request.getLoaiChietKhau().trim().equals("PHAN_TRAM") && !request.getLoaiChietKhau().trim().equals("SO_TIEN")) {
             model.addAttribute("DotGiamGiaUpdate", request);
             model.addAttribute("message", "Loại chiết khẩu phải là Phần trăm Hoặc Số tiền");
             return "admin/dot-giam-gia/form-update";

@@ -2,6 +2,8 @@ package com.poliqlo.repositories;
 
 import com.poliqlo.models.KhachHang;
 import com.poliqlo.models.PhieuGiamGia;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,8 +11,10 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface PhieuGiamGiaRepository extends JpaRepository<PhieuGiamGia, Integer>, JpaSpecificationExecutor<PhieuGiamGia> {
 
@@ -40,7 +44,56 @@ public interface PhieuGiamGiaRepository extends JpaRepository<PhieuGiamGia, Inte
                                        @Param("ngayBatDau") LocalDateTime ngayBatDau,
                                        @Param("ngayKetThuc") LocalDateTime ngayKetThuc);
 
+    @Query("SELECT k FROM KhachHang k WHERE LOWER(k.ten) LIKE LOWER(CONCAT('%', :ten, '%'))")
+    Page<KhachHang> searchByTen(@Param("ten") String ten, Pageable pageable);
+
     @Query(value = "SELECT * FROM khach_hang", nativeQuery = true)
     List<KhachHang> findAllCustomers();
+    @Query("SELECT p FROM PhieuGiamGia p WHERE p.id = :id")
+    Optional<PhieuGiamGia> findby(@Param("id") Long id);
+
+    boolean existsByTen(@Size(max = 255) @NotNull String ten);
+
+    boolean existsByGiaTriGiam(@NotNull BigDecimal giaTriGiam);
+    @Query(value = "SELECT p FROM PhieuGiamGia p " +
+            "INNER JOIN PhieuGiamGiaKhachHang pg ON pg.phieuGiamGia.id = p.id " +
+            "INNER JOIN KhachHang kh ON kh.id = pg.khachHang.id " +
+            "WHERE p.trangThai = 'DANG_DIEN_RA' AND kh.id = :idKH AND p.hoaDonToiThieu <= :tongTien")
+    List<PhieuGiamGia> hienThiPhieuGiamBangIdKhachHang(@Param("idKH") Integer idKH, @Param("tongTien") BigDecimal tongTien);
+
+    @Query("SELECT p FROM PhieuGiamGia p " +
+            "LEFT JOIN PhieuGiamGiaKhachHang pg ON pg.phieuGiamGia.id = p.id " +
+            "WHERE p.trangThai = 'DANG_DIEN_RA' " +
+            "AND pg.id IS NULL " +
+            "AND p.hoaDonToiThieu <= :tongTien")
+    List<PhieuGiamGia> findCouponsNotApplied(@Param("tongTien") BigDecimal tongTien);
+
+    @Query("SELECT CASE WHEN COUNT(p) > 0 THEN TRUE ELSE FALSE END " +
+            "FROM PhieuGiamGia p " +
+            "LEFT JOIN PhieuGiamGiaKhachHang pg ON pg.phieuGiamGia.id = p.id " +
+            "WHERE p.trangThai = 'DANG_DIEN_RA' " +
+            "AND pg.id IS NULL")
+    Boolean existsCouponsNotApplied();
+    @Query("SELECT pgg FROM PhieuGiamGia pgg " +
+            "LEFT JOIN pgg.khachHangs kh " +
+            "WHERE CURRENT_TIMESTAMP BETWEEN pgg.ngayBatDau AND pgg.ngayKetThuc " +
+            "AND pgg.soLuong > 0 " +
+            "AND  kh IS NULL " +
+            "AND (pgg.hoaDonToiThieu<= :price or pgg.hoaDonToiThieu=null) " +
+            "AND pgg.isDeleted = false "
+    )
+    Page<PhieuGiamGia> findAllActive(Double price,Pageable page);
+
+    @Query("SELECT pgg FROM PhieuGiamGia pgg " +
+            "LEFT JOIN pgg.khachHangs kh " +
+            "WHERE CURRENT_TIMESTAMP BETWEEN pgg.ngayBatDau AND pgg.ngayKetThuc " +
+            "AND pgg.soLuong > 0 " +
+            "AND (kh.id = :khachHangId OR kh IS NULL )" +
+            "AND (pgg.hoaDonToiThieu<= :price or pgg.hoaDonToiThieu=null) " +
+            "AND pgg.isDeleted = false "
+    )
+
+
+    Page<PhieuGiamGia> findAllActive(Integer khachHangId, Double price, Pageable page);
 
 }

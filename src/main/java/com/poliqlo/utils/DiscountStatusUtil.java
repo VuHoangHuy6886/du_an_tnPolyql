@@ -3,10 +3,10 @@ package com.poliqlo.utils;
 import java.time.LocalDateTime;
 
 public class DiscountStatusUtil {
-    public static final String CHUA_DIEN_RA = "Chưa diễn ra";
-    public static final String DANG_DIEN_RA = "Đang diễn ra";
-    public static final String DA_KET_THUC = "Đã kết thúc";
-    public static final String HUY_BO = "Hủy bỏ";
+    public static final String CHUA_DIEN_RA = "CHUA_DIEN_RA";
+    public static final String DANG_DIEN_RA = "DANG_DIEN_RA";
+    public static final String DA_KET_THUC = "DA_KET_THUC";
+    public static final String HUY_BO = "HUY_BO";
 
     public static String getStatus(LocalDateTime startTime, LocalDateTime endTime, boolean isCancelled) {
         LocalDateTime now = LocalDateTime.now();

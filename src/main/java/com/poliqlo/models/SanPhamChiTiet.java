@@ -8,6 +8,7 @@ import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Builder
 @AllArgsConstructor
@@ -52,5 +53,16 @@ public class SanPhamChiTiet {
     @ColumnDefault("b'0'")
     @Column(name = "IS_DELETED", nullable = false)
     private Boolean isDeleted = false;
+
+    @ManyToMany
+    @JoinTable(
+            name = "san_pham_chi_tiet_dot_giam_gia",
+            joinColumns = @JoinColumn(name = "san_pham_chi_tiet_id"),
+            inverseJoinColumns = @JoinColumn(name = "dot_giam_gia_id")
+    )
+    private List<DotGiamGia> dotGiamGias;
+
+//    @OneToMany(mappedBy = "sanPhamChiTiet")
+//    private Set<SanPhamChiTietDotGiamGia> sanPhamChiTietDotGiamGias = new LinkedHashSet<>();
 
 }

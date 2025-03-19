@@ -39,7 +39,7 @@ public class SanPhamProductResponse implements Serializable {
         Integer id;
         List<KhuyenMai> khuyenMai;
         MauSac mauSac;
-        String rom;
+        String kichThuoc;
         Integer soLuong;
         BigDecimal giaBan;
         String trangThai;
