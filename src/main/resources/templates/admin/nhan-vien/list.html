@@ -289,9 +289,9 @@
             item.addEventListener("click", function (event) {
                 event.preventDefault();
                 const deleteUrl = this.getAttribute("data-url");
+
                 Swal.fire({
                     title: "Bạn có chắc chắn muốn xóa?",
-                    text: "Hành động này không thể hoàn tác!",
                     icon: "warning",
                     showCancelButton: true,
                     confirmButtonColor: "#d33",
@@ -300,7 +300,47 @@
                     cancelButtonText: "Hủy"
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.location.href = deleteUrl;
+                        // Sử dụng fetch để gọi API xóa thay vì chuyển hướng trang
+                        fetch(deleteUrl, {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            }
+                        })
+                            .then(response => {
+                                if (response.ok) {
+                                    // Hiển thị thông báo xóa thành công
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Thành công!',
+                                        text: 'Xóa nhân viên thành công',
+                                        timer: 2500,
+                                        showConfirmButton: false
+                                    }).then(() => {
+                                        // Sau khi hiển thị thông báo, tải lại trang để cập nhật danh sách
+                                        location.reload();
+                                    });
+                                } else {
+                                    // Xử lý lỗi nếu có
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Lỗi!',
+                                        text: 'Có lỗi xảy ra khi xóa nhân viên',
+                                        timer: 3000,
+                                        showConfirmButton: false
+                                    });
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Lỗi!',
+                                    text: 'Có lỗi xảy ra khi xóa nhân viên',
+                                    timer: 3000,
+                                    showConfirmButton: false
+                                });
+                            });
                     }
                 });
             });

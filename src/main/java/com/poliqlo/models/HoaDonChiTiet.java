@@ -20,7 +20,6 @@ public class HoaDonChiTiet {
     @Column(name = "ID", nullable = false)
     private Integer id;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "HOA_DON_ID", nullable = false)
     private HoaDon hoaDon;

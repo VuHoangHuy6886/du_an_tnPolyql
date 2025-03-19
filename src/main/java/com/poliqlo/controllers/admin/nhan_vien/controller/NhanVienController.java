@@ -1,41 +1,22 @@
 package com.poliqlo.controllers.admin.nhan_vien.controller;
 
 
-
-import com.azure.core.annotation.Get;
-import com.poliqlo.controllers.admin.nhan_vien.model.request.AddRequest;
-import com.poliqlo.controllers.admin.nhan_vien.model.request.EditReq;
-import com.poliqlo.controllers.admin.nhan_vien.model.request.ImportReq;
-import com.poliqlo.controllers.admin.nhan_vien.model.response.Response;
 import com.poliqlo.controllers.admin.nhan_vien.service.NhanVienService;
 import com.poliqlo.controllers.admin.nhan_vien.service.TaiKhoanService;
 import com.poliqlo.controllers.common.file.service.BlobStoreService;
 import com.poliqlo.models.NhanVien;
 import com.poliqlo.models.TaiKhoan;
-import com.poliqlo.repositories.NhanVienRepository;
-import com.poliqlo.repositories.TaiKhoanRepository;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 @Controller
 @RequestMapping("admin/nhan-vien")
@@ -79,17 +60,17 @@ public class NhanVienController {
                               @RequestParam("anhUrl") MultipartFile file,
                               RedirectAttributes redirectAttributes) {
 
-        // Kiểm tra email đã tồn tại
-        if (taiKhoanService.existsByEmail(email)) {
-            redirectAttributes.addFlashAttribute("errorEmail", "Email đã tồn tại, vui lòng nhập email khác.");
-            return "redirect:/admin/nhan-vien/add-nhan-vien";
-        }
-
-        // Kiểm tra số điện thoại đã tồn tại
-        if (taiKhoanService.existsBySoDienThoai(soDienThoai)) {
-            redirectAttributes.addFlashAttribute("errorPhone", "Số điện thoại đã tồn tại, vui lòng nhập số khác.");
-            return "redirect:/admin/nhan-vien/add-nhan-vien";
-        }
+//        // Kiểm tra email đã tồn tại
+//        if (taiKhoanService.existsByEmail(email)) {
+//            redirectAttributes.addFlashAttribute("errorEmail", "Email đã tồn tại, vui lòng nhập email khác.");
+//            return "redirect:/admin/nhan-vien/add-nhan-vien";
+//        }
+//
+//        // Kiểm tra số điện thoại đã tồn tại
+//        if (taiKhoanService.existsBySoDienThoai(soDienThoai)) {
+//            redirectAttributes.addFlashAttribute("errorPhone", "Số điện thoại đã tồn tại, vui lòng nhập số khác.");
+//            return "redirect:/admin/nhan-vien/add-nhan-vien";
+//        }
 
         // Tạo tài khoản mới
         TaiKhoan taiKhoan = new TaiKhoan();
@@ -149,9 +130,17 @@ public class NhanVienController {
     }
     // Danh sách nhân viên bị xóa
     @GetMapping("/list-deleted")
-    public String listDeletedNhanVien(Model model) {
-        List<NhanVien> danhSachNhanVienDaXoa = nhanVienService.getAllNhanVienDeleted();
-        model.addAttribute("nhanViens", danhSachNhanVienDaXoa);
+    public String listDeletedNhanVien(Model model,
+                                      @RequestParam(defaultValue = "0") int page,
+                                      @RequestParam(defaultValue = "5") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<NhanVien> pageNhanVien = nhanVienService.getAllNhanVienDeleted(pageable);
+
+        model.addAttribute("nhanViens", pageNhanVien.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", pageNhanVien.getTotalPages());
+        model.addAttribute("totalItems", pageNhanVien.getTotalElements());
+
         return "admin/nhan-vien/list-deleted";
     }
     // Khôi phục nhân viên đã bị xóa

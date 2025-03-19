@@ -6,6 +6,8 @@
 <head>
   <th:block layout:fragment="head_link">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
       .update-container {
         max-width: 900px;
@@ -53,6 +55,11 @@
         background: #28a745;
         color: white;
       }
+      .validation-feedback {
+        font-size: 0.875em;
+        color: #dc3545;
+        display: none;
+      }
     </style>
   </th:block>
 </head>
@@ -89,8 +96,9 @@
             </div>
             <div class="form-group">
               <label>Email</label>
-              <input type="email" class="form-control" th:field="*{taiKhoan.email}" required>
+              <input type="email" class="form-control" th:field="*{taiKhoan.email}" id="email" required>
               <div class="invalid-feedback">Vui lòng nhập email hợp lệ.</div>
+              <div id="emailFeedback" class="validation-feedback">Email này đã được sử dụng . Nhập email khác</div>
             </div>
             <div class="form-group">
               <label>Mật khẩu</label>
@@ -102,6 +110,7 @@
               <label>Số điện thoại</label>
               <input type="text" id="soDienThoai" class="form-control" th:field="*{taiKhoan.soDienThoai}" pattern="^[0-9]{10,11}$" inputmode="numeric" required>
               <div class="invalid-feedback">Vui lòng nhập số điện thoại hợp lệ (10-11 chữ số).</div>
+              <div id="phoneFeedback" class="validation-feedback">Số điện thoại này đã được sử dụng . Nhập số điện thoại khác</div>
             </div>
             <div class="form-group">
               <label>Chức vụ</label>
@@ -130,16 +139,6 @@
   </div>
 </div>
 
-<!-- Modal xác nhận -->
-<div id="confirmModal" class="modal">
-  <div class="modal-content">
-    <h4>Xác nhận cập nhật</h4>
-    <p>Bạn có chắc chắn muốn cập nhật thông tin nhân viên không?</p>
-    <button class="btn btn-success" onclick="submitForm()">Cập nhật</button>
-    <button class="btn btn-secondary" onclick="closeModal()">Hủy</button>
-  </div>
-</div>
-
 <!-- Thông báo cập nhật thành công -->
 <div id="successMessage" class="alert">Cập nhật thành công!</div>
 
@@ -151,13 +150,60 @@
     document.addEventListener("DOMContentLoaded", function () {
       const form = document.getElementById("updateForm");
       const saveButton = document.getElementById("saveChangesBtn");
+      const emailInput = document.getElementById("email");
+      const phoneInput = document.getElementById("soDienThoai");
+      const emailFeedback = document.getElementById("emailFeedback");
+      const phoneFeedback = document.getElementById("phoneFeedback");
+      const taiKhoanId = document.querySelector('input[name="taiKhoan.id"]').value;
+
+      let emailValid = true;
+      let phoneValid = true;
+
+      // Kiểm tra email
+      emailInput.addEventListener("blur", function() {
+        const email = emailInput.value;
+        if (!email) return;
+
+        fetch(`/admin/api/nhan-vien/check-email?email=${email}&excludeId=${taiKhoanId}`)
+                .then(response => response.json())
+                .then(exists => {
+                  emailValid = !exists;
+                  emailFeedback.style.display = exists ? "block" : "none";
+                });
+      });
+
+      // Kiểm tra số điện thoại
+      phoneInput.addEventListener("blur", function() {
+        const phone = phoneInput.value;
+        if (!phone) return;
+
+        fetch(`/admin/api/nhan-vien/check-phone?phone=${phone}&excludeId=${taiKhoanId}`)
+                .then(response => response.json())
+                .then(exists => {
+                  phoneValid = !exists;
+                  phoneFeedback.style.display = exists ? "block" : "none";
+                });
+      });
 
       saveButton.addEventListener("click", function () {
+        // Kiểm tra form validation thông thường
         if (!form.checkValidity()) {
           form.classList.add("was-validated");
           return;
         }
 
+        // Kiểm tra trùng email và SĐT
+        if (!emailValid || !phoneValid) {
+          if (!emailValid) {
+            emailFeedback.style.display = "block";
+          }
+          if (!phoneValid) {
+            phoneFeedback.style.display = "block";
+          }
+          return;
+        }
+
+        // Hiển thị hộp thoại xác nhận
         Swal.fire({
           icon: 'question',
           title: 'Xác nhận cập nhật',
@@ -175,7 +221,7 @@
               title: 'Cập nhật thành công!',
               text: 'Thông tin nhân viên đã được cập nhật.',
               showConfirmButton: false,
-              timer: 3000
+              timer: 5000
             }).then(() => {
               window.location.href = "/admin/nhan-vien/list";
             });

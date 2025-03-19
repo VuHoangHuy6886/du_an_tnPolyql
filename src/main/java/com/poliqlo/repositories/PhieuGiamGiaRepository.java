@@ -49,6 +49,8 @@ public interface PhieuGiamGiaRepository extends JpaRepository<PhieuGiamGia, Inte
 
     @Query(value = "SELECT * FROM khach_hang", nativeQuery = true)
     List<KhachHang> findAllCustomers();
+    @Query("SELECT p FROM PhieuGiamGia p WHERE p.id = :id")
+    Optional<PhieuGiamGia> findby(@Param("id") Long id);
 
     boolean existsByTen(@Size(max = 255) @NotNull String ten);
 
@@ -72,4 +74,26 @@ public interface PhieuGiamGiaRepository extends JpaRepository<PhieuGiamGia, Inte
             "WHERE p.trangThai = 'DANG_DIEN_RA' " +
             "AND pg.id IS NULL")
     Boolean existsCouponsNotApplied();
+    @Query("SELECT pgg FROM PhieuGiamGia pgg " +
+            "LEFT JOIN pgg.khachHangs kh " +
+            "WHERE CURRENT_TIMESTAMP BETWEEN pgg.ngayBatDau AND pgg.ngayKetThuc " +
+            "AND pgg.soLuong > 0 " +
+            "AND  kh IS NULL " +
+            "AND (pgg.hoaDonToiThieu<= :price or pgg.hoaDonToiThieu=null) " +
+            "AND pgg.isDeleted = false "
+    )
+    Page<PhieuGiamGia> findAllActive(Double price,Pageable page);
+
+    @Query("SELECT pgg FROM PhieuGiamGia pgg " +
+            "LEFT JOIN pgg.khachHangs kh " +
+            "WHERE CURRENT_TIMESTAMP BETWEEN pgg.ngayBatDau AND pgg.ngayKetThuc " +
+            "AND pgg.soLuong > 0 " +
+            "AND (kh.id = :khachHangId OR kh IS NULL )" +
+            "AND (pgg.hoaDonToiThieu<= :price or pgg.hoaDonToiThieu=null) " +
+            "AND pgg.isDeleted = false "
+    )
+
+
+    Page<PhieuGiamGia> findAllActive(Integer khachHangId, Double price, Pageable page);
+
 }

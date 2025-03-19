@@ -1,19 +1,15 @@
 package com.poliqlo.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Builder
 @AllArgsConstructor
@@ -71,5 +67,11 @@ public class PhieuGiamGia {
     @ColumnDefault("b'0'")
     @Column(name = "IS_DELETED", nullable = false)
     private Boolean isDeleted = false;
+
+    @ManyToMany
+    @JoinTable(name = "phieu_giam_gia_khach_hang",
+            joinColumns = @JoinColumn(name = "PHIEU_GIAM_GIA_ID"),
+            inverseJoinColumns = @JoinColumn(name = "KHACH_HANG_ID"))
+    private List<KhachHang> khachHangs = new ArrayList<>();
 
 }
