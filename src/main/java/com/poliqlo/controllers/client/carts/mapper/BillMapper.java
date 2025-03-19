@@ -2,6 +2,7 @@ package com.poliqlo.controllers.client.carts.mapper;
 
 import com.poliqlo.controllers.client.carts.dto.BillRequestDTO;
 import com.poliqlo.models.*;
+import com.poliqlo.repositories.HoaDonRepository;
 import com.poliqlo.utils.BillStatus;
 
 import java.math.BigDecimal;
@@ -22,8 +23,8 @@ public class BillMapper {
         hoaDon.setTongTien(BigDecimal.valueOf(Long.parseLong(billRequestDTO.getTotalPrice())));
         hoaDon.setPhuongThucThanhToan(billRequestDTO.getPaymentMethod());
         hoaDon.setGhiChu(billRequestDTO.getNote());
-        hoaDon.setTrangThai(BillStatus.CHO_XAC_NHAN);
-        hoaDon.setLoaiHoaDon(BillStatus.ONLINE);
+        hoaDon.setTrangThai(HoaDonRepository.CHO_XAC_NHAN);
+        hoaDon.setLoaiHoaDon("ONLINE");
         hoaDon.setIsDeleted(false);
         return hoaDon;
 
