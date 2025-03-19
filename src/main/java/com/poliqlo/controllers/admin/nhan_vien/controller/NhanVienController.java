@@ -1,41 +1,22 @@
 package com.poliqlo.controllers.admin.nhan_vien.controller;
 
 
-
-import com.azure.core.annotation.Get;
-import com.poliqlo.controllers.admin.nhan_vien.model.request.AddRequest;
-import com.poliqlo.controllers.admin.nhan_vien.model.request.EditReq;
-import com.poliqlo.controllers.admin.nhan_vien.model.request.ImportReq;
-import com.poliqlo.controllers.admin.nhan_vien.model.response.Response;
 import com.poliqlo.controllers.admin.nhan_vien.service.NhanVienService;
 import com.poliqlo.controllers.admin.nhan_vien.service.TaiKhoanService;
 import com.poliqlo.controllers.common.file.service.BlobStoreService;
 import com.poliqlo.models.NhanVien;
 import com.poliqlo.models.TaiKhoan;
-import com.poliqlo.repositories.NhanVienRepository;
-import com.poliqlo.repositories.TaiKhoanRepository;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 @Controller
 @RequestMapping("admin/nhan-vien")
