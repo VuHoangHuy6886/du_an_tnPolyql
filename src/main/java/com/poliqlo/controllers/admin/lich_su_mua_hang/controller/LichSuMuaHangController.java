@@ -5,6 +5,9 @@ import com.poliqlo.models.HoaDon;
 import com.poliqlo.models.HoaDonChiTiet;
 import com.poliqlo.models.LichSuHoaDon;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,32 +22,52 @@ import java.util.Optional;
 @RequestMapping("/lichsumuahang")
 public class LichSuMuaHangController {
     private final HoaDonService hoaDonService;
+    private static final int PAGE_SIZE = 2; // Số đơn hàng trên 1 trang
 
     @Autowired
     public LichSuMuaHangController(HoaDonService hoaDonService) {
         this.hoaDonService = hoaDonService;
     }
-
+    // Hiển thị các đơn hàng
     @GetMapping
-    public String showOrderHistory(Model model) {
-        // Tạm thời hiển thị tất cả đơn hàng, sau này có thể lọc theo khách hàng đăng nhập
-        List<HoaDon> hoaDons = hoaDonService.getAllActiveOrders();
-        model.addAttribute("hoaDons", hoaDons);
+    public String showOrderHistory(@RequestParam(value = "page", defaultValue = "0") int page, Model model) {
+
+        Pageable pageable = PageRequest.of(page, PAGE_SIZE);
+        Page<HoaDon> hoaDonPage = hoaDonService.getAllActiveOrdersPaged(pageable);
+
+        addPaginationAttributes(model, hoaDonPage);
+
         return "client/lich-su-mua-hang/index";
     }
-
+     // Lọc theo ID khách hàng
     @GetMapping("/khachhang/{khachHangId}")
-    public String showOrderHistoryByCustomer(@PathVariable Integer khachHangId, Model model) {
-        List<HoaDon> hoaDons = hoaDonService.getOrdersByCustomerId(khachHangId);
-        model.addAttribute("hoaDons", hoaDons);
+    public String showOrderHistoryByCustomer(
+            @PathVariable Integer khachHangId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            Model model) {
+
+        Pageable pageable = PageRequest.of(page, PAGE_SIZE);
+        Page<HoaDon> hoaDonPage = hoaDonService.getOrdersByCustomerIdPaged(khachHangId, pageable);
+
+        addPaginationAttributes(model, hoaDonPage);
+        model.addAttribute("khachHangId", khachHangId);
+
         return "client/lich-su-mua-hang/index";
     }
 
+    // Lọc đơn hàng theo trạng thái
     @GetMapping("/trangthai/{trangThai}")
-    public String showOrderHistoryByStatus(@PathVariable String trangThai, Model model) {
-        List<HoaDon> hoaDons = hoaDonService.getOrdersByStatus(trangThai);
-        model.addAttribute("hoaDons", hoaDons);
+    public String showOrderHistoryByStatus(
+            @PathVariable String trangThai,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            Model model) {
+
+        Pageable pageable = PageRequest.of(page, PAGE_SIZE);
+        Page<HoaDon> hoaDonPage = hoaDonService.getOrdersByStatusPaged(trangThai, pageable);
+
+        addPaginationAttributes(model, hoaDonPage);
         model.addAttribute("trangThai", trangThai);
+
         return "client/lich-su-mua-hang/index";
     }
 
@@ -85,6 +108,15 @@ public class LichSuMuaHangController {
         model.addAttribute("lichSu", lichSu);
 
         return "client/lich-su-mua-hang/modal-content";
+    }
+
+    // Phương thức hỗ trợ để thêm thuộc tính phân trang vào model
+    private void addPaginationAttributes(Model model, Page<HoaDon> hoaDonPage) {
+        model.addAttribute("hoaDons", hoaDonPage.getContent());
+        model.addAttribute("currentPage", hoaDonPage.getNumber());
+        model.addAttribute("totalPages", hoaDonPage.getTotalPages());
+        model.addAttribute("totalItems", hoaDonPage.getTotalElements());
+        model.addAttribute("pageSize", PAGE_SIZE);
     }
 
 //    @PostMapping("/huy/{hoaDonId}")

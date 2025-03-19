@@ -322,6 +322,8 @@
             item.addEventListener("click", function (event) {
                 event.preventDefault();
                 const deleteUrl = this.getAttribute("data-url");
+                const row = this.closest('tr');
+
                 Swal.fire({
                     title: "Bạn có chắc chắn muốn xóa?",
                     text: "Hành động này không thể hoàn tác!",
@@ -333,10 +335,83 @@
                     cancelButtonText: "Hủy"
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.location.href = deleteUrl;
+                        // Gửi yêu cầu AJAX để xóa khách hàng
+                        fetch(deleteUrl, {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                        })
+                            .then(response => {
+                                if (response.ok) {
+                                    // Hiển thị thông báo thành công
+                                    Swal.fire({
+                                        title: "Đã xóa!",
+                                        text: "Khách hàng đã được xóa thành công.",
+                                        icon: "success",
+                                        timer: 2000,
+                                        showConfirmButton: false
+                                    }).then(() => {
+                                        // Xóa trực tiếp hàng trong bảng hoặc làm mới trang
+                                        row.remove(); // Xóa trực tiếp hàng trong DOM
+                                        // Hoặc làm mới trang
+                                        // window.location.reload();
+                                    });
+                                } else {
+                                    // Hiển thị thông báo lỗi
+                                    Swal.fire({
+                                        title: "Lỗi!",
+                                        text: "Đã xảy ra lỗi khi xóa khách hàng.",
+                                        icon: "error"
+                                    });
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                Swal.fire({
+                                    title: "Lỗi!",
+                                    text: "Đã xảy ra lỗi trong quá trình xử lý.",
+                                    icon: "error"
+                                });
+                            });
                     }
                 });
             });
+        });
+
+        // Thêm đoạn mã để hiển thị thông báo thành công từ controller (nếu có)
+        document.addEventListener("DOMContentLoaded", function () {
+            // Kiểm tra nếu có tham số success trong URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const successMsg = urlParams.get('success');
+
+            if (successMsg) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công!',
+                    text: decodeURIComponent(successMsg),
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            }
+
+            // Đoạn mã hiện có để hiển thị thông báo từ successMessage vẫn giữ nguyên
+            const successMessage = document.getElementById("successMessage");
+            if (successMessage) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công!',
+                    text: successMessage.textContent,
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            }
+        });
+
+        // Thêm xử lý cho nút làm mới
+        document.getElementById('btn-reload').addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.reload();
         });
     </script>
     <!-- Script khởi tạo DataTable -->

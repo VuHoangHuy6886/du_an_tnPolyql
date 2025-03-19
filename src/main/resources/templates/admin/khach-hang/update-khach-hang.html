@@ -6,6 +6,8 @@
 <head>
     <th:block layout:fragment="head_link">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <style>
             .update-container {
                 max-width: 900px;
@@ -262,87 +264,181 @@
 </body>
 <th:block layout:fragment="bottom_link">
     <script>
-        const fileInput = document.getElementById("anhUrl");
-        const imagePreview = document.getElementById("imagePreview");
-        fileInput.addEventListener("change", function () {
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-            reader.onloadend = function () {
-                imagePreview.innerHTML = `<img src="${reader.result}" alt="Ảnh preview" class="img-thumbnail" style="max-width: 100px; max-height: 100px;">`;
-            };
-            if (file) {
-                reader.readAsDataURL(file);
-            }
-        });
+        // Thêm thư viện SweetAlert2
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("updateCustomerForm");
+            const saveBtn = document.getElementById("saveBtn");
+            const emailInput = document.getElementById("email");
+            const phoneInput = document.getElementById("soDienThoai");
+            const accountId = document.querySelector("input[name='taiKhoan.id']").value;
 
-        // Modal confirmation for updating
-        const updateForm = document.getElementById("updateCustomerForm");
-        const saveBtn = document.getElementById("saveBtn");
-        const updateConfirmModal = document.getElementById("updateConfirmModal");
-        const confirmUpdateBtn = document.getElementById("confirmUpdate");
-        const cancelUpdateBtn = document.getElementById("cancelUpdate");
+            let emailValid = true;
+            let phoneValid = true;
 
-        saveBtn.addEventListener("click", function() {
-            // First validate the form
-            let isValid = true;
+            // Hiển thị ảnh xem trước khi chọn file
+            const fileInput = document.getElementById("anhUrl");
+            const imagePreview = document.getElementById("imagePreview");
 
-            // Kiểm tra ngày sinh không lớn hơn ngày hiện tại
-            const ngaySinhInput = document.getElementById("ngaySinh");
-            if (ngaySinhInput && ngaySinhInput.value) {
-                const ngaySinh = new Date(ngaySinhInput.value);
-                const today = new Date();
-                if (ngaySinh > today) {
-                    ngaySinhInput.setCustomValidity("Ngày sinh không được lớn hơn ngày hiện tại.");
-                    isValid = false;
-                } else {
-                    ngaySinhInput.setCustomValidity("");
+            fileInput.addEventListener("change", function () {
+                const file = fileInput.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = function () {
+                        imagePreview.innerHTML = `<img src="${reader.result}" alt="Ảnh preview" class="img-thumbnail" style="max-width: 100px; max-height: 100px;">`;
+                    };
+                    reader.readAsDataURL(file);
                 }
-            }
-
-            // Validate all form fields
-            if (!updateForm.checkValidity()) {
-                updateForm.classList.add("was-validated");
-                isValid = false;
-            }
-
-            // If valid, show confirmation modal
-            if (isValid) {
-                updateConfirmModal.style.display = "block";
-            }
-        });
-
-        // Confirm update
-        confirmUpdateBtn.addEventListener("click", function() {
-            updateForm.submit();
-        });
-
-        // Cancel update
-        cancelUpdateBtn.addEventListener("click", function() {
-            updateConfirmModal.style.display = "none";
-        });
-
-        // Close modal when clicking outside
-        window.addEventListener("click", function(event) {
-            if (event.target === updateConfirmModal) {
-                updateConfirmModal.style.display = "none";
-            }
-        });
-
-        (function () {
-            "use strict";
-            const forms = document.querySelectorAll(".needs-validation");
-
-            Array.prototype.slice.call(forms).forEach(function (form) {
-                form.addEventListener("submit", function (event) {
-                    if (!form.checkValidity()) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
-
-                    form.classList.add("was-validated");
-                }, false);
             });
-        })();
+
+            // Kiểm tra email trùng lặp
+            emailInput.addEventListener("blur", function() {
+                const email = emailInput.value;
+                if (!email || !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) return;
+
+                fetch(`/admin/api/khach-hang/check-email?email=${encodeURIComponent(email)}&excludeId=${accountId}`)
+                    .then(response => response.json())
+                    .then(exists => {
+                        emailValid = !exists;
+
+                        if (exists) {
+                            emailInput.setCustomValidity("Email này đã được sử dụng");
+                            // Hiển thị thông báo lỗi
+                            let feedbackElement = emailInput.nextElementSibling;
+                            if (!feedbackElement || !feedbackElement.classList.contains("invalid-feedback")) {
+                                feedbackElement = document.createElement("div");
+                                feedbackElement.className = "invalid-feedback";
+                                emailInput.parentNode.appendChild(feedbackElement);
+                            }
+                            feedbackElement.textContent = "Email này đã được sử dụng";
+                            emailInput.classList.add("is-invalid");
+                        } else {
+                            emailInput.setCustomValidity("");
+                            emailInput.classList.remove("is-invalid");
+                            emailInput.classList.add("is-valid");
+                        }
+                    });
+            });
+
+            // Kiểm tra số điện thoại trùng lặp
+            phoneInput.addEventListener("blur", function() {
+                const phone = phoneInput.value;
+                if (!phone || !phone.match(/^[0-9]{10,11}$/)) return;
+
+                fetch(`/admin/api/khach-hang/check-phone?phone=${encodeURIComponent(phone)}&excludeId=${accountId}`)
+                    .then(response => response.json())
+                    .then(exists => {
+                        phoneValid = !exists;
+
+                        if (exists) {
+                            phoneInput.setCustomValidity("Số điện thoại này đã được sử dụng");
+                            // Hiển thị thông báo lỗi
+                            let feedbackElement = phoneInput.nextElementSibling;
+                            if (!feedbackElement || !feedbackElement.classList.contains("invalid-feedback")) {
+                                feedbackElement = document.createElement("div");
+                                feedbackElement.className = "invalid-feedback";
+                                phoneInput.parentNode.appendChild(feedbackElement);
+                            }
+                            feedbackElement.textContent = "Số điện thoại này đã được sử dụng";
+                            phoneInput.classList.add("is-invalid");
+                        } else {
+                            phoneInput.setCustomValidity("");
+                            phoneInput.classList.remove("is-invalid");
+                            phoneInput.classList.add("is-valid");
+                        }
+                    });
+            });
+
+            // Nút cập nhật
+            saveBtn.addEventListener("click", function() {
+                // Kiểm tra form hợp lệ
+                let isValid = true;
+
+                // Kiểm tra ngày sinh không lớn hơn ngày hiện tại
+                const ngaySinhInput = document.getElementById("ngaySinh");
+                if (ngaySinhInput && ngaySinhInput.value) {
+                    const ngaySinh = new Date(ngaySinhInput.value);
+                    const today = new Date();
+                    if (ngaySinh > today) {
+                        ngaySinhInput.setCustomValidity("Ngày sinh không được lớn hơn ngày hiện tại.");
+                        isValid = false;
+                    } else {
+                        ngaySinhInput.setCustomValidity("");
+                    }
+                }
+
+                // Validate all form fields
+                if (!form.checkValidity()) {
+                    form.classList.add("was-validated");
+                    isValid = false;
+                }
+
+                // Kiểm tra trùng email và SĐT
+                if (!emailValid || !phoneValid) {
+                    if (!emailValid) {
+                        emailInput.classList.add("is-invalid");
+                    }
+                    if (!phoneValid) {
+                        phoneInput.classList.add("is-invalid");
+                    }
+                    return;
+                }
+
+                // Nếu hợp lệ, hiển thị SweetAlert xác nhận
+                if (isValid) {
+                    Swal.fire({
+                        icon: 'question',
+                        title: 'Xác nhận cập nhật',
+                        text: 'Bạn có chắc chắn muốn cập nhật thông tin khách hàng không?',
+                        showCancelButton: true,
+                        confirmButtonText: 'Xác nhận',
+                        cancelButtonText: 'Hủy',
+                        confirmButtonColor: '#6c5ce7',
+                        cancelButtonColor: '#636e72'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Sử dụng FormData và fetch để gửi form
+                            const formData = new FormData(form);
+
+                            fetch(form.action, {
+                                method: "POST",
+                                body: formData
+                            })
+                                .then(response => {
+                                    if (response.ok) {
+                                        // Hiển thị thông báo thành công
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Cập nhật thành công!',
+                                            text: 'Thông tin khách hàng đã được cập nhật.',
+                                            showConfirmButton: false,
+                                            timer: 1500
+                                        }).then(() => {
+                                            window.location.href = "/admin/khach-hang/list-khach-hang";
+                                        });
+                                    } else {
+                                        // Xử lý lỗi
+                                        response.text().then(text => {
+                                            Swal.fire({
+                                                icon: 'error',
+                                                title: 'Cập nhật thất bại',
+                                                text: 'Có lỗi xảy ra: ' + text
+                                            });
+                                        });
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error("Error:", error);
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Cập nhật thất bại',
+                                        text: 'Có lỗi xảy ra khi gửi dữ liệu.'
+                                    });
+                                });
+                        }
+                    });
+                }
+            });
+        });
     </script>
 </th:block>
 </html>

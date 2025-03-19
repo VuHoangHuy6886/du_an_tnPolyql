@@ -93,6 +93,54 @@
                 border-color: #e9ecef #e9ecef #dee2e6;
                 color: #495057;
             }
+            /* Thêm CSS cho phân trang */
+            .pagination {
+                display: flex;
+                justify-content: center;
+                margin-top: 20px;
+            }
+
+            .pagination li {
+                list-style-type: none;
+                margin: 0 5px;
+            }
+
+            .pagination li a {
+                color: #333;
+                text-decoration: none;
+                padding: 8px 12px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                transition: background-color 0.3s;
+            }
+
+            .pagination li.active a {
+                background-color: #007bff;
+                color: white;
+                border-color: #007bff;
+            }
+
+            .pagination li a:hover:not(.active) {
+                background-color: #f5f5f5;
+            }
+
+            .pagination li.disabled a {
+                color: #ccc;
+                cursor: not-allowed;
+            }
+            /* Làm đậm hơn tab đang được chọn */
+            .nav-tabs .nav-link.active {
+                font-weight: bold;
+                color: #0d6efd; /* Màu xanh chính của Bootstrap */
+                border-bottom: 2px solid #0d6efd; /* Thêm đường gạch chân đậm hơn */
+            }
+
+            /* Tuỳ chọn: Thêm hiệu ứng hover cho tab */
+            .nav-tabs .nav-link:hover:not(.active) {
+                border-bottom: 1px solid #0d6efd;
+                color: #0d6efd;
+                opacity: 0.8;
+            }
         </style>
 
     </th:block>
@@ -270,14 +318,14 @@
                             <span class="text-muted" th:text="${#temporals.format(hoaDon.ngayNhanHang, 'dd/MM/yyyy')}"></span>
                         </div>
                         <div>
-         <span class="status-badge"  th:classappend="${
-                  hoaDon.trangThai == 'Chờ xác nhận' ? 'status-waiting' : (
-                  hoaDon.trangThai == 'Chờ đóng gói' || hoaDon.trangThai == 'Chờ giao hàng' ? 'status-confirmed' : (
-                  hoaDon.trangThai == 'Đang giao hàng' ? 'status-delivering' : (
-                  hoaDon.trangThai == 'Đã nhận hàng' || hoaDon.trangThai == 'Hoàn tất' ? 'status-completed' :
-                  'status-cancelled')))}"
-            th:text="${hoaDon.trangThai}">
-         </span>
+                         <span class="status-badge"  th:classappend="${
+                                  hoaDon.trangThai == 'Chờ xác nhận' ? 'status-waiting' : (
+                                  hoaDon.trangThai == 'Chờ đóng gói' || hoaDon.trangThai == 'Chờ giao hàng' ? 'status-confirmed' : (
+                                  hoaDon.trangThai == 'Đang giao hàng' ? 'status-delivering' : (
+                                  hoaDon.trangThai == 'Đã nhận hàng' || hoaDon.trangThai == 'Hoàn tất' ? 'status-completed' :
+                                  'status-cancelled')))}"
+                               th:text="${hoaDon.trangThai}">
+                         </span>
                         </div>
                     </div>
                     <div class="order-body p-3">
@@ -296,6 +344,44 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Phân trang -->
+        <div th:if="${totalPages > 1}" class="d-flex justify-content-center mt-4">
+            <nav aria-label="Phân trang">
+                <ul class="pagination">
+                    <!-- Nút Previous -->
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" th:if="${trangThai == null && khachHangId == null}"
+                           th:href="@{/lichsumuahang(page=${currentPage - 1})}">&laquo;</a>
+                        <a class="page-link" th:if="${trangThai != null}"
+                           th:href="@{'/lichsumuahang/trangthai/' + ${trangThai}(page=${currentPage - 1})}">&laquo;</a>
+                        <a class="page-link" th:if="${khachHangId != null}"
+                           th:href="@{'/lichsumuahang/khachhang/' + ${khachHangId}(page=${currentPage - 1})}">&laquo;</a>
+                    </li>
+
+                    <!-- Các nút số trang -->
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                        th:classappend="${currentPage == i} ? 'active'">
+                        <a class="page-link" th:if="${trangThai == null && khachHangId == null}"
+                           th:href="@{/lichsumuahang(page=${i})}" th:text="${i + 1}"></a>
+                        <a class="page-link" th:if="${trangThai != null}"
+                           th:href="@{'/lichsumuahang/trangthai/' + ${trangThai}(page=${i})}" th:text="${i + 1}"></a>
+                        <a class="page-link" th:if="${khachHangId != null}"
+                           th:href="@{'/lichsumuahang/khachhang/' + ${khachHangId}(page=${i})}" th:text="${i + 1}"></a>
+                    </li>
+
+                    <!-- Nút Next -->
+                    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                        <a class="page-link" th:if="${trangThai == null && khachHangId == null}"
+                           th:href="@{/lichsumuahang(page=${currentPage + 1})}">&raquo;</a>
+                        <a class="page-link" th:if="${trangThai != null}"
+                           th:href="@{'/lichsumuahang/trangthai/' + ${trangThai}(page=${currentPage + 1})}">&raquo;</a>
+                        <a class="page-link" th:if="${khachHangId != null}"
+                           th:href="@{'/lichsumuahang/khachhang/' + ${khachHangId}(page=${currentPage + 1})}">&raquo;</a>
+                    </li>
+                </ul>
+            </nav>
         </div>
     </div>
     <!-- Modal Chi tiết đơn hàng -->
@@ -414,6 +500,11 @@
             $('#modalContent').load('/lichsumuahang/modal/' + orderId, function() {
                 $('#orderDetailsModal').modal('show');
             });
+        });
+        $('.pagination .page-link').on('click', function() {
+            if ($(this).parent().hasClass('disabled')) {
+                return false;
+            }
         });
     });
 

@@ -36,6 +36,14 @@
         color: red;
         font-weight: bold;
       }
+
+      /* Style cho thông báo lỗi validation */
+      .validation-feedback {
+        font-size: 0.875em;
+        color: #dc3545;
+        display: none;
+        margin-top: 0.25rem;
+      }
     </style>
   </th:block>
 </head>
@@ -49,7 +57,7 @@
       <div class="card-body">
         <h3 class="fw-bold fs-4 mb-3">Thêm nhân viên mới</h3>
 
-        <form class="needs-validation" novalidate action="/admin/nhan-vien/add-nhan-vien" method="post" enctype="multipart/form-data">
+        <form id="addForm" class="needs-validation" novalidate action="/admin/nhan-vien/add-nhan-vien" method="post" enctype="multipart/form-data">
           <div class="row">
             <div class="col-md-6">
               <!-- Ảnh -->
@@ -57,6 +65,7 @@
                 <label for="anhUrl" class="form-label required-field">Ảnh</label>
                 <input type="file" id="anhUrl" name="anhUrl" class="form-control" accept="image/jpeg, image/png" required>
                 <div class="invalid-feedback">Vui lòng chọn một ảnh (JPG, PNG).</div>
+                <div id="imagePreview" class="mt-2"></div>
               </div>
 
               <!-- Mã nhân viên (readonly) -->
@@ -77,7 +86,7 @@
                 <label for="email" class="form-label required-field">Email</label>
                 <input type="email" id="email" name="email" class="form-control" required>
                 <div class="invalid-feedback">Vui lòng nhập email hợp lệ.</div>
-                <span style="color: red;">[[${errorEmail}]]</span>
+                <div id="emailFeedback" class="validation-feedback">Email này đã được sử dụng, vui lòng chọn email khác.</div>
               </div>
             </div>
             <div class="col-md-6">
@@ -86,7 +95,7 @@
                 <label for="soDienThoai" class="form-label required-field">Số điện thoại</label>
                 <input type="text" id="soDienThoai" name="soDienThoai" class="form-control" pattern="^0\d{9}$" required>
                 <div class="invalid-feedback">Số điện thoại phải bắt đầu bằng 0 và có đúng 10 số.</div>
-                <span style="color: red;">[[${errorPhone}]]</span>
+                <div id="phoneFeedback" class="validation-feedback">Số điện thoại này đã được sử dụng, vui lòng chọn số điện thoại khác.</div>
               </div>
               <!-- Mật khẩu -->
               <div class="mb-3">
@@ -113,7 +122,7 @@
             <small class="text-muted"><span class="text-danger">*</span> Trường bắt buộc phải nhập</small>
           </div>
 
-          <button type="submit" class="btn btn-success">Lưu</button>
+          <button type="button" id="submitBtn" class="btn btn-success">Lưu</button>
           <a href="/admin/nhan-vien/list" class="btn btn-secondary">Hủy</a>
         </form>
       </div>
@@ -124,15 +133,87 @@
 </body>
 
 <th:block layout:fragment="bottom_link">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
-    // Thêm div để preview ảnh nếu chưa có
-    if (!document.getElementById("imagePreview")) {
-      const previewDiv = document.createElement("div");
-      previewDiv.id = "imagePreview";
-      previewDiv.style.marginTop = "10px";
-      document.getElementById("anhUrl").parentNode.appendChild(previewDiv);
-    }
+    document.addEventListener("DOMContentLoaded", function() {
+      const form = document.getElementById("addForm");
+      const emailInput = document.getElementById("email");
+      const phoneInput = document.getElementById("soDienThoai");
+      const submitBtn = document.getElementById("submitBtn");
+      const emailFeedback = document.getElementById("emailFeedback");
+      const phoneFeedback = document.getElementById("phoneFeedback");
 
+      let emailValid = true;
+      let phoneValid = true;
+
+      // Kiểm tra email
+      emailInput.addEventListener("blur", function() {
+        const emailValue = emailInput.value.trim();
+        if (!emailValue) return;
+
+        fetch(`/admin/api/nhan-vien/check-email?email=${encodeURIComponent(emailValue)}`)
+                .then(response => response.json())
+                .then(exists => {
+                  emailValid = !exists;
+                  emailFeedback.style.display = exists ? "block" : "none";
+                })
+                .catch(error => {
+                  console.error('Error checking email:', error);
+                });
+      });
+
+      // Kiểm tra số điện thoại
+      phoneInput.addEventListener("blur", function() {
+        const phoneValue = phoneInput.value.trim();
+        if (!phoneValue) return;
+
+        fetch(`/admin/api/nhan-vien/check-phone?phone=${encodeURIComponent(phoneValue)}`)
+                .then(response => response.json())
+                .then(exists => {
+                  phoneValid = !exists;
+                  phoneFeedback.style.display = exists ? "block" : "none";
+                })
+                .catch(error => {
+                  console.error('Error checking phone:', error);
+                });
+      });
+
+      // Xử lý submit form
+      submitBtn.addEventListener("click", function(event) {
+        // Kiểm tra form validation
+        if (!form.checkValidity()) {
+          form.classList.add("was-validated");
+          return;
+        }
+
+        // Kiểm tra email và SĐT đã tồn tại
+        if (!emailValid || !phoneValid) {
+          if (!emailValid) {
+            emailFeedback.style.display = "block";
+          }
+          if (!phoneValid) {
+            phoneFeedback.style.display = "block";
+          }
+          return;
+        }
+
+        // Hiển thị hộp thoại xác nhận
+        Swal.fire({
+          title: "Xác nhận thêm nhân viên?",
+          text: "Bạn có chắc chắn muốn thêm nhân viên này?",
+          icon: "question",
+          showCancelButton: true,
+          confirmButtonText: "Xác nhận",
+          cancelButtonText: "Hủy",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            form.submit();
+          }
+        });
+      });
+    });
+
+    // Preview ảnh
     const fileInput = document.getElementById("anhUrl");
     const imagePreview = document.getElementById("imagePreview");
 
@@ -150,44 +231,18 @@
         imagePreview.innerHTML = '';
       }
     });
-    document.addEventListener("DOMContentLoaded", function () {
-      const form = document.querySelector("form.needs-validation");
-      const submitButton = document.querySelector("button[type='submit']");
 
-      submitButton.addEventListener("click", function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        if (form.checkValidity()) {
-          Swal.fire({
-            title: "Xác nhận thêm nhân viên?",
-            text: "Bạn có chắc chắn muốn thêm nhân viên này?",
-            icon: "question",
-            showCancelButton: true,
-            confirmButtonText: "Xác nhận",
-            cancelButtonText: "Hủy",
-          }).then((result) => {
-            if (result.isConfirmed) {
-              form.submit();
-            }
-          });
-        } else {
-          form.classList.add("was-validated");
-        }
+    // Kiểm tra thông báo thành công
+    const successMessage = document.getElementById("successMessage");
+    if (successMessage && successMessage.textContent.trim() !== "") {
+      Swal.fire({
+        icon: 'success',
+        title: 'Thành công!',
+        text: successMessage.textContent,
+        timer: 3000,
+        showConfirmButton: false
       });
-
-      // Kiểm tra nếu có thông báo thành công
-      const successMessage = document.getElementById("successMessage");
-      if (successMessage) {
-        Swal.fire({
-          icon: 'success',
-          title: 'Thành công!',
-          text: successMessage.textContent,
-          timer: 3000,
-          showConfirmButton: false
-        });
-      }
-    });
+    }
   </script>
 </th:block>
 </html>

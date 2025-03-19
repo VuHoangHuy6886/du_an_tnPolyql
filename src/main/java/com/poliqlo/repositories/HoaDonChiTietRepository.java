@@ -1,5 +1,6 @@
 package com.poliqlo.repositories;
 
+import com.poliqlo.models.HoaDon;
 import com.poliqlo.models.HoaDonChiTiet;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -18,4 +19,9 @@ public interface HoaDonChiTietRepository extends JpaRepository<HoaDonChiTiet, In
           "JOIN FETCH spct.kichThuoc kt JOIN FETCH spct.mauSac ms " +
           "WHERE hdct.hoaDon.id = :hoaDonId AND hdct.isDeleted = false")
   List<HoaDonChiTiet> findAllDetailsByHoaDonId(@Param("hoaDonId") Integer hoaDonId);
-  }
+
+//  List<HoaDonChiTiet> findByHoaDonAndIsDeletedFalse(HoaDon hoaDon);
+
+  @Query("SELECT hdct FROM HoaDonChiTiet hdct WHERE hdct.hoaDon.id = :hoaDonId AND hdct.isDeleted = false")
+  List<HoaDonChiTiet> findByHoaDonIdAndIsDeletedFalse(@Param("hoaDonId") Integer hoaDonId);
+}
