@@ -9,14 +9,17 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class AddressService {    // get dia chi
     private final DiaChiRepository diaChiRepository;
+
     public AddressResponseDTO findDiaChiByIdCustomer(Integer id) {
         DiaChi diaChi = diaChiRepository.findAddressDefault(id);
         return AddressMapper.diaChiToAddress(diaChi);
     }
+
     public AddressResponseDTO findDiaChiById(Integer id) {
         DiaChi diaChi = diaChiRepository.findDiaChiById(id);
         return AddressMapper.diaChiToAddress(diaChi);
@@ -30,5 +33,10 @@ public class AddressService {    // get dia chi
             addressResponseDTOList.add(addressDTO);
         }
         return addressResponseDTOList;
+    }
+
+    public List<DiaChi> getAllDiaChiByCustomerId(Integer id) {
+        List<DiaChi> list = diaChiRepository.timKiemDiaChiTheoIdKhachHang(id);
+        return list;
     }
 }

@@ -108,6 +108,9 @@ function validateForm() {
         alert("Ngày Kết Thúc phải sau Ngày Bắt Đầu.");
         return false;
     }
-
+    if (new Date(ngayKetThuc) <= new Date()) {
+        alert("Ngày Kết Thúc phải sau thời gian hiện tại.");
+        return false;
+    }
     return true;
 }

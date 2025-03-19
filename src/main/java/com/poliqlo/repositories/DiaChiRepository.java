@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface DiaChiRepository extends JpaRepository<DiaChi, Integer>, JpaSpecificationExecutor<DiaChi> {
 
-    @Query("select d from DiaChi d where d.khachHang.id = :id")
+    @Query("select d from DiaChi d where d.khachHang.id = :id and d.isDeleted = false")
     List<DiaChi> timKiemDiaChiTheoIdKhachHang(@Param("id") Integer id);
 
     @Query("select d from DiaChi d where d.khachHang.id = :id and d.isDefault = true ")

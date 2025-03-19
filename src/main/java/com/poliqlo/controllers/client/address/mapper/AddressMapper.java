@@ -1,6 +1,7 @@
 package com.poliqlo.controllers.client.address.mapper;
 
 import com.poliqlo.controllers.client.address.dto.AddressRequestDTO;
+import com.poliqlo.controllers.client.address.dto.UpdateAddressRequestDTO;
 import com.poliqlo.controllers.client.address.dto.AddressResponseDTO;
 import com.poliqlo.models.DiaChi;
 import com.poliqlo.models.KhachHang;
@@ -31,7 +32,21 @@ public class AddressMapper {
                 .isDeleted(false)
                 .isDefault(false)
                 .build();
-
+        return diaChi;
+    }
+    public static DiaChi requestUpdateToDiaChi(UpdateAddressRequestDTO requestDTO, KhachHang khachHang) {
+        DiaChi diaChi = DiaChi.builder()
+                .id(requestDTO.getId())
+                .provinceId(Integer.parseInt(requestDTO.getProvinceID()))
+                .districtId(Integer.parseInt(requestDTO.getDistrictID()))
+                .wardCode(requestDTO.getWardID())
+                .address(requestDTO.getAddressStr())
+                .khachHang(khachHang)
+                .hoTenNguoiNhan(requestDTO.getTenNguoiNhan())
+                .soDienThoai(requestDTO.getPhone())
+                .isDeleted(false)
+                .isDefault(false)
+                .build();
         return diaChi;
     }
 }
