@@ -72,9 +72,11 @@ document.addEventListener("DOMContentLoaded", function () {
         // hiển thị tre giao diện
         let convertToMoney = totalPrice.toLocaleString('vi-VN', {style: 'currency', currency: 'VND'});
         totalPrices.innerText = convertToMoney;
+        console.log("list cart have click : ",listCartId)
+
         tongTien = totalPrice;
         // sử lý button thanh toan
-        if (totalPrice !== 0) {
+        if (listCartId.length > 0) {
             document.getElementById("btnThanToan").style.display = "block"
         } else {
             document.getElementById("btnThanToan").style.display = "none"
@@ -148,12 +150,12 @@ function handlerVoucher() {
         });
     });
 
-// Xử lý khi bấm nút OK
+    // Xử lý khi bấm nút OK
     document.getElementById("confirmVoucher").addEventListener("click", function () {
         if (selectedVoucherId) {
             console.log(`Voucher đã chọn: ID = ${selectedVoucherId}, Giá trị giảm = ${selectedDiscountValue} VND`);
             document.getElementById("voucherId").value = selectedVoucherId
-// Tính lại tiền
+            // Tính lại tiền
             let tongTienNew = tongTien - parseFloat(selectedDiscountValue);
             document.getElementById("soTienGiam").style.display = 'block';
             document.getElementById("soTienGiam").innerText = 'Số tiền giảm: ' +
@@ -175,7 +177,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let success = document.getElementById("successRP")?.innerText;
 
     if (message && success) {
-        console.log("message : ",message)
+        console.log("message : ", message)
         Swal.fire({
             position: "top-end",
             icon: success.trim() === "true" ? "success" : "error",

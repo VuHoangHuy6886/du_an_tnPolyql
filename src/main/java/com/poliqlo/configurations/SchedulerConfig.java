@@ -13,9 +13,9 @@ import java.util.List;
 public class SchedulerConfig {
     private final DotGiamGiaService service;
 
-//    @Scheduled(fixedDelay = 10000) // Chạy mỗi 10    giây
-//    public void fixedRateTask() {
-//        List<DotGiamGia> dotGiamGiaList = service.listDiscountsUpdateStatus();
-//        service.updateStatusDiscount(dotGiamGiaList);
-//    }
+    @Scheduled(fixedDelay = 10000) // Chạy mỗi 10    giây
+    public void fixedRateTask() {
+        List<DotGiamGia> dotGiamGiaList = service.listDiscountsUpdateStatus();
+        service.updateStatusDiscount(dotGiamGiaList);
+    }
 }

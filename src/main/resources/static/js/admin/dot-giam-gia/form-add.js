@@ -109,6 +109,10 @@ document.addEventListener("DOMContentLoaded", function () {
     // Validate $: chỉ cho phép nhập số
     function validateDollar() {
         ipValues.value = ipValues.value.trim().replace(/\D/g, '');
+        // su ly input giam toi da
+        let discountMax = document.getElementById("giamToiDa")
+        discountMax.value = ipValues.value
+        discountMax.style.display = "none"
     }
 
     // Gán sự kiện cho radio buttons

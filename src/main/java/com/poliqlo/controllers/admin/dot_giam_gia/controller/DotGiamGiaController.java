@@ -97,7 +97,7 @@ public class DotGiamGiaController {
     @GetMapping("/admin/dot-giam-gia/form-add")
     public String formAdd(
             @RequestParam(value = "page", defaultValue = "0", required = false) String pageStr,
-            @RequestParam(value = "size", defaultValue = "2", required = false) String sizeStr,
+            @RequestParam(value = "size", defaultValue = "7", required = false) String sizeStr,
             @RequestParam(value = "name", defaultValue = "", required = false) String name,
             Model model) {
         int page, size;
@@ -106,7 +106,7 @@ public class DotGiamGiaController {
             size = Integer.parseInt(sizeStr);
         } catch (NumberFormatException e) {
             page = 0;
-            size = 2;
+            size = 7;
         }
         if (name.equals("")) {
             name = null;

@@ -66,11 +66,11 @@
                             <label for="status" class="form-label font-weight-bold">Trạng Thái</label>
                             <select id="status" class="form-control" name="status">
                                 <option value="">Select</option>
-                                <option value="Chưa diễn ra" th:selected="${status == 'Chưa diễn ra'}">Chưa diễn ra
+                                <option value="CHUA_DIEN_RA" th:selected="${status == 'CHUA_DIEN_RA'}">Chưa diễn ra
                                 </option>
-                                <option value="Đang diễn ra" th:selected="${status == 'Đang diễn ra'}">Đang diễn ra
+                                <option value="DANG_DIEN_RA" th:selected="${status == 'DANG_DIEN_RA'}">Đang diễn ra
                                 </option>
-                                <option value="Đã kết thúc" th:selected="${status == 'Đã kết thúc'}">Đã kết thúc
+                                <option value="DA_KET_THUC" th:selected="${status == 'DA_KET_THUC'}">Đã kết thúc
                                 </option>
                             </select>
                         </div>
@@ -128,9 +128,9 @@
                                class="btn btn-warning btn-sm">
                                 <i class="fa-solid fa-pen"></i>
                             </a>
-                            <a th:href="@{'/admin/dot-giam-gia/toggle-status/' + ${dotGiamGia.id}}"
+                            <a id="toggleBTN" th:href="@{'/admin/dot-giam-gia/toggle-status/' + ${dotGiamGia.id}}"
                                class="btn btn-success btn-sm">
-                                <i class="fa-solid fa-clock-rotate-left"></i>
+                                toggle button
                             </a>
                             <a th:href="@{'/admin/dot-giam-gia/delete/' + ${dotGiamGia.id}}"
                                class="btn btn-danger btn-sm"
@@ -138,7 +138,6 @@
                                 <i class="fa-solid fa-trash"></i>
                             </a>
                         </td>
-                    </tr>
                     </tr>
                     </tbody>
                 </table>
