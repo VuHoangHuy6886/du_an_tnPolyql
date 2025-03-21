@@ -22,11 +22,13 @@
         <h2 class="mb-3">Danh Sách Địa Chỉ</h2>
     </div>
     <!-- Nút mở modal -->
-    <div class="row d-flex justify-content-end">
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addressModal">
-            Thêm Địa Chỉ
-        </button>
-    </div>
+        <div class="row d-flex justify-content-end ">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addressModal">
+                Thêm Địa Chỉ
+            </button>
+        </div>
+
+
     <div class="row card  p-3 w-75 m-auto">
         <h3>Sổ địa chỉ</h3>
         <ul id="mylist">
@@ -79,8 +81,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                <button id="submit" type="button" class="btn btn-success" data-bs-dismiss="modal">Lưu Địa Chỉ
-                </button>
+                <button id="submit" type="button" class="btn btn-success">Lưu Địa Chỉ</button>
             </div>
         </div>
     </div>
@@ -114,6 +115,10 @@
                 <div class="mb-3">
                     <label for="editXa">Phường/Xã</label>
                     <select id="editXa" class="form-control"></select>
+                </div>
+                <div class="mb-3">
+                    <label for="editDiaChiChiTiet">Địa chỉ chi tiết</label>
+                    <input type="text" id="editDiaChiChiTiet" class="form-control" placeholder="Địa chỉ chi tiết">
                 </div>
             </div>
             <div class="modal-footer">

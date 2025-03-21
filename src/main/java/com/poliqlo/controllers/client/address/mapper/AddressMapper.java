@@ -15,6 +15,7 @@ public class AddressMapper {
                 .districtId(diaChi.getDistrictId())
                 .wardId(diaChi.getWardCode())
                 .soDienThoai(diaChi.getSoDienThoai())
+                .addressStr(diaChi.getAddress())
                 .defaultValue(diaChi.getIsDefault())
                 .build();
         return addressDTO;
