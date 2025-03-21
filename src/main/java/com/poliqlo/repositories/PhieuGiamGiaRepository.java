@@ -2,6 +2,7 @@ package com.poliqlo.repositories;
 
 import com.poliqlo.models.KhachHang;
 import com.poliqlo.models.PhieuGiamGia;
+import com.poliqlo.models.TaiKhoan;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.springframework.data.domain.Page;
@@ -44,8 +45,14 @@ public interface PhieuGiamGiaRepository extends JpaRepository<PhieuGiamGia, Inte
                                        @Param("ngayBatDau") LocalDateTime ngayBatDau,
                                        @Param("ngayKetThuc") LocalDateTime ngayKetThuc);
 
-    @Query("SELECT k FROM KhachHang k WHERE LOWER(k.ten) LIKE LOWER(CONCAT('%', :ten, '%'))")
-    Page<KhachHang> searchByTen(@Param("ten") String ten, Pageable pageable);
+    //    tim kiem Khach hang theo email hoac email
+    @Query("SELECT kh FROM KhachHang kh " +
+            "JOIN kh.taiKhoan tk where " +
+            "(:request IS NULL OR tk.soDienThoai like %:request% or :request is null or tk.email like %:request%)")
+    Page<KhachHang> searchByTen(@Param("request") String request, Pageable pageable);
+
+    @Query(value = "SELECT * FROM tai_khoan WHERE EMAIL = :keyword OR SO_DIEN_THOAI = :keyword", nativeQuery = true)
+    Page<TaiKhoan> findByEmailOrSDTThang(@Param("emailOrsdt") String emailOrsdt, Pageable pageable);
 
     @Query(value = "SELECT * FROM khach_hang", nativeQuery = true)
     List<KhachHang> findAllCustomers();

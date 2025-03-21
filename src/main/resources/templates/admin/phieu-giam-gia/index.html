@@ -20,33 +20,12 @@
 <div class="row">
     <div class="card shadow m-2 w-100 ">
         <div class="card-header py-3">
-            <div class="row">
+            <div class="row w-100">
                 <h1 class="h3 text-gray-800 col-4">Quản lý Phiếu Giảm Giá</h1>
                 <!-- Additional controls -->
                 <div class="col-8 d-flex justify-content-sm-end align-items-center">
-                    <!--                    <form class="form-inline mr-3 d-flex align-items-center">-->
-                    <!--                        <label for="status" class="mr-2">Trạng thái</label>-->
-                    <!--                        <select id="status" name="status" class="form-control-plaintext text-primary"-->
-                    <!--                                style="width: 100px">-->
-                    <!--                            <option value="">Select</option>-->
-                    <!--                            <option value="Chưa diễn ra" th:selected="${status == 'Chưa diễn ra'}">Chưa diễn ra-->
-                    <!--                            </option>-->
-                    <!--                            <option value="Đang diễn ra" th:selected="${status == 'Đang diễn ra'}">Đang diễn ra-->
-                    <!--                            </option>-->
-                    <!--                            <option value="Đã kết thúc" th:selected="${status == 'Đã kết thúc'}">Đã kết thúc-->
-                    <!--                            </option>-->
-                    <!--                        </select>-->
-                    <!--                    </form>-->
-                    <!--                    <a id="btn-reload" class="btn btn-primary btn-icon-split mr-2">-->
-                    <!--                                        <span class="icon text-white-50">-->
-                    <!--                                            <i class="fas fa-rotate-right"></i>-->
-                    <!--                                        </span>-->
-                    <!--                        <span class="text">Làm mới</span>-->
-                    <!--                    </a>-->
-
-
-                    <a th:href="@{'/admin/phieu-giam-gia/form-add'}" class="btn btn-info btn-icon-split mr-2"
-                       id="btn-add">
+                    <a th:href="@{'/admin/phieu-giam-gia/form-add'}" id="btn-add"
+                       class="btn btn-secondary btn-icon-split mr-2">
                                         <span class="icon text-white-50">
                                             <i class="fas fa-plus"></i>
                                         </span>
@@ -56,68 +35,60 @@
 
 
                 <!--form filter-->
-                <div class="container mt-4">
-                    <div class="card p-4">
-                        <form class="row g-3 align-items-center">
-                            <div class="col-md-4">
-                                <span for="name">Tìm kiếm theo Mã & Tên</span>
-                                <input
-                                        id="name"
-                                        type="text"
-                                        name="name"
-                                        class="form-control"
-                                        th:value="${name}"
-                                        placeholder="Nhập Mã & Tên ">
-                            </div>
-
-                            <div class="col-md-4">
-                                <span for="startTime">Ngày bắt đầu</span>
-                                <input type="date" class="form-control" id="startTime" name="startTime"
-                                       th:value="${#temporals.format(startTime, 'yyyy-MM-dd')}"/>
-                            </div>
-
-                            <div class="col-md-4">
-                                <span for="endTime">Ngày kết thúc</span>
-                                <input type="date" class="form-control" id="endTime" name="endTime"
-                                       th:value="${#temporals.format(endTime, 'yyyy-MM-dd')}"/>
-                            </div>
-                            <div class="form-group d-flex flex-column justify-content-start align-items-start">
-                                <div class="form-group d-flex flex-column justify-content-start align-items-start">
-                                    <label for="status" class="form-label font-weight-bold">Trạng Thái</label>
-                                    <select id="status" class="form-control" name="status">
-                                        <option value="">Select</option>
-                                        <option value="SAP_DIEN_RA" th:selected="${status == 'SAP_DIEN_RA'}">Sắp diễn
-                                            ra
-                                        </option>
-                                        <option value="DANG_DIEN_RA" th:selected="${status == 'DANG_DIEN_RA'}">Đang diễn
-                                            ra
-                                        </option>
-                                        <option value="DA_KET_THUC" th:selected="${status == 'DA_KET_THUC'}">Đã kết thúc
-                                        </option>
-                                    </select>
+                    <div class="container-fluid w-100 mt-4">
+                        <div class="container-fluid card p-4 w-100">
+                            <form class="container-fluid row g-3 align-items-center w-100">
+                                <div class="col-md-4">
+                                    <span for="name">Tìm kiếm theo Mã & Tên</span>
+                                    <input
+                                            id="name"
+                                            type="text"
+                                            name="name"
+                                            class="form-control"
+                                            th:value="${name}"
+                                            placeholder="Nhập Mã & Tên ">
                                 </div>
-                            </div>
-                            <button class="btn btn-info" id="ClearForm">
-                                <i class="fas fa-rotate-right"></i>
-                                                                Clear
-                            </button>
-                            <button class="form-control btn-secondary">
-<!--                                <i class="fa-solid fa-magnifying-glass"></i>-->
-                                Tìm Kiếm
-                            </button>
+                                <div class="col-md-4">
+                                    <span for="startTime">Ngày bắt đầu</span>
+                                    <input type="date" class="form-control" id="startTime" name="startTime"
+                                           th:value="${#temporals.format(startTime, 'yyyy-MM-dd')}"/>
+                                </div>
 
-                        </form>
-                        <!--                        <div class="row g-3 align-items-center mt-3">-->
-                        <!--                            <div class="col-md-2 text-end">-->
-                        <!--                                <button class="btn btn-secondary">-->
-                        <!--                                    Tìm Kiếm-->
-                        <!--                                </button>-->
-                        <!--                            </div>-->
-                        <!--                        </div>-->
+                                <div class="col-md-4">
+                                    <span for="endTime">Ngày kết thúc</span>
+                                    <input type="date" class="form-control" id="endTime" name="endTime"
+                                           th:value="${#temporals.format(endTime, 'yyyy-MM-dd')}"/>
+                                </div>
+                                    <div class="col-md-4 form-group d-flex flex-column justify-content-start align-items-start">
+                                        <label for="status" class="form-label font-weight-bold">Trạng Thái</label>
+                                        <select id="status" class="form-control" name="status">
+                                            <option value="">Select</option>
+                                            <option value="SAP_DIEN_RA" th:selected="${status == 'SAP_DIEN_RA'}">Sắp
+                                                diễn
+                                                ra
+                                            </option>
+                                            <option value="DANG_DIEN_RA" th:selected="${status == 'DANG_DIEN_RA'}">Đang
+                                                diễn
+                                                ra
+                                            </option>
+                                            <option value="DA_KET_THUC" th:selected="${status == 'DA_KET_THUC'}">Đã kết
+                                                thúc
+                                            </option>
+                                        </select>
+                                    </div>
 
+                                    <button class="btn btn-secondary col-md-2" id="ClearForm" style="margin-left:  15px ; margin-top: 15px" >
+                                        <i class="fas fa-rotate-right"></i>
+                                        Clear
+                                    </button>
+                                <button class="form-control btn-secondary">
+                                    Tìm Kiếm
+                                </button>
+                            </form>
+                        </div>
                     </div>
-                </div>
-<!--                form phieu giam gia-->
+
+<!--                ssasa-->
                 <div class="card-body">
                     <div>
                         <table class="table table-bordered" id="dataTable">
@@ -157,7 +128,7 @@
                                     <a class="btn btn-danger btn-sm"
                                        th:href="@{'/admin/phieu-giam-gia/change-status/'+ ${phieuGiamGia.id}}"
                                        style="text-decoration: none; margin: 10px">
-<!--                                        <i class="fa-solid fa-repeat"></i>-->
+                                        <!--                                        <i class="fa-solid fa-repeat"></i>-->
                                         <i class="fa-solid fa-power-off"></i>
                                     </a>
 
@@ -165,35 +136,43 @@
 
                             </tr>
                         </table>
-                        <!--  Phân Trang-->
 
-                        <nav class="d-flex justify-content-center mt-3" aria-label="Page navigation"
-                             th:if="${totalPages > 1}">
+                        <!-- Phân Trang -->
+                        <nav class="d-flex justify-content-center mt-3" aria-label="Page navigation" th:if="${totalPages > 1}">
                             <ul class="pagination">
+                                <!-- Nút Previous -->
                                 <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
                                     <a class="page-link"
-                                       th:href="@{/admin/phieu-giam-gia/all(page=${currentPage - 1}, size=5)}">
+                                       th:href="@{/admin/phieu-giam-gia/all(page=${currentPage - 1}, size=5,
+                                                 name=${name}, startTime=${startTime},
+                                                 endTime=${endTime}, status=${status})}">
                                         &laquo;
                                     </a>
                                 </li>
 
+                                <!-- Các số trang -->
                                 <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
                                     th:classappend="${i == currentPage} ? 'active'">
-                                    <a class="page-link" th:href="@{/admin/phieu-giam-gia/all(page=${i}, size=5)}"
-                                       th:text="${i + 1}"></a>
+                                    <a class="page-link"
+                                       th:href="@{/admin/phieu-giam-gia/all(page=${i}, size=5,
+                                                 name=${name}, startTime=${startTime},
+                                                 endTime=${endTime}, status=${status})}"
+                                       th:text="${i + 1}">
+                                    </a>
                                 </li>
 
+                                <!-- Nút Next -->
                                 <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
                                     <a class="page-link"
-                                       th:href="@{/admin/phieu-giam-gia/all(page=${currentPage + 1}, size=5)}">
+                                       th:href="@{/admin/phieu-giam-gia/all(page=${currentPage + 1}, size=5,
+                                                 name=${name}, startTime=${startTime},
+                                                 endTime=${endTime}, status=${status})}">
                                         &raquo;
                                     </a>
                                 </li>
                             </ul>
                         </nav>
-
-                        <!--  Phân Trang-->
-
+                        <!-- End Phân Trang -->
 
                     </div>
                 </div>

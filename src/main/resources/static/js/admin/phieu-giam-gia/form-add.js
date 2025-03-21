@@ -1,50 +1,40 @@
+let ids = [];
+
 document.addEventListener("DOMContentLoaded", function () {
     let inputGiaTriGiam = document.querySelector("input[name='giaTriGiam']");
     let radioPhanTram = document.getElementById("phantram");
     let radioGiaTien = document.getElementById("giatien");
     let inputGiamToiDa = document.querySelector("input[name='giamToiDa']");
 
-
     inputGiaTriGiam.addEventListener("input", function () {
         let giaTri = parseFloat(inputGiaTriGiam.value);
-
-        // Kiểm tra nếu chọn %
         if (radioPhanTram.checked && giaTri > 99) {
             alert("Giá Trị Giảm không được lớn hơn 99%.");
-            inputGiaTriGiam.value = 99; // Set về 99 nếu nhập quá
+            inputGiaTriGiam.value = 99;
         }
     });
 
-    // Kiểm tra giá trị của inputGiamToiDa
-    inputGiamToiDa.addEventListener("input", function () {
-        let giamToiDaValue = parseFloat(inputGiamToiDa.value);
-
-        if (giamToiDaValue > 100000) {
-            alert("Giảm tối đa 100000.");
-            inputGiamToiDa.value = 100000; // Gán lại giá trị về 100000
-        }
+    radioPhanTram.addEventListener("change", function () {
+        console.log("chon %");
+        inputGiamToiDa.style.display = "block";
     });
 
-    // Nếu đổi radio button, xóa giới hạn nếu chọn VND
-    document.querySelectorAll("input[name='loaiHinhGiam']").forEach(radio => {
-        radio.addEventListener("change", function () {
-            inputGiaTriGiam.value = ""; // Xóa input khi chuyển đổi
-        });
+    radioGiaTien.addEventListener("change", function () {
+        console.log("chon giá tiền");
+        document.addEventListener("input", function () {
+            inputGiamToiDa.value = inputGiaTriGiam.value;
+        })
+        inputGiamToiDa.style.display = "none";
     });
 });
-
-//lay du lieu tu check box costomList
-let ids = [];
 
 function toggleCheckbox(input) {
     let value = parseInt(input.value);
     if (input.checked) {
         ids.push(value);
     } else {
-// Lọc id khách hàng, so sánh với mảng hiện tại, đã có >> bỏ đi
         ids = ids.filter(id => id !== value);
     }
-
     document.getElementById("listIdCustomer").value = '';
     console.log("thong tin khach hang : " + ids);
     document.getElementById("listIdCustomer").value = ids.join(",");
@@ -60,19 +50,24 @@ function validateForm() {
     let ngayBatDau = document.getElementById("ngayBatDau").value;
     let ngayKetThuc = document.getElementById("ngayKetThuc").value;
 
-    let regexTen = /^[a-zA-ZÀ-Ỹà-ỹ\s]+$/; // Chỉ cho phép chữ và khoảng trắng
+    let regexTen = /^[a-zA-Z0-9\s]+$/; // Cho phép chữ cái, số và khoảng trắng
+
 
 // Kiểm tra tên phiếu giảm giá
-    if (ten === "" || !regexTen.test(ten)) {
-        alert("Tên Phiếu Giảm Giá không được để trống và chỉ chứa chữ cái.");
-        return false;
-    }
+    function validateCouponName(ten) {
+        if (ten.trim() === "") {
+            alert("Tên Phiếu Giảm Giá không được để trống.");
+            return false;
+        }
 
-//check giam toi da
-//     if (giamToiDa > 100000.00) {
-//         alert("Chỉ giảm tối đa 100000.00");
-//         return giamToiDa == 100000.00;
-//     }
+        if (!regexTen.test(ten)) {
+            alert("Tên Phiếu Giảm Giá chỉ có thể chứa chữ cái, số và khoảng trắng.");
+            return false;
+        }
+
+        alert("Tên Phiếu Giảm Giá hợp lệ!");
+        return true;
+    }
 
 
 // Kiểm tra giá trị giảm

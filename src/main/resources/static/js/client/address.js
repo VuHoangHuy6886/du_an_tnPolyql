@@ -3,54 +3,90 @@ const apiBase = "https://online-gateway.ghn.vn/shiip/public-api/master-data";
 const customerId = document.getElementById("customerId").value
 let mylist = document.getElementById("mylist")
 
-function loadTinh() {
+function loadTinh(selectId, selectedValue = "") {
     $.ajax({
         url: `${apiBase}/province`,
         type: "GET",
         headers: {"Token": GHN_TOKEN},
         success: function (res) {
             if (res.code === 200) {
+                let select = $(`#${selectId}`);
+                select.html('<option value="">Chọn tỉnh/thành phố</option>');
                 res.data.forEach(item => {
-                    $("#tinhCreate").append(`<option value="${item.ProvinceID}">${item.ProvinceName}</option>`);
+                    let selected = item.ProvinceID == selectedValue ? "selected" : "";
+                    select.append(`<option value="${item.ProvinceID}" ${selected}>${item.ProvinceName}</option>`);
                 });
+            } else {
+                console.error("Lỗi khi load tỉnh:", res);
             }
+        },
+        error: function (xhr, status, error) {
+            console.error("Lỗi API tỉnh:", error);
         }
     });
 }
 
-function loadHuyen(tinhCreate) {
+function loadHuyen(provinceId, selectId, selectedValue = "") {
+    if (!provinceId) {
+        console.warn("Không có tỉnh để load quận/huyện!");
+        return;
+    }
+
     $.ajax({
         url: `${apiBase}/district`,
         type: "POST",
-        headers: {"Token": GHN_TOKEN, "Content-Type": "application/json"},
-        data: JSON.stringify({province_id: parseInt(tinhCreate)}),
+        headers: { "Token": GHN_TOKEN, "Content-Type": "application/json" },
+        data: JSON.stringify({ province_id: parseInt(provinceId) }),
         success: function (res) {
+            let select = $(`#${selectId}`);
+            select.html('<option value="">Chọn quận/huyện</option>'); // Reset danh sách huyện
+            $("#editXa").html('<option value="">Chọn phường/xã</option>'); // Reset xã khi tỉnh thay đổi
+
             if (res.code === 200) {
-                $("#huyenCreate").html('<option value="">Chọn quận/huyện</option>');
                 res.data.forEach(item => {
-                    $("#huyenCreate").append(`<option value="${item.DistrictID}">${item.DistrictName}</option>`);
+                    let selected = item.DistrictID == selectedValue ? "selected" : "";
+                    select.append(`<option value="${item.DistrictID}" ${selected}>${item.DistrictName}</option>`);
                 });
+            } else {
+                console.error("Lỗi khi load quận/huyện:", res);
             }
+        },
+        error: function (xhr, status, error) {
+            console.error("Lỗi API Quận/Huyện:", error);
         }
     });
 }
 
-function loadXa(huyenCreate) {
+function loadXa(districtId, selectId, selectedValue = "") {
+    if (!districtId) {
+        console.warn("Không có quận/huyện để load phường/xã!");
+        return;
+    }
+
     $.ajax({
         url: `${apiBase}/ward`,
         type: "POST",
-        headers: {"Token": GHN_TOKEN, "Content-Type": "application/json"},
-        data: JSON.stringify({district_id: parseInt(huyenCreate)}),
+        headers: { "Token": GHN_TOKEN, "Content-Type": "application/json" },
+        data: JSON.stringify({ district_id: parseInt(districtId) }),
         success: function (res) {
+            let select = $(`#${selectId}`);
+            select.html('<option value="">Chọn phường/xã</option>'); // Reset danh sách xã
+
             if (res.code === 200) {
-                $("#xaCreate").html('<option value="">Chọn phường/xã</option>');
                 res.data.forEach(item => {
-                    $("#xaCreate").append(`<option value="${item.WardCode}">${item.WardName}</option>`);
+                    let selected = item.WardCode == selectedValue ? "selected" : "";
+                    select.append(`<option value="${item.WardCode}" ${selected}>${item.WardName}</option>`);
                 });
+            } else {
+                console.error("Lỗi khi load phường/xã:", res);
             }
+        },
+        error: function (xhr, status, error) {
+            console.error("Lỗi API Phường/Xã:", error);
         }
     });
 }
+
 
 // Hàm lấy danh sách tỉnh/thành phố
 async function getProvinceName(provinceId) {
@@ -230,10 +266,10 @@ showAddress = async (id, name, phone, province, district, ward, defaultValue) =>
     let buttonGroup = document.createElement("div");
     buttonGroup.classList.add("btn-group");
 
-    let editBtn = document.createElement("a");
+    let editBtn = document.createElement("button");
     editBtn.innerText = "Sửa";
     editBtn.classList.add("btn", "btn-warning", "btn-sm");
-    editBtn.href = "/showform-update/" + id; // Đặt link đến Google
+    editBtn.onclick = () => editAddress(id);
 
     let deleteBtn = document.createElement("button");
     deleteBtn.innerText = "Xóa";
@@ -315,8 +351,79 @@ function setDefaultAddress(id) {
         })
         .catch(err => console.log(err));
 }
+// sua
+async function editAddress(id) {
+    const address = await findDiaChiById(id);
+    if (!address) {
+        alert("Không tìm thấy địa chỉ!");
+        return;
+    }
 
+    console.log("Dữ liệu địa chỉ cần sửa:", address);
 
+    // Điền dữ liệu vào form sửa
+    $("#editAddressId").val(address.id);
+    $("#editTenNguoiNhan").val(address.ten);
+    $("#editSoDienThoai").val(address.sdt);
+    $("#editDiaChiChiTiet").val(address.addressStr || "");
+
+    // Chờ load tỉnh trước, sau đó load huyện và xã
+    await loadTinh("editTinh", address.province);
+    await loadHuyen(address.province, "editHuyen", address.district);
+    await loadXa(address.district, "editXa", address.ward);
+
+    $("#editAddressModal").modal("show");
+}
+
+$("#editTinh").change(function () {
+    let provinceId = $(this).val();
+    console.log("Tỉnh được chọn:", provinceId);
+
+    if (provinceId) {
+        loadHuyen(provinceId, "editHuyen");
+        $("#editXa").html('<option value="">Chọn phường/xã</option>'); // Reset xã
+    }
+});
+
+// Khi thay đổi huyện, cập nhật danh sách xã/phường
+$("#editHuyen").change(function () {
+    let districtId = $(this).val();
+    console.log("Huyện được chọn:", districtId);
+
+    if (districtId) {
+        loadXa(districtId, "editXa");
+    }
+});
+
+$("#saveEditAddress").click(function () {
+    const updatedAddress = {
+        customerID: customerId,
+        id: $("#editAddressId").val(),
+        tenNguoiNhan: $("#editTenNguoiNhan").val(),
+        phone: $("#editSoDienThoai").val(),
+        provinceID: $("#editTinh").val(),
+        districtID: $("#editHuyen").val(),
+        wardID: $("#editXa").val(),
+        addressStr: $("#editDiaChiChiTiet").val(),
+    };
+
+    console.log("Dữ liệu cập nhật:", updatedAddress);
+
+    fetch("/api/update-address", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(updatedAddress)
+    })
+        .then(res => res.text())
+        .then(data => {
+            alert("Cập nhật thành công!");
+            $("#editAddressModal").modal("hide");
+            mylist.innerText = ""; // Xóa danh sách cũ
+            findAll(customerId); // Load lại danh sách
+        })
+        .catch(err => console.log("Lỗi khi cập nhật địa chỉ:", err));
+});
 document.addEventListener("DOMContentLoaded", function () {
     findAll(customerId)
 })
+

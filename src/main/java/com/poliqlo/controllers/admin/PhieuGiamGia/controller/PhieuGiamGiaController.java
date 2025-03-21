@@ -6,6 +6,7 @@ import com.poliqlo.controllers.admin.PhieuGiamGia.model.request.UpdatePhieuGiamG
 import com.poliqlo.controllers.admin.PhieuGiamGia.service.PhieuGiamGiaService;
 import com.poliqlo.models.KhachHang;
 import com.poliqlo.models.PhieuGiamGia;
+import com.poliqlo.models.TaiKhoan;
 import com.poliqlo.repositories.PhieuGiamGiaRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -80,7 +81,6 @@ public class PhieuGiamGiaController {
                 endTime == null) {
             service.updateStatusCoupon(service.findAllList());
             Page<PhieuGiamGia> pages = service.findAll(page, size);
-
             model.addAttribute("pages", pages);
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", pages.getTotalPages());
@@ -115,16 +115,20 @@ public class PhieuGiamGiaController {
     public String formAdd(@RequestParam(value = "page", defaultValue = "0") int page,
                           @RequestParam(value = "size", defaultValue = "5") int size,
                           @RequestParam(value = "name", required = false) String search,
+                          @RequestParam(value = "emailOrsdt", required = false) String emailOrsdt,
                           Model model) {
 
         Pageable pageable = PageRequest.of(page, size);
         Page<KhachHang> khachHangPage;
+        Page<TaiKhoan> taiKhoanPage;
+
 
         if (search != null && !search.trim().isEmpty()) {
             khachHangPage = service.timKhachHangTheoTen(search, pageable);
         } else {
             khachHangPage = service.getAllCustomers(pageable);
         }
+        thongBao = "";
         model.addAttribute("thongBao",thongBao);
         model.addAttribute("listKH", khachHangPage.getContent());
         model.addAttribute("currentPage", page);
