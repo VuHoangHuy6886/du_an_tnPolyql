@@ -5,18 +5,18 @@ quantity.addEventListener("input", function () {
     this.value = this.value.replace(/[^0-9]/g, '');
 });
 
-quantity.addEventListener("blur", function () {
-    let value = Number(this.value);
-    if (isNaN(value) || value < 1) {
-        this.value = 1; // Nếu nhập sai, tự động sửa thành 1
-    }
-    console.log("Đã nhập xong: " + this.value);
-    let data = {
-        id: cartId.value,
-        quantity: this.value
-    }
-    sendServer(data);
-});
+// quantity.addEventListener("blur", function () {
+//     let value = Number(this.value);
+//     if (isNaN(value) || value < 1) {
+//         this.value = 1; // Nếu nhập sai, tự động sửa thành 1
+//     }
+//     console.log("Đã nhập xong: " + this.value);
+//     let data = {
+//         id: cartId.value,
+//         quantity: this.value
+//     }
+//     sendServer(data);
+// });
 
 function sendServer(data) {
     fetch("/api/cart/update-quantity", {
