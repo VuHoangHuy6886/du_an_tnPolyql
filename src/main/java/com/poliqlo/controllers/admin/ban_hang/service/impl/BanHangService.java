@@ -1,12 +1,11 @@
 package com.poliqlo.controllers.admin.ban_hang.service.impl;
 
-import com.poliqlo.controllers.admin.ban_hang.service.IBanHangService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class BanHangService implements IBanHangService {
+public class BanHangService {
 //    private final ModelMapper modelMapper;
 //    private final KhachHangRepository khachHangRepository;
 //    private final HoaDonRepository hoaDonRepository;

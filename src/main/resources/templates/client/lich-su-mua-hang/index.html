@@ -249,8 +249,8 @@
                 <nav class="header__menu mobile-menu">
                     <ul>
                         <li>
-                            <a th:href="${#authentication.name.equals('anonymousUser')?'/sign-in':'/ho-so'}" id="login"> <span th:text="${#authentication.name.equals('anonymousUser')?'Đăng nhập':#authentication.principal.ten}"></span></a>
-                            <ul class="dropdown" th:class="${#authentication.name.equals('anonymousUser')?'d-none':'dropdown'}">
+                            <a th:href="${@authService.isAuthenticated?'/ho-so':'/sign-in'}" id="login"> <span th:attr="data-account-id=${@authService.getAccountId.orElse('')}" th:text="${@authService.getCurrentUsername().orElse('Đăng nhập')}"></span></a>
+                            <ul class="dropdown" th:class="${@authService.isAuthenticated()?'dropdown':'d-none'}">
                                 <li><a href="/ho-so">Tài khoản</a></li>
                                 <li><a href="/don-mua">Đơn mua</a></li>
                                 <li><a href="/logout">Đăng xuất</a></li>

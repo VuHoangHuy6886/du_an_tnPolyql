@@ -19,14 +19,14 @@
 
     <nav class="navbar navbar-light bg-primary row">
 
-        <form class="form-inline col-4 d-flex">
-            <input id="barcodeInput" class="form-control me-sm-2 flex-grow-1" type="search" placeholder="Tìm hàng hóa (F2)"
+        <div class="form-inline col-4 d-flex">
+            <input autocomplete="off" id="barcodeInput" class="form-control me-sm-2 flex-grow-1" type="text" placeholder="Tìm hàng hóa (F2)"
                    aria-label="Search" >
 
             <a check="true" class="btn btn-outline-light my-2 my-sm-0" onclick="chuyenCheDoNhap(this)"
                data-bs-toggle="collapse" href="#collapseExample" role="button"
                aria-expanded="false" aria-controls="collapseExample"><i class="fa-solid fa-barcode"></i></a>
-        </form>
+        </div>
         <div class="nav nav-tabs col-4" id="nav-invoice" role="tablist">
             <button class="nav-link active" id="invoice-tab" data-toggle="tab" type="button"
                     role="tab" aria-controls="invoice" aria-selected="true">Hóa đơn <span>1</span> <i
@@ -127,7 +127,7 @@
     </div>
     <div class="offcanvas-body mt-0 pt-1" >
         <div class="d-flex justify-content-center px-4 pb-4" style="text-align: center">
-            <img style="height: 270px;border-radius: 13px" src="https://media3.coolmate.me/cdn-cgi/image/width=672,height=990,quality=85/uploads/December2024/ao-dai-tay-the-thao-1699-trang_(3).jpg">
+            <img id="img-preview" style="height: 270px;border-radius: 13px" src="https://media3.coolmate.me/cdn-cgi/image/width=672,height=990,quality=85/uploads/December2024/ao-dai-tay-the-thao-1699-trang_(3).jpg">
 
         </div>
 

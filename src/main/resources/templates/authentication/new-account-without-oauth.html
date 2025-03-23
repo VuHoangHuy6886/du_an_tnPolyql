@@ -310,8 +310,8 @@
                     success: function (response) {
                         window.location.href="/unauth-home";
                     },
-                    error: function (xhr) {
-                            showErToast("Lỗi",xhr.responseText)
+                    error: function (xhr, status, error) {
+                        showErToast("Lỗi",xhr.responseText)
                         
                     }
                 });

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +29,8 @@ public class NhanVienController {
 
     @Autowired
     private BlobStoreService blobStoreService;
+    private PasswordEncoder passwordEncoder;
+
     // Hiển thị danh sách nhân viên
     @GetMapping("/list")
     public String listNhanVien(Model model,
@@ -77,7 +80,7 @@ public class NhanVienController {
         taiKhoan.setEmail(email);
         taiKhoan.setSoDienThoai(soDienThoai);
         taiKhoan.setRole(role);
-        taiKhoan.setPassword(password);
+        taiKhoan.setPassword(passwordEncoder.encode(password));
 
         if (!file.isEmpty()) {
             try {
