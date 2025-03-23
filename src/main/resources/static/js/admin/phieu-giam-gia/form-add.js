@@ -1,50 +1,56 @@
+let ids = [];
+
 document.addEventListener("DOMContentLoaded", function () {
     let inputGiaTriGiam = document.querySelector("input[name='giaTriGiam']");
     let radioPhanTram = document.getElementById("phantram");
     let radioGiaTien = document.getElementById("giatien");
     let inputGiamToiDa = document.querySelector("input[name='giamToiDa']");
 
-
+    // Khi nhập giá trị giảm
     inputGiaTriGiam.addEventListener("input", function () {
-        let giaTri = parseFloat(inputGiaTriGiam.value);
+        let giaTri = parseFloat(inputGiaTriGiam.value) || 0;
 
-        // Kiểm tra nếu chọn %
         if (radioPhanTram.checked && giaTri > 99) {
             alert("Giá Trị Giảm không được lớn hơn 99%.");
-            inputGiaTriGiam.value = 99; // Set về 99 nếu nhập quá
+            inputGiaTriGiam.value = 99;
+        }
+
+        console.log("Giá trị giảm nhập vào:", inputGiaTriGiam.value);
+
+        // Nếu chọn VND thì cập nhật luôn giảm tối đa
+        if (radioGiaTien.checked) {
+            inputGiamToiDa.value = inputGiaTriGiam.value;
+            console.log("Giảm tối đa khi nhập (VNĐ):", inputGiamToiDa.value);
         }
     });
 
-    // Kiểm tra giá trị của inputGiamToiDa
-    inputGiamToiDa.addEventListener("input", function () {
-        let giamToiDaValue = parseFloat(inputGiamToiDa.value);
-
-        if (giamToiDaValue > 100000) {
-            alert("Giảm tối đa 100000.");
-            inputGiamToiDa.value = 100000; // Gán lại giá trị về 100000
-        }
+    // Khi chọn %
+    radioPhanTram.addEventListener("change", function () {
+        inputGiaTriGiam.value = ''
+        console.log("Chọn %");
+        inputGiamToiDa.style.display = "block";
+        inputGiamToiDa.value = ""; // Không gán giá trị giảm vào input giảm tối đa
+        console.log("Giảm tối đa sau khi chọn %:", inputGiamToiDa.value);
     });
 
-    // Nếu đổi radio button, xóa giới hạn nếu chọn VND
-    document.querySelectorAll("input[name='loaiHinhGiam']").forEach(radio => {
-        radio.addEventListener("change", function () {
-            inputGiaTriGiam.value = ""; // Xóa input khi chuyển đổi
-        });
+    // Khi chọn giá tiền
+    radioGiaTien.addEventListener("change", function () {
+        console.log("Chọn giá tiền");
+        inputGiamToiDa.style.display = "none";
+        inputGiamToiDa.value = inputGiaTriGiam.value; // Cập nhật ngay lập tức
+        console.log("Giảm tối đa sau khi chọn giá tiền:", inputGiamToiDa.value);
     });
 });
 
-//lay du lieu tu check box costomList
-let ids = [];
+
 
 function toggleCheckbox(input) {
     let value = parseInt(input.value);
     if (input.checked) {
         ids.push(value);
     } else {
-// Lọc id khách hàng, so sánh với mảng hiện tại, đã có >> bỏ đi
         ids = ids.filter(id => id !== value);
     }
-
     document.getElementById("listIdCustomer").value = '';
     console.log("thong tin khach hang : " + ids);
     document.getElementById("listIdCustomer").value = ids.join(",");
@@ -60,19 +66,23 @@ function validateForm() {
     let ngayBatDau = document.getElementById("ngayBatDau").value;
     let ngayKetThuc = document.getElementById("ngayKetThuc").value;
 
-    let regexTen = /^[a-zA-ZÀ-Ỹà-ỹ\s]+$/; // Chỉ cho phép chữ và khoảng trắng
 
 // Kiểm tra tên phiếu giảm giá
-    if (ten === "" || !regexTen.test(ten)) {
-        alert("Tên Phiếu Giảm Giá không được để trống và chỉ chứa chữ cái.");
+    let regexTen = /^[\p{L}0-9 %]+$/u;
+
+    // Kiểm tra Tên
+    if (ten === "") {
+        alert("Tên không được để trống.");
         return false;
     }
-
-//check giam toi da
-//     if (giamToiDa > 100000.00) {
-//         alert("Chỉ giảm tối đa 100000.00");
-//         return giamToiDa == 100000.00;
-//     }
+    if (ten.replace(/\s/g, "") === "") {
+        alert("Tên không được chỉ chứa dấu cách.");
+        return false;
+    }
+    if (!regexTen.test(ten)) {
+        alert("Tên chỉ được chứa chữ cái, số và ký tự '%'. Vui lòng nhập lại.");
+        return false;
+    }
 
 
 // Kiểm tra giá trị giảm

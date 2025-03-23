@@ -5,9 +5,11 @@ import com.poliqlo.controllers.admin.PhieuGiamGia.model.request.UpdatePhieuGiamG
 import com.poliqlo.models.KhachHang;
 import com.poliqlo.models.PhieuGiamGia;
 import com.poliqlo.models.PhieuGiamGiaKhachHang;
+import com.poliqlo.models.TaiKhoan;
 import com.poliqlo.repositories.KhachHangRepository;
 import com.poliqlo.repositories.PhieuGiamGiaKhachHangRepository;
 import com.poliqlo.repositories.PhieuGiamGiaRepository;
+import com.poliqlo.repositories.TaiKhoanRepository;
 import com.poliqlo.utils.CouponStatusUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,7 +31,9 @@ public class PhieuGiamGiaService {
 
     private final PhieuGiamGiaRepository phieuGiamGiaRepository;
     private final KhachHangRepository khachHangRepository;
+    private final TaiKhoanRepository taiKhoanRepository;
     private final PhieuGiamGiaKhachHangRepository phieuGiamGiaKhachHangRepository;
+
 
     public Page<PhieuGiamGia> findAll(Integer pageNo, Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNo, pageSize);
@@ -44,11 +48,10 @@ public class PhieuGiamGiaService {
         return phieuGiamGiaRepository.filterAllCoupon(pageable, name, status, startTime, endTime);
     }
 
+//    tim kiem khach hang theo ten
     public Page<KhachHang> timKhachHangTheoTen(String ten, Pageable pageable) {
         return phieuGiamGiaRepository.searchByTen(ten, pageable);
-
     }
-
 
     //ham them
     public String save(AddPhieuGiamGiaRequest request, List<Integer> ids) {
@@ -164,6 +167,8 @@ public class PhieuGiamGiaService {
     public Page<KhachHang> getAllCustomers(Pageable pageable) {
         return khachHangRepository.findAll(pageable);
     }
+
+
 
     public void savePhieuGiamChoKhachHang(List<Integer> ids, PhieuGiamGia phieuGiamGia) {
         if (ids != null && !ids.isEmpty()) {

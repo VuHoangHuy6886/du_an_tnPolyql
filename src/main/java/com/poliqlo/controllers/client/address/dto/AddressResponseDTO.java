@@ -15,6 +15,7 @@ public class AddressResponseDTO {
     private Integer districtId;
     private String wardId;
     private String ten;
+    private String addressStr;
     private String soDienThoai;
     private Boolean defaultValue;
 }

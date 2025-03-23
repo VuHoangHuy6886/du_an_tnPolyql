@@ -16,4 +16,5 @@ public class UpdateAddressRequestDTO {
     private String addressStr;
     private String tenNguoiNhan;
     private String phone;
+    private Boolean isDefault;
 }

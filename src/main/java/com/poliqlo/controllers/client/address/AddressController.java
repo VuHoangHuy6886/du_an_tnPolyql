@@ -48,6 +48,8 @@ public class AddressController {
 
     @PostMapping("/api/create-address")
     public ResponseEntity<?> createAddress(@RequestBody AddressRequestDTO requestDTO) {
+
+
         KhachHang khachHang = khachHangRepository.findById(requestDTO.getCustomerID()).get();
         DiaChi diaChi = AddressMapper.requestToDiaChi(requestDTO, khachHang);
         diaChiRepository.save(diaChi);
@@ -63,8 +65,10 @@ public class AddressController {
     @PostMapping("/api/update-address")
     public ResponseEntity<?> updateAddress(@RequestBody UpdateAddressRequestDTO requestDTO) {
         KhachHang khachHang = khachHangRepository.findById(requestDTO.getCustomerID()).get();
-        DiaChi diaChi = AddressMapper.requestUpdateToDiaChi(requestDTO, khachHang);
+        Boolean isDefault = diaChiRepository.findById(requestDTO.getId()).get().getIsDefault();
+        DiaChi diaChi = AddressMapper.requestUpdateToDiaChi(requestDTO, khachHang,isDefault);
         diaChiRepository.save(diaChi);
+        System.out.println("dia chi muon sua : " + diaChi.toString());
         return ResponseEntity.ok("Sửa thành công");
     }
 

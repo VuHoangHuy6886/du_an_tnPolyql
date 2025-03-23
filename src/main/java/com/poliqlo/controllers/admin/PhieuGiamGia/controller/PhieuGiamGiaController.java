@@ -6,6 +6,7 @@ import com.poliqlo.controllers.admin.PhieuGiamGia.model.request.UpdatePhieuGiamG
 import com.poliqlo.controllers.admin.PhieuGiamGia.service.PhieuGiamGiaService;
 import com.poliqlo.models.KhachHang;
 import com.poliqlo.models.PhieuGiamGia;
+import com.poliqlo.models.TaiKhoan;
 import com.poliqlo.repositories.PhieuGiamGiaRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -80,7 +81,6 @@ public class PhieuGiamGiaController {
                 endTime == null) {
             service.updateStatusCoupon(service.findAllList());
             Page<PhieuGiamGia> pages = service.findAll(page, size);
-
             model.addAttribute("pages", pages);
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", pages.getTotalPages());
@@ -115,16 +115,20 @@ public class PhieuGiamGiaController {
     public String formAdd(@RequestParam(value = "page", defaultValue = "0") int page,
                           @RequestParam(value = "size", defaultValue = "5") int size,
                           @RequestParam(value = "name", required = false) String search,
+                          @RequestParam(value = "emailOrsdt", required = false) String emailOrsdt,
                           Model model) {
 
         Pageable pageable = PageRequest.of(page, size);
         Page<KhachHang> khachHangPage;
+        Page<TaiKhoan> taiKhoanPage;
+
 
         if (search != null && !search.trim().isEmpty()) {
             khachHangPage = service.timKhachHangTheoTen(search, pageable);
         } else {
             khachHangPage = service.getAllCustomers(pageable);
         }
+        thongBao = "";
         model.addAttribute("thongBao",thongBao);
         model.addAttribute("listKH", khachHangPage.getContent());
         model.addAttribute("currentPage", page);
@@ -212,75 +216,74 @@ public class PhieuGiamGiaController {
         String inputLoaiHinhGiam = request.getLoaiHinhGiam();
         String tenPhieu = request.getTen();
 
-        // Kiểm tra lỗi chung và loại hình giảm giá rỗng
-        if (inputLoaiHinhGiam == null || inputLoaiHinhGiam.trim().isEmpty() || bindingResult.hasErrors()) {
+//        // Kiểm tra lỗi chung và loại hình giảm giá rỗng
+//        if (inputLoaiHinhGiam == null || inputLoaiHinhGiam.trim().isEmpty() || bindingResult.hasErrors()) {
+//            model.addAttribute("message", "Vui lòng nhập đúng dữ liệu");
+//            model.addAttribute("request", request);
+//            return "admin/phieu-giam-gia/form-update";
+//        }
+
+        // Kiểm tra lỗi chung từ BindingResult
+        if (bindingResult.hasErrors()) {
             model.addAttribute("message", "Vui lòng nhập đúng dữ liệu");
             model.addAttribute("request", request);
             return "admin/phieu-giam-gia/form-update";
         }
 
-        // Validate Tên phiếu giảm giá (Không trống, không ký tự đặc biệt)
-        if (tenPhieu == null || tenPhieu.trim().isEmpty()) {
-            model.addAttribute("messageTen", "Tên phiếu giảm giá không được để trống");
+        //Tên phiếu giảm giá (không chứa ký tự không hợp lệ)
+        if (tenPhieu.trim().isEmpty()) {
+            model.addAttribute("messageTen", "Tên phiếu giảm giá không hợp lệ, không được chỉ chứa dấu cách");
             return "admin/phieu-giam-gia/form-update";
         }
-        if (!tenPhieu.matches("[a-zA-Z0-9\\sÀ-ỹ]+")) {
-            model.addAttribute("messageTen", "Tên phiếu giảm giá không được chứa ký tự đặc biệt");
+
+        if (!tenPhieu.matches("[\\p{L}\\p{N}%\\s]+")) {
+            model.addAttribute("messageTen", "Tên phiếu giảm giá chỉ được chứa chữ, số, ký tự % và dấu cách");
             return "admin/phieu-giam-gia/form-update";
         }
 
 
-        // Kiểm tra giá trị giảm hợp lệ dựa trên loại hình giảm giá
+        // Giá trị giảm hợp lệ dựa trên loại hình giảm giá
         try {
             if (inputGiaTriGiam != null && !inputGiaTriGiam.trim().isEmpty()) {
                 int giaTriGiam = Integer.parseInt(inputGiaTriGiam.trim());
 
-                if ("phantram".equalsIgnoreCase(inputLoaiHinhGiam)) {
+                if ("PHAN_TRAM".equalsIgnoreCase(inputLoaiHinhGiam)) {
                     if (giaTriGiam < 1 || giaTriGiam > 99) {
                         model.addAttribute("message", "Giá trị giảm theo % chỉ được nhập từ 1 đến 99");
-                        model.addAttribute("request", request);
                         return "admin/phieu-giam-gia/form-update";
                     }
-                } else if ("giatien".equalsIgnoreCase(inputLoaiHinhGiam)) {
-                    if (giaTriGiam < 1 || giaTriGiam > 100000) {
-                        model.addAttribute("message", "Giá trị giảm theo tiền chỉ được nhập từ 1 đến 100000");
-                        model.addAttribute("request", request);
+                } else if ("SO_TIEN".equalsIgnoreCase(inputLoaiHinhGiam)) {
+                    if (inputGiamToiDa == null || inputGiamToiDa.trim().isEmpty()) {
+                        model.addAttribute("messageGiamToiDa", "Vui lòng nhập giá trị giảm tối đa");
+                        return "admin/phieu-giam-gia/form-update";
+                    }
+
+                    int giamToiDa = Integer.parseInt(inputGiamToiDa.trim());
+                    if (giaTriGiam != giamToiDa) {
+                        model.addAttribute("message", "Giá trị giảm theo tiền phải bằng giảm tối đa");
                         return "admin/phieu-giam-gia/form-update";
                     }
                 } else {
                     model.addAttribute("message", "Loại hình giảm không hợp lệ");
-                    model.addAttribute("request", request);
                     return "admin/phieu-giam-gia/form-update";
                 }
             }
         } catch (NumberFormatException e) {
-            model.addAttribute("message", "Giá trị giảm phải là số hợp lệ");
-            model.addAttribute("request", request);
+            model.addAttribute("message", "Giá trị giảm và giảm tối đa phải là số hợp lệ");
             return "admin/phieu-giam-gia/form-update";
         }
 
-        // Kiểm tra giá trị giảm tối đa không được vượt quá 100.000
-        try {
-            if (inputGiamToiDa != null && !inputGiamToiDa.trim().isEmpty()) {
-                int giamToiDa = Integer.parseInt(inputGiamToiDa.trim());
-
-                if (giamToiDa > 100000) {
-                    model.addAttribute("messageGiamToiDa", "Chỉ được giảm tối đa 100000");
-                    request.setGiamToiDa("100000"); // Gán lại giá trị cho ô input
-                    model.addAttribute("request", request);
-                    return "admin/phieu-giam-gia/form-update";
-                }
-            }
-        } catch (NumberFormatException e) {
-            model.addAttribute("messageGiamToiDa", "Giá trị giảm tối đa phải là số hợp lệ");
-            model.addAttribute("request", request);
-            return "admin/phieu-giam-gia/form-update";
-        }
 
         // Kiểm tra loại hình giảm giá hợp lệ (phải là "phantram" hoặc "giatien")
-        if (!"phantram".equalsIgnoreCase(inputLoaiHinhGiam) &&
-                !"giatien".equalsIgnoreCase(inputLoaiHinhGiam)) {
-            model.addAttribute("message", "Loại hình giảm phải là 'phantram' hoặc 'giatien'");
+        if (inputLoaiHinhGiam == null || inputLoaiHinhGiam.trim().isEmpty()) {
+            model.addAttribute("messageLoaiHinh", "Vui lòng chọn loại hình giảm giá");
+            model.addAttribute("request", request);
+            return "admin/phieu-giam-gia/form-update";
+        }
+
+        if (!"PHAN_TRAM".equalsIgnoreCase(inputLoaiHinhGiam) &&
+                !"SO_TIEN".equalsIgnoreCase(inputLoaiHinhGiam)) {
+            model.addAttribute("message", "Loại hình giảm phải là 'PHAN_TRAM' hoặc 'SO_TIEN'");
             model.addAttribute("request", request);
             return "admin/phieu-giam-gia/form-update";
         }

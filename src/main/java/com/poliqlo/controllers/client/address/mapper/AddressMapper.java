@@ -15,6 +15,7 @@ public class AddressMapper {
                 .districtId(diaChi.getDistrictId())
                 .wardId(diaChi.getWardCode())
                 .soDienThoai(diaChi.getSoDienThoai())
+                .addressStr(diaChi.getAddress())
                 .defaultValue(diaChi.getIsDefault())
                 .build();
         return addressDTO;
@@ -34,7 +35,8 @@ public class AddressMapper {
                 .build();
         return diaChi;
     }
-    public static DiaChi requestUpdateToDiaChi(UpdateAddressRequestDTO requestDTO, KhachHang khachHang) {
+
+    public static DiaChi requestUpdateToDiaChi(UpdateAddressRequestDTO requestDTO, KhachHang khachHang, Boolean defaultValue) {
         DiaChi diaChi = DiaChi.builder()
                 .id(requestDTO.getId())
                 .provinceId(Integer.parseInt(requestDTO.getProvinceID()))
@@ -45,7 +47,7 @@ public class AddressMapper {
                 .hoTenNguoiNhan(requestDTO.getTenNguoiNhan())
                 .soDienThoai(requestDTO.getPhone())
                 .isDeleted(false)
-                .isDefault(false)
+                .isDefault(defaultValue)
                 .build();
         return diaChi;
     }

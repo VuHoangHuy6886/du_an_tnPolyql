@@ -25,17 +25,15 @@
 <!-- Custom styles for this page -->
 
 <body layout:fragment="content">
-<div class="row d-flex justify-content-center align-items-center p-4 border rounded shadow bg-white">
-    <h3>Thêm Mới Đợt Giảm Giá</h3>
+<div class="row d-flex justify-content-center align-items-center p-4 border rounded shadow bg-white"
+     style="margin-bottom: 30px; color: #4e73df">
+    <h3>Thêm Mới Phiếu Giảm Giá</h3>
 </div>
-<a class="btn btn-info btn-sm" th:href="@{'/admin/phieu-giam-gia/all'}">
-    <i class="fa-solid fa-house"></i>
-    Back
-</a>
+
 <div class="row d-flex justify-content-between ">
     <form method="post" th:action="@{/admin/phieu-giam-gia/save}" th:object="${request}"
           onsubmit="return validateForm()"
-          class=" w-50 p-4 border rounded shadow bg-white">
+          class="p-4 border rounded shadow bg-white" style="width: 47%">
         <span th:if="${thongBao}" th:text="${thongBao}" style="font-weight: bold; color: red"></span>
 
         <div class="mb-3">
@@ -59,13 +57,13 @@
                 <section>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="loaiHinhGiam" id="phantram"
-                               value="phantram"
+                               value="PHAN_TRAM"
                                checked>
                         <label class="form-check-label" for="phantram">%</label>
                     </div>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="loaiHinhGiam" id="giatien"
-                               value="giatien">
+                               value="SO_TIEN">
                         <label class="form-check-label" for="giatien">VND</label>
                     </div>
                 </section>
@@ -73,10 +71,13 @@
                 <!-- end radio -->
             </div>
         </div>
-        <div class="col-md-6">
-            <label class="form-label">Giảm Tối Đa</label>
-            <input type="text" class="form-control" id="giamToiDa" th:field="*{giamToiDa}"/>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label class="form-label">Giảm Tối Đa</label>
+                <input type="text" class="form-control" id="giamToiDa" th:field="*{giamToiDa}"/>
+            </div>
         </div>
+
 
         <div class="row mb-3">
             <div class="col-md-6">
@@ -100,7 +101,6 @@
             <span th:text="${messages}" style="color: red"></span>
         </div>
         <button type="submit" class="btn btn-primary w-100 fw-bold">Lưu</button>
-
     </form>
 
     <div class="w-50 p-4 border rounded shadow bg-white" id="formKhachHang">
@@ -108,8 +108,9 @@
             <h6>Chọn khách hàng</h6>
 
             <div class="input-group">
-                <input type="text" name="name" class="form-control" placeholder="Nhập tên" th:value="${tenkh}">
-                <button class="input-group-text">search</button>
+                <input type="text" name="name" class="form-control" placeholder="Nhập sdt hoặc email"
+                       th:value="${tenkh}">
+                <button class="input-group-text " style="background-color: #4e73df;color: white">search</button>
             </div>
         </form>
         <br>
@@ -118,8 +119,8 @@
             <tr>
                 <th></th>
                 <th>Tên khách hàng</th>
-                <!--                    <th>Số điện thoại</th>-->
-                <th>Ngày sinh</th>
+                <th>Số điện thoại</th>
+                <th>Email</th>
             </tr>
             </thead>
 
@@ -127,8 +128,9 @@
             <tr th:each="kh: ${listKH}">
                 <td><input type="checkbox" th:value="${kh.id}" onclick="toggleCheckbox(this)"></td>
                 <td th:text="${kh.ten}"></td>
-                <td th:text="${kh.ngaySinh}"></td>
-                <!--                <td th:text="${kh.sdt}"></td>-->
+                <td th:text="${kh.taiKhoan.soDienThoai}"></td>
+                <td th:text="${kh.taiKhoan.email}"></td>
+                <!--                <td th:text="${kh.ngaySinh}"></td>-->
             </tr>
             </tbody>
         </table>
