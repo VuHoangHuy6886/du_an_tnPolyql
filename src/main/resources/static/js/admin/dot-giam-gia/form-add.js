@@ -104,6 +104,7 @@ document.addEventListener("DOMContentLoaded", function () {
             value = "1";
         }
         ipValues.value = value;
+        document.getElementById("giamToiDa").style.display = "block"
     }
 
     // Validate $: chỉ cho phép nhập số
@@ -123,19 +124,40 @@ document.addEventListener("DOMContentLoaded", function () {
     handleRadioChange();
 });
 document.getElementById("formAdd").addEventListener("submit", function (event) {
-    let isValid = true
-    let giaTriGiam = document.getElementById("ipValues").value;
+    let isValid = true;
+    let giaTriGiam = document.getElementById("ipValues").value.trim();
     let thoiGianBatDau = document.getElementById("thoiGianBatDau").value;
+    let giamToiDa = document.getElementById("giamToiDa").value.trim();
     let thoiGianKetThuc = document.getElementById("thoiGianKetThuc").value;
     let listIdSanPhamChiTiet = document.getElementById("productDetailIds").value;
-    if (giaTriGiam == "") {
-        document.getElementById("showEr").innerText = "giá trị giảm không được để trống !";
+    let ten  = document.getElementById("ten").value.trim();
+
+    // Kiểm tra tên không được để trống
+    if (ten === "") {
+        document.getElementById("errorName").innerText = "Tên không được trống!";
+        isValid = false;
+    } else {
+        document.getElementById("errorName").innerText = "";
+    }
+
+    // Kiểm tra giá trị giảm không được để trống & phải là số nguyên dương
+    if (giaTriGiam === "" || !Number.isInteger(Number(giaTriGiam)) || Number(giaTriGiam) <= 0) {
+        document.getElementById("showEr").innerText = "Giá trị giảm phải là số nguyên dương!";
         isValid = false;
     } else {
         document.getElementById("showEr").innerText = "";
     }
+
+    // Kiểm tra giảm tối đa không được để trống & phải là số nguyên dương
+    if (giamToiDa === "" || !Number.isInteger(Number(giamToiDa)) || Number(giamToiDa) <= 0) {
+        document.getElementById("errorGiamToiDa").innerText = "Giảm tối đa phải là số nguyên dương!";
+        isValid = false;
+    } else {
+        document.getElementById("errorGiamToiDa").innerText = "";
+    }
+
     // Kiểm tra trường thời gian bắt đầu không được để trống
-    if (thoiGianBatDau == "") {
+    if (thoiGianBatDau === "") {
         document.getElementById("showErStartDate").innerText = "Thời gian bắt đầu không được để trống";
         isValid = false;
     } else {
@@ -143,7 +165,7 @@ document.getElementById("formAdd").addEventListener("submit", function (event) {
     }
 
     // Kiểm tra trường thời gian kết thúc không được để trống
-    if (thoiGianKetThuc == "") {
+    if (thoiGianKetThuc === "") {
         document.getElementById("showErEndDate").innerText = "Thời gian kết thúc không được để trống";
         isValid = false;
     } else {
@@ -158,11 +180,15 @@ document.getElementById("formAdd").addEventListener("submit", function (event) {
         document.getElementById("showErStartDate").innerText = "Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc";
         isValid = false;
     }
-    if (listIdSanPhamChiTiet == "") {
-        alert("vui lòng chọn sản phẩm chi tiết");
+
+    // Kiểm tra danh sách sản phẩm có được chọn không
+    if (listIdSanPhamChiTiet === "") {
+        alert("Vui lòng chọn sản phẩm chi tiết");
         isValid = false;
     }
+
+    // Nếu có lỗi thì ngăn không cho submit form
     if (!isValid) {
         event.preventDefault();
     }
-})
+});

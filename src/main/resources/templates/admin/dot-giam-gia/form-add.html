@@ -31,6 +31,7 @@
                         <input type="text" id="ten" th:field="*{ten}" class="form-control" placeholder="Nhập tên"/>
                         <span th:if="${#fields.hasErrors('ten')}" th:errors="*{ten}" style="color: red;"></span>
                         <span th:if="${message}" th:text="${message}" style="color: red;"></span>
+                        <span id="errorName" style="color: red;"></span>
                     </div>
                     <div class="mb-3">
                         <label for="ipValues">Nhập giá trị</label>
@@ -58,6 +59,7 @@
                                placeholder="Nhập giảm tối đa"/>
                         <span th:if="${#fields.hasErrors('giamToiDa')}" th:errors="*{giamToiDa}"
                               style="color: red;"></span>
+                        <span id="errorGiamToiDa" style="color: red;"></span>
                     </div>
                     <div class="mb-3">
                         <label for="thoiGianBatDau" class="form-label">Thời gian bắt đầu</label>
@@ -90,17 +92,18 @@
                 <div class="p-4 border rounded shadow-sm bg-light">
                     <!--form filter sản phẩm-->
                     <form class="w-100 p-3 d-flex justify-content-around align-items-center">
-
                         <div class="w-25">
                             <h6>Lọc theo tên</h6>
                         </div>
                         <div class="w-50">
-                            <input type="text" class="form-control" name="name" value="" placeholder="nhập tên">
+                            <input type="text" class="form-control" name="name" th:value="${name}"
+                                   placeholder="Nhập tên">
                         </div>
                         <div class="w-25 d-flex justify-content-center align-items-center">
                             <button class="btn btn-primary">Search</button>
                         </div>
                     </form>
+
                     <!-- Start Nội dung danh sách sản phẩm -->
                     <table class="table table-bordered table-hover text-center" id="dataTable">
                         <thead>
@@ -108,6 +111,7 @@
                             <th style="width: 10%;">STT</th>
                             <th style="width: 20%;">Mã</th>
                             <th style="width: 20%;">Tên</th>
+                            <th style="width: 20%;">Trạng Thái</th>
                             <th style="width: 10%;">
                                 <label class="mr-2">All</label>
                                 <input type="checkbox" id="checkAll">
@@ -119,6 +123,7 @@
                             <td th:text="${i.index + 1}"></td>
                             <td th:text="${product.maSanPham}"></td>
                             <td th:text="${product.ten}"></td>
+                            <td th:text="${product.trangThai == 'CON_HANG' ? 'Còn hàng':'Hết hàng'}"></td>
                             <td>
                                 <input type="checkbox" name="selectedProducts" th:value="${product.id}"
                                        th:id="${product.id}" onclick="handlerClick(this)">
@@ -128,9 +133,11 @@
                     </table>
                 </div>
                 <!-- End Nội dung danh sách sản phẩm -->
-                <div class="row mt-3 d-flex justify-content-center align-content-center">
+                <div class="row mt-3 d-flex justify-content-center align-content-center"
+                     th:if="${products.totalElements > 0}">
                     <nav aria-label="Page navigation example">
                         <ul class="pagination justify-content-center">
+                            <!-- Nút Previous -->
                             <li class="page-item" th:classappend="${!products.hasPrevious()} ? 'disabled'">
                                 <a class="page-link"
                                    th:href="@{/admin/dot-giam-gia/form-add(page=${products.number - 1}, name=${name})}"
@@ -138,12 +145,14 @@
                                     <span aria-hidden="true">&laquo;</span>
                                 </a>
                             </li>
+                            <!-- Số Trang -->
                             <li class="page-item" th:each="pageNum : ${#numbers.sequence(0, products.totalPages - 1)}"
                                 th:classappend="${pageNum == products.number} ? 'active'">
                                 <a class="page-link"
                                    th:href="@{/admin/dot-giam-gia/form-add(page=${pageNum}, name=${name})}"
                                    th:text="${pageNum + 1}"></a>
                             </li>
+                            <!-- Nút Next -->
                             <li class="page-item" th:classappend="${!products.hasNext()} ? 'disabled'">
                                 <a class="page-link"
                                    th:href="@{/admin/dot-giam-gia/form-add(page=${products.number + 1}, name=${name})}"
