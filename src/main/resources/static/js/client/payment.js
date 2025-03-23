@@ -18,7 +18,7 @@ const addressData = {
     defaultValue: ''
 };
 console.log("customer id : ", customerId)
-
+checkDiaChi()
 // render ten dia chi ra view
 async function displayAddress(addressData) {
     // showInformationAddress
@@ -389,6 +389,7 @@ document.getElementById("ghiChuText").addEventListener("input", function () {
 })
 // SY LY PHUONG THUC THANH TOAN CHO BILL
 document.addEventListener("DOMContentLoaded", () => {
+    checkDiaChi()
     const btnChecks = document.querySelectorAll(".btn-check");
     const billPaymentMethod = document.getElementById("billPaymentMethod");
     const giamGiaElement = document.getElementById("giamGia");
@@ -396,12 +397,10 @@ document.addEventListener("DOMContentLoaded", () => {
         ? convertVNDToNumber(giamGiaElement.textContent.trim()) || 0
         : 0;
     document.getElementById("billCoupon").value = soTienGiam;
-
     if (btnChecks.length > 0) {
         btnChecks[0].checked = true;  // Chọn mặc định nút đầu tiên
         billPaymentMethod.value = btnChecks[0].value; // Cập nhật giá trị
     }
-
     btnChecks.forEach(item => {
         item.addEventListener("change", () => {
             if (item.checked) {

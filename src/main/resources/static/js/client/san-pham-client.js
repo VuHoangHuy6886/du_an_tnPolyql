@@ -4,7 +4,6 @@ var selectedSize = null;
 var currentProduct = null;
 var lastQuery = {};
 $(document).ready(function() {
-    debugger
     $('#thuongHieuSelect').select2({
         placeholder: "Chọn thương hiệu",
         allowClear: true
@@ -572,7 +571,6 @@ $("#modal-form").on("submit", function(e) {
 
     var info = {
         idSanPhamChiTiet: parseInt(matchingDetail.id),
-        idKhachHang: 1,
         soLuong: parseInt(quantity),
     };
     console.log("Thông tin giỏ hàng:", info);
