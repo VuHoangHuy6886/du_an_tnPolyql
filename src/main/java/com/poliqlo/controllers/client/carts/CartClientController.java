@@ -3,6 +3,7 @@ package com.poliqlo.controllers.client.carts;
 import com.poliqlo.controllers.client.carts.dto.*;
 import com.poliqlo.controllers.client.carts.mapper.CartDetailMapper;
 import com.poliqlo.controllers.client.carts.service.CartDetailService;
+import com.poliqlo.controllers.common.auth.service.AuthService;
 import com.poliqlo.models.DiaChi;
 import com.poliqlo.models.KhachHang;
 import com.poliqlo.models.PhieuGiamGia;
@@ -29,11 +30,12 @@ public class CartClientController {
     private final KhachHangRepository khachHangRepository;
     private final DiaChiRepository diaChiRepository;
     private final PhieuGiamGiaRepository phieuGiamGiaRepository;
+    private final AuthService authService;
 
     @GetMapping("/cart/all")
     public String showCart(Model model) {
-        List<CartDetailResponseDTO> responseDTOList = service.getCartDetailByIdCustomer(1);
-        model.addAttribute("idCustomer", 1);
+        List<CartDetailResponseDTO> responseDTOList = service.getCartDetailByIdCustomer(authService.getCurrentUserDetails().get().getKhachHang().getId());
+        model.addAttribute("idCustomer", authService.getCurrentUserDetails().get().getKhachHang().getId());
         model.addAttribute("messageResponse", service.getMessageResponse());
         model.addAttribute("carts", responseDTOList);
         return "client/cart";
