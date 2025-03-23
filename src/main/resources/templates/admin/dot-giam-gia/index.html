@@ -66,11 +66,11 @@
                             <label for="status" class="form-label font-weight-bold">Trạng Thái</label>
                             <select id="status" class="form-control" name="status">
                                 <option value="">Select</option>
-                                <option value="Chưa diễn ra" th:selected="${status == 'Chưa diễn ra'}">Chưa diễn ra
+                                <option value="CHUA_DIEN_RA" th:selected="${status == 'CHUA_DIEN_RA'}">Chưa diễn ra
                                 </option>
-                                <option value="Đang diễn ra" th:selected="${status == 'Đang diễn ra'}">Đang diễn ra
+                                <option value="DANG_DIEN_RA" th:selected="${status == 'DANG_DIEN_RA'}">Đang diễn ra
                                 </option>
-                                <option value="Đã kết thúc" th:selected="${status == 'Đã kết thúc'}">Đã kết thúc
+                                <option value="DA_KET_THUC" th:selected="${status == 'DA_KET_THUC'}">Đã kết thúc
                                 </option>
                             </select>
                         </div>
@@ -128,9 +128,9 @@
                                class="btn btn-warning btn-sm">
                                 <i class="fa-solid fa-pen"></i>
                             </a>
-                            <a th:href="@{'/admin/dot-giam-gia/toggle-status/' + ${dotGiamGia.id}}"
+                            <a id="toggleBTN" th:href="@{'/admin/dot-giam-gia/toggle-status/' + ${dotGiamGia.id}}"
                                class="btn btn-success btn-sm">
-                                <i class="fa-solid fa-clock-rotate-left"></i>
+                                toggle button
                             </a>
                             <a th:href="@{'/admin/dot-giam-gia/delete/' + ${dotGiamGia.id}}"
                                class="btn btn-danger btn-sm"
@@ -139,37 +139,61 @@
                             </a>
                         </td>
                     </tr>
-                    </tr>
                     </tbody>
                 </table>
             </div>
             <!--        Phân Trang        -->
-            <nav th:if="${pages.totalPages > 0}" aria-label="Page navigation example bg-danger">
+            <nav th:if="${pages.totalPages > 0}" aria-label="Page navigation example">
                 <ul class="pagination justify-content-center">
                     <!-- Previous page link -->
                     <li class="page-item" th:classappend="${pages.hasPrevious()} ? '' : 'disabled'">
                         <a class="page-link"
-                           th:href="@{/admin/dot-giam-gia/all(page=${pages.number - 1}, size=${pages.size})}"
+                           th:href="@{/admin/dot-giam-gia/all(
+                page=${pages.number - 1},
+                size=${pages.size},
+                name=${name},
+                startTime=${#temporals.format(startTime, 'yyyy-MM-dd')},
+                endTime=${#temporals.format(endTime, 'yyyy-MM-dd')},
+                status=${status}
+            )}"
                            aria-label="Previous">
                             <span aria-hidden="true">&laquo;</span>
                         </a>
                     </li>
+
                     <!-- Page number links -->
                     <li class="page-item" th:each="i : ${#numbers.sequence(0, pages.totalPages - 1)}"
                         th:classappend="${pages.number == i} ? 'active' : ''">
-                        <a class="page-link" th:href="@{/admin/dot-giam-gia/all(page=${i}, size=${pages.size})}"
+                        <a class="page-link"
+                           th:href="@{/admin/dot-giam-gia/all(
+                page=${i},
+                size=${pages.size},
+                name=${name},
+                startTime=${#temporals.format(startTime, 'yyyy-MM-dd')},
+                endTime=${#temporals.format(endTime, 'yyyy-MM-dd')},
+                status=${status}
+            )}"
                            th:text="${i + 1}">1</a>
                     </li>
+
                     <!-- Next page link -->
                     <li class="page-item" th:classappend="${pages.hasNext()} ? '' : 'disabled'">
                         <a class="page-link"
-                           th:href="@{/admin/dot-giam-gia/all(page=${pages.number + 1}, size=${pages.size})}"
+                           th:href="@{/admin/dot-giam-gia/all(
+                page=${pages.number + 1},
+                size=${pages.size},
+                name=${name},
+                startTime=${#temporals.format(startTime, 'yyyy-MM-dd')},
+                endTime=${#temporals.format(endTime, 'yyyy-MM-dd')},
+                status=${status}
+            )}"
                            aria-label="Next">
                             <span aria-hidden="true">&raquo;</span>
                         </a>
                     </li>
                 </ul>
             </nav>
+
             <!--        Phân Trang        -->
         </div>
         <!--Table đợt giảm giá -->

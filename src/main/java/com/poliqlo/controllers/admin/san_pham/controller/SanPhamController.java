@@ -50,6 +50,10 @@ public class SanPhamController {
     public String add(Model model) {
         return "/admin/san-pham/add";
     }
+    @GetMapping("/admin/order_detail")
+    public String adda(Model model) {
+        return "/admin/don_hang/order_detail";
+    }
 
     @GetMapping("/admin/san-pham/{id}")
     public String edit(Model model, @PathVariable(name = "id") SanPham sp) {

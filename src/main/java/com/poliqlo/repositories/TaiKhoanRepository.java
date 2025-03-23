@@ -15,8 +15,10 @@ public interface TaiKhoanRepository extends JpaRepository<TaiKhoan, Integer>, Jp
    Optional<TaiKhoan> findByIdAndIsDeletedFalse(Integer id);
 
     boolean existsByEmail(String email);
+
     boolean existsBySoDienThoai(String soDienThoai);
 
-
+    boolean existsByEmailAndIdNot(String email, Integer excludeId);
+    boolean existsBySoDienThoaiAndIdNot(String soDienThoai, Integer excludeId);
 
 }

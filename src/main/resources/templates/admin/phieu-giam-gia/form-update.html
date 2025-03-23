@@ -19,6 +19,8 @@
               class=" w-100 p-4 border rounded shadow bg-white">
             <div class="d-flex justify-content-center align-items-center">
             </div>
+            <span th:text="${messages}" style="color: red"></span>
+
             <div class="mb-3">
                 <label class="form-label">Mã Phiếu Giảm Giá</label>
                 <input type="text" class="form-control w-50" th:field="*{ma}" id="ma" readonly>
@@ -30,7 +32,8 @@
                 <input type="hidden" id="id" th:field="*{id}"/>
                 <input type="hidden" id="trangThai" th:field="*{trangThai}" class="form-control"/>
                 <input type="text" class="form-control" id="ten" th:field="*{ten}">
-                <span class="text-danger" th:if="${#fields.hasErrors('ten')}" th:errors="*{ten}"></span>
+                <span class="text-danger" th:if="${messageTen}" th:text="${messageTen}"></span>
+
             </div>
             <div class="row mb-3">
                 <div class="col-md-6">
@@ -39,26 +42,26 @@
                         <label class="form-label">Giá Trị Giảm</label>
                         <input type="text" class="form-control" name="giaTriGiam" id="loaiHinhGiam"
                                th:field="*{giaTriGiam}"
-                               placeholder="Vui lòng nhập">
-                        <span class="text-danger" th:if="${#fields.hasErrors('giaTriGiam')}"
-                              th:errors="*{giaTriGiam}"></span>
+                               placeholder="Vui lòng nhập giá trị giảm">
+
+                        <span class="text-danger" th:if="${message}" th:text="${message}"></span>
+
                     </section>
                     <!-- End input  -->
                     <!-- Start radio -->
                     <section>
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="radio" name="loaiHinhGiam" id="phantram"
-                                   value="phantram"
-                                   checked>
+                                   value="phantram" th:checked="${request.loaiHinhGiam=='phantram'}">
                             <label class="form-check-label" for="phantram">%</label>
                         </div>
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="radio" name="loaiHinhGiam" id="giatien"
-                                   value="giatien">
+                                   value="giatien" th:checked="${request.loaiHinhGiam=='giatien'}">
                             <label class="form-check-label" for="giatien">$</label>
                         </div>
                     </section>
-                    <span th:text="${message}" style="color: red"></span>
+
                     <!-- end radio -->
                 </div>
             </div>
@@ -66,6 +69,7 @@
                 <label class="form-label">Giảm Tối Đa</label>
                 <input type="text" class="form-control" id="giamToiDa" th:field="*{giamToiDa}">
                 <span class="text-danger" th:if="${#fields.hasErrors('giamToiDa')}" th:errors="*{giamToiDa}"></span>
+                <span class="text-danger" th:if="${messageGiamToiDa}" th:text="${messageGiamToiDa}"></span>
             </div>
 
             <div class="row mb-3">
@@ -85,20 +89,19 @@
                 <div class="col-md-6">
                     <label class="form-label">Từ Ngày</label>
                     <input type="datetime-local" class="form-control" id="ngayBatDau" th:field="*{ngayBatDau}">
-                    <span class="text-danger" th:if="${#fields.hasErrors('ngayBatDau')}"
-                          th:errors="*{ngayBatDau}"></span>
+<!--                    <span th:text="${messages}" style="color: red"></span>-->
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Đến Ngày</label>
                     <input type="datetime-local" class="form-control" id="ngayKetThuc" th:field="*{ngayKetThuc}">
                     <span class="text-danger" th:if="${#fields.hasErrors('ngayKetThuc')}"
                           th:errors="*{ngayKetThuc}"></span>
-                    <span th:text="${messages}" style="color: red"></span>
+<!--                    <span th:text="${messages}" style="color: red"></span>-->
                 </div>
             </div>
             <button type="submit" class="btn btn-primary w-100 fw-bold">Cập Nhật</button>
         </form>
-
+        <a th:href="@{'/admin/phieu-giam-gia/all'}"> Quay lại</a>
     </section>
     <!--    end form    -->
 

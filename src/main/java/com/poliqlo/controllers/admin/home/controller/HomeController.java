@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("")
 
 public class HomeController {
-    @GetMapping(path = {"","/admin"})
+    @GetMapping(path = {""," "})
     public String index() {
         return "admin/test";
     }

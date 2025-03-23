@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/client/layout/layout-client.html"
+>
+<head>
+    <!--    Custom link-->
+    <th:block layout:fragment="head_link">
+        <!-- Bootstrap CSS -->
+        <link href="/css/client/client.css" rel="stylesheet">
+        </style>
+    </th:block>
+
+</head>
+
+<!-- Custom styles for this page -->
+
+<body layout:fragment="content">
+<div class="container">
+    <div class="row">
+        <h2 class="mb-3">Danh Sách Địa Chỉ</h2>
+    </div>
+    <!-- Nút mở modal -->
+    <div class="row d-flex justify-content-end">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addressModal">
+            Thêm Địa Chỉ
+        </button>
+    </div>
+    <div class="row card  p-3 w-75 m-auto">
+        <h3>Sổ địa chỉ</h3>
+        <ul id="mylist">
+        </ul>
+    </div>
+</div>
+<!-- Modal  thêm mới -->
+<div class="modal fade" id="addressModal" tabindex="-1" aria-labelledby="addressModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addressModalLabel">Thêm Địa Chỉ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="customerId" th:value="${customerId}">
+                <form>
+                    <div class="mb-3">
+                        <label for="tenNguoiNhan">Tên Người Nhận</label>
+                        <input type="text" id="tenNguoiNhan" class="form-control" placeholder="tenNguoiNhan">
+                    </div>
+                    <div class="mb-3">
+                        <label for="soDienThoai">Số Điện Thoại</label>
+                        <input type="text" id="soDienThoai" class="form-control" placeholder="soDienThoai">
+                    </div>
+                    <div class="mb-3">
+                        <label for="tinhCreate">Tỉnh/Thành phố:</label>
+                        <select class="form-control" id="tinhCreate" required>
+                            <option value="">Chọn tỉnh/thành phố</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="huyenCreate">Quận/Huyện:</label>
+                        <select class="form-control" id="huyenCreate" required>
+                            <option value="">Chọn quận/huyện</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="xaCreate">Phường/Xã:</label>
+                        <select class="form-control" id="xaCreate" required>
+                            <option value="">Chọn phường/xã</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="diaChiChiTietCreate">Địa chỉ chi tiết</label>
+                        <input type="text" id="diaChiChiTietCreate" class="form-control"
+                               placeholder="địa chỉ chi tiết">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button id="submit" type="button" class="btn btn-success" data-bs-dismiss="modal">Lưu Địa Chỉ
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+<th:block layout:fragment="bottom_link">
+    <!-- jQuery and Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
+    <script src="/js/client/iphone.js"></script>
+    <script src="/js/client/address.js"></script>
+</th:block>
+</html>
