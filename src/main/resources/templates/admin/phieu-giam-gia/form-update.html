@@ -68,11 +68,13 @@
                     <!-- end radio -->
                 </div>
             </div>
-            <div class="col-md-6">
-                <label class="form-label">Giảm Tối Đa</label>
-                <input type="text" class="form-control" id="giamToiDa" th:field="*{giamToiDa}">
-                <span class="text-danger" th:if="${#fields.hasErrors('giamToiDa')}" th:errors="*{giamToiDa}"></span>
-                <span class="text-danger" th:if="${messageGiamToiDa}" th:text="${messageGiamToiDa}"></span>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Giảm Tối Đa</label>
+                    <input type="text" class="form-control" id="giamToiDa" th:field="*{giamToiDa}">
+                    <span class="text-danger" th:if="${#fields.hasErrors('giamToiDa')}" th:errors="*{giamToiDa}"></span>
+                    <span class="text-danger" th:if="${messageGiamToiDa}" th:text="${messageGiamToiDa}"></span>
+                </div>
             </div>
 
             <div class="row mb-3">
