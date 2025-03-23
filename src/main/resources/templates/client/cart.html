@@ -89,8 +89,9 @@
                                 <input type="hidden" id="idCart" name="idCart" th:value="${cart.id}">
                                 <input id="inputQuantity" type="text" th:value="${cart.quantity}"
                                        class="form-control h-100"
-                                       style="width: 50px;" readonly>
+                                       style="width: 50px;">
                             </form>
+
                             <a th:href="@{'/cart/decrease/'+${cart.id}}" class="btn btn-outline-danger">-</a>
                         </div>
                     </td>

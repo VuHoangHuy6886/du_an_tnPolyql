@@ -8,9 +8,11 @@ import org.hibernate.annotations.ColumnDefault;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 @Builder
 @AllArgsConstructor
@@ -19,7 +21,7 @@ import java.util.List;
 @Setter
 @Entity
 @Table(name = "tai_khoan")
-public class TaiKhoan implements UserDetails {
+public class TaiKhoan implements UserDetails, OAuth2User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID", nullable = false)
@@ -67,6 +69,14 @@ public class TaiKhoan implements UserDetails {
     @Column(name = "IS_DELETED", nullable = false)
     private Boolean isDeleted = false;
 
+    @OneToOne(mappedBy = "taiKhoan", cascade = CascadeType.ALL)
+    private KhachHang khachHang;
+
+    @Override
+    public Map<String, Object> getAttributes() {
+        return Map.of();
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"));
@@ -75,5 +85,16 @@ public class TaiKhoan implements UserDetails {
     @Override
     public String getUsername() {
         return email;
+    }
+
+    @Override
+    public String getName() {
+        return khachHang.getTen();
+    }
+
+    public static class Role {
+        public static final String ROLE_ADMIN = "ROLE_ADMIN";
+        public static final String ROLE_USER  = "ROLE_USER";
+        public static final String ROLE_EMPLOYEE = "ROLE_EMPLOYEE";
     }
 }

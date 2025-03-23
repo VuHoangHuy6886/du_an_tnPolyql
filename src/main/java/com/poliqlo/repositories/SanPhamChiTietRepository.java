@@ -2,12 +2,15 @@ package com.poliqlo.repositories;
 
 import com.poliqlo.controllers.admin.san_pham_chi_tiet.chat_lieu.model.response.ProductDetailDTO;
 import com.poliqlo.models.SanPhamChiTiet;
+import jakarta.validation.constraints.Size;
+import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, Integer>, JpaSpecificationExecutor<SanPhamChiTiet> {
   @Query("SELECT sp FROM SanPhamChiTiet sp WHERE sp.sanPham.id IN :ids")
@@ -33,4 +36,6 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
 """, nativeQuery = true)
     List<ProductDetailDTO> findProductDetailsBySanPhamId(@Param("sanPhamId") Integer sanPhamId);
 
+    @Query("SELECT spct.id FROM SanPhamChiTiet spct WHERE spct.barcode = :barcode")
+    Optional<Integer> findFirstByBarcode(@Size(max = 100) String barcode, Limit limit);
 }

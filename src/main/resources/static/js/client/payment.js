@@ -24,52 +24,50 @@ async function displayAddress(addressData) {
     // showInformationAddress
     if (!addressData || !addressData.province || !addressData.district ||
         !addressData.ward || !addressData.ten || !addressData.sdt || !addressData.id) {
-        let thongTin = document.getElementById("showMessage");
+        let thongTin = document.getElementById("showInformationAddress");
         thongTin.textContent = "Khách hàng không có địa chỉ mặc định"
         thongTin.style.color = "red"
-        document.getElementById("showInformationAddress").style.display = "none"
-        checkDiaChi()
-    } else {
-        try {
-            document.getElementById("showInformationAddress").style.display = "block"
-            document.getElementById("showMessage").style.display = "none";
-            const provinceName = await getProvinceName(parseInt(addressData.province));
-            const districtName = await getDistrictName(addressData.district);
-            const wardName = await getWardName(addressData.district, addressData.ward);
-
-            document.getElementById("province").textContent = provinceName;
-            document.getElementById("district").textContent = districtName;
-            document.getElementById("ward").textContent = wardName;
-            document.getElementById("viewTen").textContent = addressData.ten;
-            document.getElementById("viewSDT").textContent = addressData.sdt;
-            //document.getElementById("addressID").textContent = addressData.id;
-
-            let macDinh = addressData.defaultValue;
-            let theSpan = document.getElementById("Default");
-
-            if (theSpan) {
-                if (macDinh) {
-                    //theSpan.style.backgroundColor = "orange";
-                    theSpan.style.color = "red";
-                    theSpan.textContent = "Mặc định";
-                } else {
-                    // theSpan.style.backgroundColor = "#1cc88a";
-                    theSpan.style.color = "orange";
-                    theSpan.textContent = "Mới chọn";
-                    //  theSpan.style.display = "none"
-                }
-            }
-
-            // Hiển thị lên bill
-            let billAddressInput = document.getElementById("billAddressID");
-            if (billAddressInput) {
-                billAddressInput.value = addressData.id;
-            }
-            checkDiaChi()
-        } catch (error) {
-            console.error("Lỗi khi xử lý địa chỉ:", error);
-        }
+        return;
     }
+
+    try {
+        const provinceName = await getProvinceName(parseInt(addressData.province));
+        const districtName = await getDistrictName(addressData.district);
+        const wardName = await getWardName(addressData.district, addressData.ward);
+
+        document.getElementById("province").textContent = provinceName;
+        document.getElementById("district").textContent = districtName;
+        document.getElementById("ward").textContent = wardName;
+        document.getElementById("viewTen").textContent = addressData.ten;
+        document.getElementById("viewSDT").textContent = addressData.sdt;
+        //document.getElementById("addressID").textContent = addressData.id;
+
+        let macDinh = addressData.defaultValue;
+        let theSpan = document.getElementById("Default");
+
+        if (theSpan) {
+            if (macDinh) {
+                //theSpan.style.backgroundColor = "orange";
+                theSpan.style.color = "red";
+                theSpan.textContent = "Mặc định";
+            } else {
+                // theSpan.style.backgroundColor = "#1cc88a";
+                theSpan.style.color = "orange";
+                theSpan.textContent = "Mới chọn";
+                //  theSpan.style.display = "none"
+            }
+        }
+
+        // Hiển thị lên bill
+        let billAddressInput = document.getElementById("billAddressID");
+        if (billAddressInput) {
+            billAddressInput.value = addressData.id;
+        }
+    } catch (error) {
+        console.error("Lỗi khi xử lý địa chỉ:", error);
+    }
+
+
 }
 
 // lay id dia chi trong danh sach dia chi
@@ -99,7 +97,6 @@ async function findDiaChiById(id) {
             Object.assign(addressData, newAddress)
             displayAddress(addressData)
             calculateShippingFee()
-            checkDiaChi()
         })
         .catch(error => {
             console.error("Lỗi:", error);
@@ -302,13 +299,13 @@ $(document).ready(function () {
                 isValid = false;
             }
 
-            // Kiểm tra Số Điện Thoại (phải là số điện thoại Việt Nam)
-            let phonePattern = /^(?:\+84|0)(3[2-9]|5[2689]|7[0-9]|8[1-9]|9[0-9])\d{7}$/;
+            // Kiểm tra Số Điện Thoại
+            let phonePattern = /^[0-9]{10}$/;
             if (phone === "") {
                 $("#showErrorSDT").text("Vui lòng nhập số điện thoại.");
                 isValid = false;
             } else if (!phonePattern.test(phone)) {
-                $("#showErrorSDT").text("Số điện thoại không hợp lệ! Vui lòng nhập số điện thoại Việt Nam.");
+                $("#showErrorSDT").text("Số điện thoại không hợp lệ! Vui lòng nhập 10 chữ số.");
                 isValid = false;
             }
 
@@ -534,17 +531,9 @@ function convertVNDToNumber(formattedVND) {
     return Number(formattedVND.replace(/[^0-9]/g, ""));
 }
 
-function checkDiaChi() {
-    let diaChiCheck = document.getElementById("billAddressID").value
-    if (diaChiCheck != null && diaChiCheck.trim().length > 0) {
-        document.getElementById("btnDatHang").style.display = "block"
-    } else {
-        document.getElementById("btnDatHang").style.display = "none"
-    }
-}
-
 findDiaChiByIdCustomer(customerId);
 findAllListDiaChiById(customerId);
+
 // confirm
 document.getElementById("formDatHang").addEventListener("submit", function () {
     event.preventDefault(); // Ngăn form gửi đi ngay lập tức

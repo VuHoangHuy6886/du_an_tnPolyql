@@ -22,7 +22,7 @@ public class KhachHang {
     private Integer id;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "TAI_KHOAN_ID", nullable = false)
     private TaiKhoan taiKhoan;
 

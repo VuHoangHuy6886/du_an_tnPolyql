@@ -5,6 +5,9 @@ import com.poliqlo.controllers.admin.ban_hang.model.request.HoaDonDto;
 import com.poliqlo.controllers.admin.ban_hang.model.response.KhachHangDto;
 import com.poliqlo.controllers.admin.ban_hang.model.response.PhieuGiamGiaDto;
 import com.poliqlo.controllers.admin.ban_hang.repository.impl.SanPhamRepositoryImpl;
+import com.poliqlo.controllers.admin.chi_tiet_san_pham.service.SanPhamChiTietService;
+import com.poliqlo.controllers.common.api.service.SanPhamAPIService;
+import com.poliqlo.controllers.common.auth.service.AuthService;
 import com.poliqlo.models.KhachHang;
 import com.poliqlo.models.LichSuHoaDon;
 import com.poliqlo.repositories.HoaDonRepository;
@@ -14,6 +17,7 @@ import com.poliqlo.repositories.SanPhamChiTietRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -38,6 +42,9 @@ public class BanHangController {
     private final PhieuGiamGiaRepository phieuGiamGiaRepository;
     private final HoaDonRepository hoaDonRepository;
     private final SanPhamChiTietRepository sanPhamChiTietRepository;
+    private final SanPhamChiTietService sanPhamChiTietService;
+    private final SanPhamAPIService sanPhamAPIService;
+    private final AuthService authService;
 //    private final MaGiamGiaRepository maGiamGiaRepository;
 //    private final ImeiRepository imeiRepository;
 //    private final SanPhamChiTietRepository sanPhamChiTietRepository;
@@ -97,6 +104,20 @@ public class BanHangController {
         return ResponseEntity.ok(phieuGiamGias);
     }
 
+    @GetMapping("/admin/api/v1/sale/san-pham/san-pham-chi-tiet/{barcode}")
+    public ResponseEntity<?> getSanPhamCTietAPIResponseResponseEntity(
+            @PathVariable String barcode
+    ) {
+        var id=sanPhamChiTietRepository.findFirstByBarcode((barcode), Limit.of(1));
+        if(id.isPresent()){
+            return sanPhamAPIService.findSPCTById(id.get());
+        }else{
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+    }
+
+
+
     @PutMapping("/admin/api/v1/sale")
     @ResponseBody
     @Transactional
@@ -112,7 +133,7 @@ public class BanHangController {
         }
         newHoaDon.setNgayNhanHang(LocalDateTime.now());
         var lshd = new LichSuHoaDon();
-        lshd.setMoTa("Hóa đơn mua hàng tại quầy");
+        lshd.setMoTa("Hóa đơn mua hàng tại quầy được xử lý bởi " + authService.getCurrentUsername().orElse("hệ thống"));
         lshd.setTieuDe("Hóa đơn mua hàng tại quầy");
         lshd.setThoiGian(LocalDateTime.now());
 
@@ -132,8 +153,7 @@ public class BanHangController {
                 .toList()
         );
 
-
         var resp = hoaDonRepository.save(newHoaDon);
-        return ResponseEntity.ok(null);
+        return ResponseEntity.ok(resp.getId());
     }
 }

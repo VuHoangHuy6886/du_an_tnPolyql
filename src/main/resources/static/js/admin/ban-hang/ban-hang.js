@@ -1650,7 +1650,7 @@ function loadToOffcanvas(idSp) {
             let mauSacId = $(this).attr('ms-id');
             
             let imgSP=currentProduct.anhs.find(img=>img.mauSacId==mauSacId&img.isDefault)?.url||currentProduct.anhUrl
-            $('#offcanvas-check-out img:first-child').attr('src',imgSP)
+            $('#img-preview').attr('src',imgSP)
             currentProduct.sanPhamChiTiets.filter(spct=>spct.mauSac.id==mauSacId).sort((ct1,ct2)=>ct1.kichThuoc.ten.localeCompare(ct2.kichThuoc.ten)).forEach(
                 spct=>{
                     btnKichThuoc += `
@@ -2091,10 +2091,46 @@ document.addEventListener("keydown", function (event) {
     }
 });
 $(document).ready(() => {
-    document.getElementById('barcodeInput').addEventListener("input", function () {
-        console.log(this.value);
+    let barcode = "";
+    let timeout = null;
+
+    document.getElementById('barcodeInput').addEventListener("input", function (event) {
+        clearTimeout(timeout);
+        barcode = this.value;
+
+        timeout = setTimeout(() => {
+            addToCartByBarCode(barcode);
+        }, 200);
+    });
+
+    document.getElementById('barcodeInput').addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+            clearTimeout(timeout);
+            addToCartByBarCode(this.value);
+        }
     });
 });
+function addToCartByBarCode(barcode){
+
+    $.ajax({
+        url: `/admin/api/v1/sale/san-pham/san-pham-chi-tiet/${barcode}`,
+        type: 'GET',
+        success: function (response) {
+            if(response){
+                let crrProduct =_mapProductDetail.get(response.id+"");
+                if(crrProduct){
+                }else{
+                    _mapProductDetail.set(response.id+"",response);
+                }
+                addToCart(response.id+"",1,response.ten)
+            }
+        },
+        error: function (xhr, status, error) {
+            console.log(error);
+        }
+    });
+    document.getElementById('barcodeInput').value="";
+}
 
 
 function updateBillStep2(soTienThanhToan,soTienGiam){
@@ -2226,6 +2262,8 @@ $(document).ready(()=>{
                 }))
             }
             console.log(formData)
+            debugger
+            printInvoiceFromObject(formData)
             // Nếu form hợp lệ, gửi dữ liệu form lên server
             $.ajax({
                 url: '/admin/api/v1/sale', // Thay 'URL_API' bằng đường dẫn của API của bạn
@@ -2254,3 +2292,71 @@ $(document).ready(()=>{
 
 
 })
+function printInvoiceFromObject(invoice) {
+    let date = new Date(invoice.ngayNhanHang).toLocaleString();
+    let tenNguoiNhan = removeVietnameseAccents(invoice.tenNguoiNhan || "Khach le");
+    let soDienThoai = invoice.soDienThoai || "Khong co";
+    let phuongThucThanhToan = removeVietnameseAccents(invoice.phuongThucThanhToan);
+    let trangThai = removeVietnameseAccents(invoice.trangThai);
+    let giamMaGiamGia = invoice.giamMaGiamGia ? `-${invoice.giamMaGiamGia.toLocaleString()} VND` : "0 VND";
+    let phiVanChuyen = invoice.phiVanChuyen ? `${invoice.phiVanChuyen.toLocaleString()} VND` : "Mien phi";
+
+    let content = `
+        <html>
+        <head>
+            <title>Hoa Don Ban Hang</title>
+            <style>
+                body { font-family: 'Courier New', monospace; font-size: 14px; padding: 10px; text-align: center; }
+                h2 { text-transform: uppercase; }
+                .invoice { border: 1px dashed #000; padding: 10px; display: inline-block; text-align: left; }
+                .invoice table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                .invoice th, .invoice td { padding: 5px; border-bottom: 1px dashed #000; text-align: left; }
+                .invoice-footer { margin-top: 10px; font-weight: bold; }
+                .right { text-align: right; }
+            </style>
+        </head>
+        <body>
+            <div class="invoice">
+                <h2>HOA DON BAN HANG</h2>
+                <p><strong>Ngay nhan hang:</strong> ${date}</p>
+                <p><strong>Khach hang:</strong> ${tenNguoiNhan} (${soDienThoai})</p>
+                <p><strong>Phuong thuc thanh toan:</strong> ${phuongThucThanhToan}</p>
+                <p><strong>Trang thai:</strong> ${trangThai}</p>
+
+                <h3>Chi tiet don hang</h3>
+                <table>
+                    <tr>
+                        <th>ID SP</th>
+                        <th>SL</th>
+                        <th class="right">Gia</th>
+                    </tr>
+                    ${invoice.hoaDonChiTiets.map(item => `
+                        <tr>
+                            <td>${item.sanPhamChiTietId}</td>
+                            <td>${item.soLuong}</td>
+                            <td class="right">${item.giaKhuyenMai.toLocaleString()} VND</td>
+                        </tr>
+                    `).join("")}
+                </table>
+
+                <div class="invoice-footer">
+                    <p><strong>Phi van chuyen:</strong> ${phiVanChuyen}</p>
+                    <p><strong>Giam gia:</strong> ${giamMaGiamGia}</p>
+                    <p><strong>Tong tien:</strong> ${invoice.tongTien.toLocaleString()} VND</p>
+                </div>
+            </div>
+        </body>
+        </html>
+    `;
+
+    let printWindow = window.open("", "", "width=350,height=600");
+    printWindow.document.write(content);
+    printWindow.document.close();
+    printWindow.print();
+}
+function removeVietnameseAccents(str) {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/đ/g, "d").replace(/Đ/g, "D");
+}
+
+

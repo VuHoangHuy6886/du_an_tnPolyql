@@ -1,8 +1,10 @@
 package com.poliqlo.controllers.client.carts;
 
 import com.poliqlo.controllers.client.carts.dto.*;
+import com.poliqlo.controllers.client.carts.mapper.CartDetailMapper;
 import com.poliqlo.controllers.client.carts.service.CartDetailService;
 import com.poliqlo.models.DiaChi;
+import com.poliqlo.models.KhachHang;
 import com.poliqlo.models.PhieuGiamGia;
 import com.poliqlo.repositories.DiaChiRepository;
 import com.poliqlo.repositories.KhachHangRepository;
@@ -146,6 +148,7 @@ public class CartClientController {
         model.addAttribute("carts", responseDTOList);
         model.addAttribute("totalPrice", totalPrice);
         model.addAttribute("tongTienSauKhiApDungVoucher", tongTien);
+
         return "client/payment";
     }
 

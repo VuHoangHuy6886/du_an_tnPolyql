@@ -49,7 +49,6 @@ public class DotGiamGiaService {
 
     public String add(AddDotGiamGiaRequest request, List<Integer> ids) {
         DotGiamGia dotGiamGia = mapper.toDotGiamGia(request, genMa());
-        String ma = genMa();
         DotGiamGia result = dotGiamGiaRepository.save(dotGiamGia);
         // apply to product detail
         for (int i = 0; i < ids.toArray().length; i++) {
@@ -111,7 +110,7 @@ public class DotGiamGiaService {
     }
 
     public String genMa() {
-        return dotGiamGiaRepository.findNextMa();
+        return dotGiamGiaRepository.generateMaDotGiamGia();
     }
 
     // function update status discount by scheduler
@@ -125,6 +124,8 @@ public class DotGiamGiaService {
                 if (!status.equals(dgg.getTrangThai())) {
                     dgg.setTrangThai(DiscountStatusUtil.getStatus(startTime, endTime, false));
                     dotGiamGiaRepository.save(dgg);
+                } else {
+                    System.out.println("sắp diễn ra ko có j thay đổi");
                 }
             } else if (timeNow.isAfter(endTime)) {
                 // check trạng thái
