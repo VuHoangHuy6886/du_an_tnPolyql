@@ -881,7 +881,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         })
                         .then(() => {
                             Swal.fire('Thành công', 'Cập nhật số lượng thành công!', 'success');
-                            $('#addProductModal').modal('hide');
+                            $('#addCartModal').modal('hide');
                             fetchOrderDetails();
                         })
                         .catch(error => {
@@ -899,11 +899,8 @@ document.addEventListener("DOMContentLoaded", function() {
                             return response.json();
                         })
                         .then(result => {
-                            const detail = result;
-                            const logMsg = `Thêm mới "${detail.tenSanPham} - ${detail.mauSac?.ten || ""} - ${detail.kichThuoc?.ten || ""}" với số lượng ${detail.soLuong}`;
-                            addHistoryLog("Thêm sản phẩm", logMsg);
                             Swal.fire('Thành công', 'Thêm sản phẩm thành công!', 'success');
-                            $('#addProductModal').modal('hide');
+                            $('#addCartModal').modal('hide');
                             fetchOrderDetails();
                         })
                         .catch(error => {

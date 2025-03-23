@@ -552,7 +552,7 @@ $("#modal-form").on("submit", function(e) {
 
     // Tính giá hiệu quả dựa trên khuyến mại nếu có
     var effectivePrice = matchingDetail.giaBan;
-    if (matchingDetail.isPromotionProduct && matchingDetail.dotGiamGia && isDiscountActive(matchingDetail)) {
+    if (matchingDetail.isPromotionProduct) {
         if (matchingDetail.dotGiamGia.loaiChietKhau === 'PHAN_TRAM') {
             effectivePrice = matchingDetail.giaChietKhau;
         } else {
@@ -572,7 +572,6 @@ $("#modal-form").on("submit", function(e) {
 
     var info = {
         idSanPhamChiTiet: parseInt(matchingDetail.id),
-        idKhachHang: 1,
         soLuong: parseInt(quantity),
     };
     console.log("Thông tin giỏ hàng:", info);

@@ -1,5 +1,7 @@
 package com.poliqlo.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -22,6 +24,7 @@ public class HoaDonChiTiet {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "HOA_DON_ID", nullable = false)
+    @JsonBackReference
     private HoaDon hoaDon;
 
     @NotNull

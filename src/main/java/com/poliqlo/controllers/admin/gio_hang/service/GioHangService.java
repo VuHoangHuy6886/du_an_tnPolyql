@@ -1,6 +1,7 @@
 package com.poliqlo.controllers.admin.gio_hang.service;
 
 import com.poliqlo.controllers.admin.gio_hang.model.response.Response;
+import com.poliqlo.controllers.common.auth.service.AuthService;
 import com.poliqlo.controllers.common.file.service.BlobStoreService;
 import com.poliqlo.models.GioHangChiTiet;
 import com.poliqlo.models.KhachHang;
@@ -35,12 +36,14 @@ public class GioHangService {
     private KhachHangRepository khachHangRepository;
     @Autowired
     private SanPhamChiTietRepository sanPhamChiTietRepository;
+    @Autowired
+    private AuthService authService;
 
     public void saveGioHangChiTiet(GioHangChiTiet gioHang) {
         gioHangChiTietRepository.save(gioHang);
     }
     public GioHangChiTiet addToCart(Response request) {
-        KhachHang khachHang = khachHangRepository.findById(request.getIdKhachHang())
+        KhachHang khachHang = khachHangRepository.findById(authService.getCurrentUserDetails().get().getKhachHang().getId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng"));
 
         SanPhamChiTiet sanPhamChiTiet = sanPhamChiTietRepository.findById(request.getIdSanPhamChiTiet())

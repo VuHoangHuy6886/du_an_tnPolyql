@@ -2,6 +2,7 @@ package com.poliqlo.controllers.admin.xu_ly_don_hang.service;
 
 
 import com.poliqlo.controllers.admin.xu_ly_don_hang.model.request.*;
+import com.poliqlo.controllers.common.auth.service.AuthService;
 import com.poliqlo.models.*;
 import com.poliqlo.repositories.*;
 import jakarta.transaction.Transactional;
@@ -32,6 +33,9 @@ public class OrderService {
     private SanPhamChiTietRepository sanPhamChiTietRepository;
     @Autowired
     private SanPhamRepository sanPhamRepository;
+    @Autowired
+    private AuthService authService;
+
 
     public Optional<HoaDon> getOrderById(Integer id) {
         return hoaDonRepository.findById(id);
@@ -110,8 +114,9 @@ public class OrderService {
         recalcHoaDonTotal(hoaDon);
         detail.setSoLuong(newQty);
         HoaDonChiTiet updatedDetail = hoaDonChiTietRepository.save(detail);
+         Integer idTaiKhoan=authService.getCurrentUserDetails().get().getKhachHang().getId();
         String logMsg = String.format("Cập nhật số lượng sản phẩm");
-        addHistoryLog(orderId, "Cập nhật số lượng", logMsg, 1);
+        addHistoryLog(orderId, "Cập nhật số lượng", logMsg, idTaiKhoan);
 
         return updatedDetail;
     }
@@ -183,7 +188,7 @@ public class OrderService {
         order.setGhiChu(orderData.getGhiChu());
         recalcHoaDonTotal(order);
         HoaDon updated = hoaDonRepository.save(order);
-        addHistory(orderId, 1, "Cập nhật thông tin", "Cập nhật thông tin người nhận và phí vận chuyển");
+        addHistory(orderId, authService.getCurrentUserDetails().get().getKhachHang().getId(), "Cập nhật thông tin", "Cập nhật thông tin người nhận và phí vận chuyển");
         return updated;
     }
 
@@ -215,8 +220,7 @@ public class OrderService {
 
         // Ghi log lịch sử cập nhật
         String logMsg = "Cập nhật thông tin người nhận thành";
-        // Giả sử tài khoản thực hiện có ID mặc định là 1
-        addHistoryLog(orderId, "Cập nhật thông tin", logMsg, 1);
+        addHistoryLog(orderId, "Cập nhật thông tin", logMsg, authService.getCurrentUserDetails().get().getKhachHang().getId());
 
         return updatedOrder;
     }
@@ -258,7 +262,7 @@ public class OrderService {
         String logMsg = "Hủy đơn hàng: chuyển trạng thái từ "
                 + TrangThaiUtils.convertTrangThai(oldStatus)
                 + " sang Đã hủy";
-        addHistoryLog(orderId, "Hủy đơn hàng", logMsg, 1);
+        addHistoryLog(orderId, "Hủy đơn hàng", logMsg, authService.getCurrentUserDetails().get().getKhachHang().getId());
         return updatedOrder;
     }
     // Xóa sản phẩm (soft delete) và log
@@ -296,7 +300,7 @@ public class OrderService {
         String logMsg = "Xóa sản phẩm ";
 
         // Ghi log lịch sử
-        addHistoryLog(orderId, "Xóa sản phẩm", logMsg, 1);
+        addHistoryLog(orderId, "Xóa sản phẩm", logMsg, authService.getCurrentUserDetails().get().getKhachHang().getId());
 
         return detail;
     }
@@ -333,7 +337,7 @@ public class OrderService {
         String logMsg = "Hoàn tác sản phẩm ";
 
         // Ghi log lịch sử
-        addHistoryLog(orderId, "Hoàn tác sản phẩm", logMsg, 1);
+        addHistoryLog(orderId, "Hoàn tác sản phẩm", logMsg, authService.getCurrentUserDetails().get().getKhachHang().getId());
 
         return detail;
     }
@@ -422,7 +426,7 @@ public class OrderService {
             // Ghi log lịch sử
             String logMsg = "Cập nhật số lượng sản phẩm \"" + productDetail.getSanPham().getTen() + "\" từ "
                     + (newQuantity - dto.getSoLuong()) + " lên " + newQuantity;
-            addHistoryLog(orderId, "Cập nhật số lượng sản phẩm", logMsg, 1);
+            addHistoryLog(orderId, "Cập nhật số lượng sản phẩm", logMsg, authService.getCurrentUserDetails().get().getKhachHang().getId());
 
             // Cập nhật tổng tiền đơn hàng (nếu cần)
             // recalcOrderTotal(order); -> nếu có logic tính lại tổng tiền
@@ -448,7 +452,7 @@ public class OrderService {
 
             // Ghi log lịch sử
             String logMsg = "Thêm mới sản phẩm \"" + productDetail.getSanPham().getTen() + "\" với số lượng " + dto.getSoLuong();
-            addHistoryLog(orderId, "Thêm sản phẩm", logMsg, 1);
+            addHistoryLog(orderId, "Thêm sản phẩm", logMsg, authService.getCurrentUserDetails().get().getKhachHang().getId());
 
             // Cập nhật tổng tiền đơn hàng
             // recalcOrderTotal(order); -> nếu có logic tính lại tổng tiền

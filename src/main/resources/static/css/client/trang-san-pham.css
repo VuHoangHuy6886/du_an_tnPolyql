@@ -1,0 +1,67 @@
+/* Sidebar Filter */
+.filter-sidebar {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.filter-sidebar h4 {
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+.filter-sidebar label {
+    font-weight: 500;
+}
+/* Product Card */
+.product-card {
+    margin-bottom: 20px;
+}
+.product-card .card-img-top {
+    width: 100%;
+    height: 250px; /* Fixed height */
+    object-fit: contain; /* Hiển thị đầy đủ hình ảnh, không cắt xén */
+    background-color: #fff;
+}
+/* Grid sản phẩm */
+.product-grid {
+    margin-top: 20px;
+}
+/* Slider style */
+#price-slider {
+    margin-top: 10px;
+}
+/* Icon trong nút */
+.btn i {
+    margin-right: 5px;
+}
+/* Pagination */
+#pagination-container {
+    margin-top: 20px;
+}
+/* Modal variant options button styles */
+.variant-label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+.color-options, .size-options {
+    display: flex;
+    flex-wrap: wrap;
+}
+.color-swatch, .size-swatch {
+    border: 1px solid #ccc;
+    padding: 8px 12px;
+    margin: 5px 5px 0 0;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+.color-swatch.active, .size-swatch.active {
+    border-color: #007bff;
+    background-color: #007bff;
+    color: #fff;
+}
+.color-swatch[disabled], .size-swatch[disabled] {
+    opacity: 0.5;
+    pointer-events: none;
+}
