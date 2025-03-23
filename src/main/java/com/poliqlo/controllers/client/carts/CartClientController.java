@@ -140,12 +140,13 @@ public class CartClientController {
         billRequestDTO.setCartDetailIds(ids);
         billRequestDTO.setCustomerId(String.valueOf(customerId));
         billRequestDTO.setVoucherId(String.valueOf(voucherId));
-
+        if (diaChi != null) {
+            model.addAttribute("diachi", diaChi);
+        }
         model.addAttribute("bill", billRequestDTO);
         model.addAttribute("voucher", phieuGiamGia);
         model.addAttribute("customerId", customerId);
         model.addAttribute("listAddress", diaChiList);
-        model.addAttribute("diachi", diaChi);
         model.addAttribute("totalQuantity", totalQuantity);
         model.addAttribute("carts", responseDTOList);
         model.addAttribute("totalPrice", totalPrice);

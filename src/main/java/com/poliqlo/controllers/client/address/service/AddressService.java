@@ -17,12 +17,18 @@ public class AddressService {    // get dia chi
 
     public AddressResponseDTO findDiaChiByIdCustomer(Integer id) {
         DiaChi diaChi = diaChiRepository.findAddressDefault(id);
-        return AddressMapper.diaChiToAddress(diaChi);
+        if (diaChi != null) {
+            return AddressMapper.diaChiToAddress(diaChi);
+        }
+        return null;
     }
 
     public AddressResponseDTO findDiaChiById(Integer id) {
         DiaChi diaChi = diaChiRepository.findDiaChiById(id);
-        return AddressMapper.diaChiToAddress(diaChi);
+        if (diaChi != null) {
+            return AddressMapper.diaChiToAddress(diaChi);
+        }
+        return null;
     }
 
     public List<AddressResponseDTO> findAllDiaChi(Integer id) {
