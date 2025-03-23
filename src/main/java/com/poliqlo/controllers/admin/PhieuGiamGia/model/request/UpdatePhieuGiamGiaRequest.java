@@ -18,7 +18,7 @@ public class UpdatePhieuGiamGiaRequest {
 
     private String ma;
 
-    @NotBlank(message = "Ten luong duoc de trong")
+    @NotBlank(message = "Ten khong duoc de trong")
     private String ten;
 
     @NotBlank(message = "So luong Khong duoc de trong")

@@ -248,11 +248,11 @@ findAll = (id) => {
                 let province = item.provinceId
                 let defaultVL = item.defaultValue
                 let addressDetail = item.addressStr
-                showAddress(id, name, phone, province, district, ward.toString(), defaultVL,addressDetail)
+                showAddress(id, name, phone, province, district, ward.toString(), defaultVL, addressDetail)
             })
         }).catch(err => console.log(err));
 }
-showAddress = async (id, name, phone, province, district, ward, defaultValue,addressDetail) => {
+showAddress = async (id, name, phone, province, district, ward, defaultValue, addressDetail) => {
     let liTag = document.createElement("li");
     liTag.classList.add("list-group-item", "d-flex", "border", "justify-content-between", "align-items-center");
 
@@ -389,6 +389,7 @@ async function editAddress(id) {
     $("#editAddressModal").modal("show");
 }
 
+//them
 $(document).ready(function () {
     loadTinhCr();
 
@@ -420,20 +421,36 @@ $(document).ready(function () {
         let xaCreate = $("#xaCreate").val();
         let addressDetail = $("#diaChiChiTietCreate").val().trim();
 
-        let phoneRegex = /^(0\d{9}|\+84\d{9})$/; // Kiểm tra số điện thoại Việt Nam
 
+        let nameRegex = /^[\p{L}\s]+$/u; // Chỉ cho phép chữ cái và dấu cách, hỗ trợ tiếng Việt
+        let phoneRegex = /^(0[35789])[0-9]{8}$/;
+        let numberOnlyRegex = /^\d+$/; // Chỉ chứa số
+
+        //TEN
         if (!tenNgNhan) {
             isValid = false;
             $("#tenNguoiNhan").after('<p class="error-message text-danger">Vui lòng nhập tên người nhận!</p>');
+        } else if (!nameRegex.test(tenNgNhan)) {
+            isValid = false;
+            $("#tenNguoiNhan").after('<p class="error-message text-danger">Tên người nhận chỉ được chứa chữ cái và dấu cách!</p>');
+        } else if (/^\s+$/.test(tenNgNhan)) {
+            isValid = false;
+            $("#tenNguoiNhan").after('<p class="error-message text-danger">Tên người nhận không được chỉ chứa dấu cách!</p>');
         }
 
+
+        //SDT
         if (!soDienThoai) {
             isValid = false;
             $("#soDienThoai").after('<p class="error-message text-danger">Vui lòng nhập số điện thoại!</p>');
+        } else if (!numberOnlyRegex.test(soDienThoai)) {
+            isValid = false;
+            $("#soDienThoai").after('<p class="error-message text-danger">Số điện thoại chỉ được chứa số!</p>');
         } else if (!phoneRegex.test(soDienThoai)) {
             isValid = false;
-            $("#soDienThoai").after('<p class="error-message text-danger">Số điện thoại không hợp lệ!</p>');
+            $("#soDienThoai").after('<p class="error-message text-danger">Số điện thoại không hợp lệ! Vui lòng nhập số bắt đầu bằng 03, 05, 07, 08, 09.</p>');
         }
+
 
         if (!tinhCreate) {
             isValid = false;
@@ -455,7 +472,7 @@ $(document).ready(function () {
             $("#diaChiChiTietCreate").after('<p class="error-message text-danger">Vui lòng nhập địa chỉ chi tiết!</p>');
         }
 
-        // ✅ Nếu không hợp lệ, dừng lại và không đóng modal
+        //Nếu không hợp lệ, dừng lại và không đóng modal
         if (!isValid) return;
 
         const data = {
@@ -473,6 +490,8 @@ $(document).ready(function () {
         $("#addressModal").modal("hide");
     });
 });
+
+
 $("#editTinh").change(function () {
     let provinceId = $(this).val();
     console.log("Tỉnh được chọn:", provinceId);
@@ -490,6 +509,8 @@ $("#editHuyen").change(function () {
         loadXa(districtId, "editXa");
     }
 });
+
+//SUA
 $("#saveEditAddress").click(function () {
     const tenNguoiNhan = $("#editTenNguoiNhan").val().trim();
     const soDienThoai = $("#editSoDienThoai").val().trim();
@@ -498,15 +519,42 @@ $("#saveEditAddress").click(function () {
     const wardID = $("#editXa").val();
     const addressStr = $("#editDiaChiChiTiet").val().trim();
 
-    // ✅ Kiểm tra rỗng
+    let nameRegex = /^[\p{L}\s]+$/u;
+    // Biểu thức regex kiểm tra số điện thoại Việt Nam (bắt đầu bằng 03, 05, 07, 08, 09)
+    let phoneRegex = /^(0[35789])[0-9]{8}$/;
+    // Biểu thức regex kiểm tra chỉ chứa số
+    let numberOnlyRegex = /^[0-9]+$/;
+
+
+    // Kiểm tra tên người nhận
     if (!tenNguoiNhan) {
         alert("Vui lòng nhập Tên Người Nhận!");
         return;
-    }
-    if (!soDienThoai) {
-        alert("Vui lòng nhập Số Điện Thoại!");
+    } else if (!nameRegex.test(tenNguoiNhan)) {
+        alert("Tên Người Nhận chỉ được chứa chữ cái và dấu cách!");
+        return;
+    } else if (/^\s+$/.test(tenNguoiNhan)) {
+        alert("Tên Người Nhận không được chỉ chứa dấu cách!");
         return;
     }
+
+
+    // Kiểm tra số điện thoại
+    if (!soDienThoai) {
+        isValid = false;
+        $("#editSoDienThoai").after('<p class="error-message text-danger">Vui lòng nhập số điện thoại!</p>');
+        return;
+    } else if (!numberOnlyRegex.test(soDienThoai)) {
+        isValid = false;
+        $("#editSoDienThoai").after('<p class="error-message text-danger">Số điện thoại chỉ được chứa số!</p>');
+        return;
+    } else if (!phoneRegex.test(soDienThoai)) {
+        isValid = false;
+        $("#editSoDienThoai").after('<p class="error-message text-danger">Số điện thoại không hợp lệ! Phải bắt đầu bằng 03, 05, 07, 08, 09 và có đúng 10 chữ số.</p>');
+        return;
+    }
+
+
     if (!provinceID) {
         alert("Vui lòng chọn Tỉnh/Thành phố!");
         return;
@@ -521,13 +569,6 @@ $("#saveEditAddress").click(function () {
     }
     if (!addressStr) {
         alert("Vui lòng nhập Địa chỉ chi tiết!");
-        return;
-    }
-
-    // ✅ Kiểm tra định dạng số điện thoại Việt Nam (10 số, bắt đầu bằng 0)
-    const phoneRegex = /^(0[3|5|7|8|9])([0-9]{8})$/;
-    if (!phoneRegex.test(soDienThoai)) {
-        alert("Số điện thoại không hợp lệ! Vui lòng nhập số điện thoại Việt Nam hợp lệ (VD: 0987654321)");
         return;
     }
 
@@ -551,8 +592,8 @@ $("#saveEditAddress").click(function () {
     })
         .then(res => res.text())
         .then(data => {
-            alert("Cập nhật thành công!");
             $("#editAddressModal").modal("hide");
+            alert("Cập nhật thành công !")
             mylist.innerText = ""; // Xóa danh sách cũ
             findAll(customerId); // Load lại danh sách
         })

@@ -6,27 +6,43 @@ document.addEventListener("DOMContentLoaded", function () {
     let radioGiaTien = document.getElementById("giatien");
     let inputGiamToiDa = document.querySelector("input[name='giamToiDa']");
 
+    // Khi nhập giá trị giảm
     inputGiaTriGiam.addEventListener("input", function () {
-        let giaTri = parseFloat(inputGiaTriGiam.value);
+        let giaTri = parseFloat(inputGiaTriGiam.value) || 0;
+
         if (radioPhanTram.checked && giaTri > 99) {
             alert("Giá Trị Giảm không được lớn hơn 99%.");
             inputGiaTriGiam.value = 99;
         }
-    });
 
-    radioPhanTram.addEventListener("change", function () {
-        console.log("chon %");
-        inputGiamToiDa.style.display = "block";
-    });
+        console.log("Giá trị giảm nhập vào:", inputGiaTriGiam.value);
 
-    radioGiaTien.addEventListener("change", function () {
-        console.log("chon giá tiền");
-        document.addEventListener("input", function () {
+        // Nếu chọn VND thì cập nhật luôn giảm tối đa
+        if (radioGiaTien.checked) {
             inputGiamToiDa.value = inputGiaTriGiam.value;
-        })
+            console.log("Giảm tối đa khi nhập (VNĐ):", inputGiamToiDa.value);
+        }
+    });
+
+    // Khi chọn %
+    radioPhanTram.addEventListener("change", function () {
+        inputGiaTriGiam.value = ''
+        console.log("Chọn %");
+        inputGiamToiDa.style.display = "block";
+        inputGiamToiDa.value = ""; // Không gán giá trị giảm vào input giảm tối đa
+        console.log("Giảm tối đa sau khi chọn %:", inputGiamToiDa.value);
+    });
+
+    // Khi chọn giá tiền
+    radioGiaTien.addEventListener("change", function () {
+        console.log("Chọn giá tiền");
         inputGiamToiDa.style.display = "none";
+        inputGiamToiDa.value = inputGiaTriGiam.value; // Cập nhật ngay lập tức
+        console.log("Giảm tối đa sau khi chọn giá tiền:", inputGiamToiDa.value);
     });
 });
+
+
 
 function toggleCheckbox(input) {
     let value = parseInt(input.value);
@@ -50,23 +66,22 @@ function validateForm() {
     let ngayBatDau = document.getElementById("ngayBatDau").value;
     let ngayKetThuc = document.getElementById("ngayKetThuc").value;
 
-    let regexTen = /^[a-zA-Z0-9\s]+$/; // Cho phép chữ cái, số và khoảng trắng
-
 
 // Kiểm tra tên phiếu giảm giá
-    function validateCouponName(ten) {
-        if (ten.trim() === "") {
-            alert("Tên Phiếu Giảm Giá không được để trống.");
-            return false;
-        }
+    let regexTen = /^[\p{L}0-9 %]+$/u;
 
-        if (!regexTen.test(ten)) {
-            alert("Tên Phiếu Giảm Giá chỉ có thể chứa chữ cái, số và khoảng trắng.");
-            return false;
-        }
-
-        alert("Tên Phiếu Giảm Giá hợp lệ!");
-        return true;
+    // Kiểm tra Tên
+    if (ten === "") {
+        alert("Tên không được để trống.");
+        return false;
+    }
+    if (ten.replace(/\s/g, "") === "") {
+        alert("Tên không được chỉ chứa dấu cách.");
+        return false;
+    }
+    if (!regexTen.test(ten)) {
+        alert("Tên chỉ được chứa chữ cái, số và ký tự '%'. Vui lòng nhập lại.");
+        return false;
     }
 
 

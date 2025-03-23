@@ -26,6 +26,7 @@ public class KhachHangClientController {
 
     @PostMapping("/update")
     public String updateTaiKhoanKhachHang(@ModelAttribute("Response") KhachHangResponseDTO responseDTO, Model model) {
+
         TaiKhoan taiKhoan = taiKhoanRepository.findById(responseDTO.getIdTaiKhoan()).get();
         KhachHang khachHang = KhachHangMapper.responseToEntityCustomer(responseDTO,taiKhoan);
         taiKhoan.setSoDienThoai(responseDTO.getSoDienThoai());
