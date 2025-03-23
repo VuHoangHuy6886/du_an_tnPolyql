@@ -77,9 +77,13 @@ public class DotGiamGiaController {
         }
         if (name.equals("")) {
             name = null;
+        } else {
+            name = name.trim();
         }
         if (status.equals("")) {
             status = null;
+        } else {
+            status = status.trim();
         }
         Page<DotGiamGia> pages = service.findAll(page, size, name, status, startTime, endTime);
         model.addAttribute("listProductIsDelete", service.findAllIsDeleteTrue());
@@ -97,7 +101,7 @@ public class DotGiamGiaController {
     @GetMapping("/admin/dot-giam-gia/form-add")
     public String formAdd(
             @RequestParam(value = "page", defaultValue = "0", required = false) String pageStr,
-            @RequestParam(value = "size", defaultValue = "2", required = false) String sizeStr,
+            @RequestParam(value = "size", defaultValue = "5", required = false) String sizeStr,
             @RequestParam(value = "name", defaultValue = "", required = false) String name,
             Model model) {
         int page, size;
@@ -106,10 +110,12 @@ public class DotGiamGiaController {
             size = Integer.parseInt(sizeStr);
         } catch (NumberFormatException e) {
             page = 0;
-            size = 2;
+            size = 5;
         }
         if (name.equals("")) {
             name = null;
+        }else {
+            name = name.trim();
         }
         model.addAttribute("DotGiamGiaNew", new AddDotGiamGiaRequest());
         model.addAttribute("products", service.findAllProduct(page, size, name));

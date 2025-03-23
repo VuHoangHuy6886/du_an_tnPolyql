@@ -143,7 +143,6 @@ public class CartClientController {
         if (diaChi != null) {
             model.addAttribute("diachi", diaChi);
         }
-
         model.addAttribute("bill", billRequestDTO);
         model.addAttribute("voucher", phieuGiamGia);
         model.addAttribute("customerId", customerId);

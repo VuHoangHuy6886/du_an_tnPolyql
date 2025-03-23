@@ -89,12 +89,18 @@ public class CartDetailService {
     public BigDecimal resultCalculationPercent(int phanTram, BigDecimal giamToiDa, BigDecimal giaGoc) {
         BigDecimal discountAmount = giaGoc.multiply(BigDecimal.valueOf(phanTram)).divide(BigDecimal.valueOf(100));
         BigDecimal actualDiscount = discountAmount.min(giamToiDa);
-        return giaGoc.subtract(actualDiscount);
+        BigDecimal giaSauGiam = giaGoc.subtract(actualDiscount);
+
+        // Đảm bảo giá sau giảm không nhỏ hơn 0
+        return giaSauGiam.max(BigDecimal.ZERO);
     }
 
     public BigDecimal resultCalculationMoney(BigDecimal soTienGiam, BigDecimal giamToiDa, BigDecimal giaGoc) {
         BigDecimal actualDiscount = soTienGiam.min(giamToiDa);
-        return giaGoc.subtract(actualDiscount);
+        BigDecimal giaSauGiam = giaGoc.subtract(actualDiscount);
+
+        // Đảm bảo giá sau giảm không nhỏ hơn 0
+        return giaSauGiam.max(BigDecimal.ZERO);
     }
 
     // the function checkout discount for product detail
