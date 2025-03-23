@@ -3,81 +3,131 @@ var selectedColor = null;
 var selectedSize = null;
 var currentProduct = null;
 var lastQuery = {};
-
-/***************** Load Filter Options *****************/
-function loadFilterOptions() {
-    // Dữ liệu mô phỏng – thay bằng AJAX nếu có API thật
-    var thuongHieuData = [
-        { id: 1, ten: "Adidas" },
-        { id: 2, ten: "Nike" }
-    ];
-    var danhMucData = [
-        { id: 1, ten: "Áo" },
-        { id: 2, ten: "Quần" },
-        { id: 3, ten: "Váy" }
-    ];
-    var chatLieuData = [
-        { id: 1, ten: "Cotton" },
-        { id: 2, ten: "Jean" }
-    ];
-    var kieuDangData = [
-        { id: 1, ten: "Áo thun" },
-        { id: 2, ten: "Quần jean" },
-        { id: 3, ten: "Váy hoa" }
-    ];
-    var mauSacData = [
-        { id: 1, ten: "Đỏ" },
-        { id: 2, ten: "Xanh" },
-        { id: 3, ten: "Đen" },
-        { id: 4, ten: "Trắng" }
-    ];
-
-    // Thêm tùy chọn mặc định cho các dropdown đơn
-    $("#thuongHieuSelect").append('<option value="">Tất cả</option>');
-    $("#chatLieuSelect").append('<option value="">Tất cả</option>');
-    $("#kieuDangSelect").append('<option value="">Tất cả</option>');
-    $("#mauSacSelect").append('<option value="">Tất cả</option>');
-
-    // Cho Danh Mục dạng multi-select
-    $("#danhMucSelect").append('<option value="">Tất cả</option>');
-
-    thuongHieuData.forEach(item => {
-        $("#thuongHieuSelect").append(`<option value="${item.id}">${item.ten}</option>`);
+$(document).ready(function() {
+    debugger
+    $('#thuongHieuSelect').select2({
+        placeholder: "Chọn thương hiệu",
+        allowClear: true
     });
-    danhMucData.forEach(item => {
-        $("#danhMucSelect").append(`<option value="${item.id}">${item.ten}</option>`);
+    $('#danhMucSelect').select2({
+        placeholder: "Chọn danh mục",
+        allowClear: true
     });
-    chatLieuData.forEach(item => {
-        $("#chatLieuSelect").append(`<option value="${item.id}">${item.ten}</option>`);
+    $('#chatLieuSelect').select2({
+        placeholder: "Chọn chất liệu",
+        allowClear: true
     });
-    kieuDangData.forEach(item => {
-        $("#kieuDangSelect").append(`<option value="${item.id}">${item.ten}</option>`);
+    $('#kieuDangSelect').select2({
+        placeholder: "Chọn kiểu dáng",
+        allowClear: true
     });
-    mauSacData.forEach(item => {
-        $("#mauSacSelect").append(`<option value="${item.id}">${item.ten}</option>`);
+    $('#mauSacSelect').select2({
+        placeholder: "Chọn màu sắc",
+        allowClear: true
     });
-}
+    $('#sortSelect').select2({
+        placeholder: "Chọn sắp xếp",
+        allowClear: true
+    });
+    var initialParams = getFilterParams();
+    fetchProducts(initialParams);
 
+    $("#filter-form").on("submit", function(e) {
+        e.preventDefault();
+        var queryParams = getFilterParams();
+        queryParams.page = 0;
+        fetchProducts(queryParams);
+    });
+
+    $("#filter-form").on("reset", function() {
+        setTimeout(function() {
+            $("#thuongHieuSelect, #chatLieuSelect, #kieuDangSelect, #mauSacSelect").val("");
+            $("#danhMucSelect").val("");
+            $("#sortSelect").val("");
+            $("[id^='price-']").prop("checked", false);
+            fetchProducts(getFilterParams());
+        }, 100);
+    });
+
+    $(document).on("click", ".add-to-cart-btn", function() {
+        var productData = $(this).data("product");
+        openAddToCartModal(productData);
+    });
+});
 /***************** Get Filter Parameters *****************/
 function getFilterParams() {
     var params = {};
+
+    // Thương hiệu
     var thuongHieu = $("#thuongHieuSelect").val();
-    if (thuongHieu) params.thuongHieuId = thuongHieu;
+    if (thuongHieu && thuongHieu.length > 0 && thuongHieu[0] !== "") {
+        params.thuongHieuId = thuongHieu;
+    }
+    // Danh mục
     var danhMuc = $("#danhMucSelect").val();
-    // Nếu có chọn nhiều danh mục và không chỉ chọn "Tất cả"
     if (danhMuc && danhMuc.length > 0 && !(danhMuc.length === 1 && danhMuc[0] === "")) {
         params.danhMucIds = danhMuc;
     }
+    // Chất liệu
     var chatLieu = $("#chatLieuSelect").val();
-    if (chatLieu) params.chatLieuId = chatLieu;
+    if (chatLieu && chatLieu.length > 0 && chatLieu[0] !== "") {
+        params.chatLieuId = chatLieu;
+    }
+    // Kiểu dáng
     var kieuDang = $("#kieuDangSelect").val();
-    if (kieuDang) params.kieuDangId = kieuDang;
+    if (kieuDang && kieuDang.length > 0 && kieuDang[0] !== "") {
+        params.kieuDangId = kieuDang;
+    }
+    // Màu sắc
     var mauSac = $("#mauSacSelect").val();
-    if (mauSac) params.mauSacId = mauSac;
+    if (mauSac && mauSac.length > 0 && mauSac[0] !== "") {
+        params.mauSacId = mauSac;
+    }
+    // Lọc giá
+    var selectedPriceRange = $("input[name='priceRange']:checked").val();
+    if (selectedPriceRange) {
+        if (selectedPriceRange === "0-200000") {
+            params.minPrice = 0;
+            params.maxPrice = 200000;
+        } else if (selectedPriceRange === "200000-500000") {
+            params.minPrice = 200000;
+            params.maxPrice = 500000;
+        } else if (selectedPriceRange === "500000-800000") {
+            params.minPrice = 500000;
+            params.maxPrice = 800000;
+        } else if (selectedPriceRange === "800000-") {
+            params.minPrice = 800000;
+            // Không cần maxPrice cho "Trên 800.000 VNĐ"
+        }
+    }
+    // Sắp xếp
+    var sort = $("#sortSelect").val();
+    if (sort) {
+        if(sort === 'priceAsc') {
+            params.orderBy = 'sanPhamChiTiets.giaBan';
+            params.sortDirection = 'asc';
+        } else if(sort === 'priceDesc') {
+            params.orderBy = 'sanPhamChiTiets.giaBan';
+            params.sortDirection = 'desc';
+        } else if(sort === 'nameAsc') {
+            params.orderBy = 'ten';
+            params.sortDirection = 'asc';
+        } else if(sort === 'nameDesc') {
+            params.orderBy = 'ten';
+            params.sortDirection = 'desc';
+        }
+    }
+    // Nếu URL có parameter "ten"
+    var urlParams = new URLSearchParams(window.location.search);
+    if(urlParams.has('ten')) {
+        params.ten = urlParams.get('ten');
+        $("#product-title").text("Sản phẩm có tên: " + params.ten);
+    } else {
+        $("#product-title").text("Tất cả sản phẩm");
+    }
+
     return params;
 }
-
-/***************** Render Products *****************/
 function renderProducts(data) {
     $("#product-container").empty();
     var products = data.content;
@@ -96,12 +146,12 @@ function renderProducts(data) {
         var card = $(`
           <div class="col-md-3 product-card mb-3">
             <div class="card h-100 shadow-sm">
-              <a href="http://localhost:8080/san-pham/${product.id}">
+              <a href="/san-pham/${product.id}">
                 <img src="${defaultImage}" class="card-img-top product-img" alt="${product.ten}" data-default="${defaultImage}" data-hover="${hoverImage}">
               </a>
               <div class="card-body d-flex flex-column">
                 <h5 class="card-title">
-                  <a href="http://localhost:8080/san-pham/${product.id}" class="text-decoration-none text-dark">${product.ten}</a>
+                  <a href="/san-pham/${product.id}" class="text-decoration-none text-dark">${product.ten}</a>
                 </h5>
                 <p class="card-text"><span>Giá: </span> ${minPrice.toLocaleString()} - ${maxPrice.toLocaleString()} VNĐ</p>
                 <p class="card-text"><i class="fas fa-boxes"></i> Tồn: ${product.soLuong.toLocaleString()}</p>
@@ -126,7 +176,7 @@ function renderProducts(data) {
     }
 }
 
-/***************** Fetch and Render Products *****************/
+
 function fetchProducts(queryParams) {
     queryParams.page = (typeof queryParams.page !== "undefined") ? queryParams.page : 0;
     queryParams.pageSize = 10;
@@ -135,7 +185,7 @@ function fetchProducts(queryParams) {
     $("#product-container").html('<div class="text-center my-3"><i class="fas fa-spinner fa-spin fa-2x"></i> Đang tải sản phẩm...</div>');
 
     $.ajax({
-        url: 'http://localhost:8080/api/san-pham',
+        url: '/api/san-pham',
         type: 'GET',
         data: queryParams,
         dataType: 'json',
@@ -153,7 +203,6 @@ function fetchProducts(queryParams) {
     });
 }
 
-/***************** Render Pagination *****************/
 function renderPagination(totalPages, currentPage) {
     var paginationHTML = '';
     paginationHTML += `<li class="page-item ${currentPage == 0 ? 'disabled' : ''}">
@@ -183,7 +232,6 @@ $(document).on("click", "#pagination-container a", function(e) {
     }
 });
 
-/***************** Modal: Add to Cart with Dependent Options and Carousel *****************/
 function openAddToCartModal(product) {
     currentProduct = product;
     $("#modal-product-name").text(product.ten);
@@ -362,19 +410,68 @@ function updateImages(prod) {
     }
 }
 
-// Cập nhật giá của biến thể đã chọn
 function updateMainPrice(prod) {
+    // Hàm định dạng tiền sang VND
+    function formatCurrency1(value) {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+    }
+
     if (selectedColor && selectedSize) {
         var matchingDetail = prod.sanPhamChiTiets.find(function(ct) {
             return ct.mauSac.ten === selectedColor && ct.kichThuoc.ten === selectedSize;
         });
         if (matchingDetail) {
-            $("#modal-price").text(matchingDetail.giaBan.toLocaleString() + " VNĐ");
+            var giaSanPhamHtml = '';
+            if (matchingDetail.isPromotionProduct) {
+                // Trường hợp khuyến mại
+                if (matchingDetail.dotGiamGia.loaiChietKhau === 'PHAN_TRAM') {
+                    giaSanPhamHtml = `
+                        <div class="p-0 d-flex align-items-end">
+                            <h5 class="me-3 mr-2">Giá gốc:</h5>
+                            <del class="h5 mt-2 price text-15 text-th">${formatCurrency1(matchingDetail.giaBan)}</del>
+                            <span class="ml-1" style="color: red;"> - ${matchingDetail.dotGiamGia.giaTriGiam}%</span>
+                        </div>
+                        <div class="p-0 d-flex align-items-end">
+                            <h5 class="me-3 p-0 mr-2" style="margin: 0;">Giá khuyến mại:</h5>
+                            <div class="p-0">
+                                <span class="h5 mt-2 price font-weight-bold">${formatCurrency1(matchingDetail.giaChietKhau)}</span>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Trường hợp khuyến mại theo giá trị tuyệt đối
+                    giaSanPhamHtml = `
+                        <div class="p-0 d-flex align-items-end">
+                            <h5 class="me-3">Giá gốc:</h5>
+                            <del class="h5 mt-2 price text-15 text-th">${formatCurrency1(matchingDetail.giaBan)}</del>
+                            <span class="ml-1"> - ${formatCurrency1(matchingDetail.dotGiamGia.giaTriGiam)}</span>
+                        </div>
+                        <div class="p-0 d-flex align-items-end">
+                            <h5 class="mt-2" style="margin: 0;">Giá khuyến mại:</h5>
+                            <div class="p-0">
+                                <span class="h5 mt-2 price font-weight-bold">${formatCurrency1(matchingDetail.giaBan - matchingDetail.dotGiamGia.giaTriGiam)}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            } else {
+                // Không có khuyến mại
+                giaSanPhamHtml = `
+                    <div class="p-0 d-flex align-items-end">
+                        <h5 class="me-3 p-0 m-0">Giá:</h5>
+                        <div class="p-0">
+                            <span class="h5 mt-2 price font-weight-bold">${formatCurrency1(matchingDetail.giaBan)}</span>
+                        </div>
+                    </div>
+                `;
+            }
+            $("#modal-price").html(giaSanPhamHtml);
             return;
         }
     }
     $("#modal-price").text("N/A");
 }
+
 
 // Cập nhật tổng tiền (giá x số lượng) và cảnh báo nếu vượt 5 triệu VNĐ
 function updateTotalAmount(prod) {
@@ -384,8 +481,17 @@ function updateTotalAmount(prod) {
         });
         if (matchingDetail) {
             var quantity = parseInt($("#modal-quantity").val(), 10) || 0;
-            var totalAmount = quantity * matchingDetail.giaBan;
-            $("#modal-total").text("Tổng tiền: "+totalAmount.toLocaleString() + " VNĐ");
+            // Xác định giá hiệu quả dựa trên khuyến mại
+            var effectivePrice = matchingDetail.giaBan;
+            if (matchingDetail.isPromotionProduct) {
+                if (matchingDetail.dotGiamGia.loaiChietKhau === 'PHAN_TRAM') {
+                    effectivePrice = matchingDetail.giaChietKhau;
+                } else {
+                    effectivePrice = matchingDetail.giaBan - matchingDetail.dotGiamGia.giaTriGiam;
+                }
+            }
+            var totalAmount = quantity * effectivePrice;
+            $("#modal-total").text("Tổng tiền: " + totalAmount.toLocaleString() + " VNĐ");
             if (totalAmount > 5000000) {
                 $("#modal-total-warning").text("Tổng tiền vượt quá 5 triệu VNĐ!").css("color", "red");
             } else {
@@ -398,6 +504,7 @@ function updateTotalAmount(prod) {
     $("#modal-total-warning").text("");
 }
 
+
 // Lắng nghe sự thay đổi của số lượng để cập nhật tổng tiền
 $("#modal-quantity").on("input", function() {
     if (currentProduct) updateTotalAmount(currentProduct);
@@ -408,47 +515,115 @@ $("#modal-form").on("submit", function(e) {
     e.preventDefault();
     var quantity = parseInt($("#modal-quantity").val(), 10);
     if (isNaN(quantity) || quantity < 1) {
-        Swal.fire({ icon: 'error', title: 'Lỗi!', text: 'Số lượng phải là số nguyên dương, ít nhất 1.' });
+        Swal.fire({
+            icon: 'error',
+            title: 'Lỗi!',
+            text: 'Số lượng phải là số nguyên dương, ít nhất 1.'
+        });
         return;
     }
     if (!selectedColor || !selectedSize) {
-        Swal.fire({ icon: 'error', title: 'Chưa chọn đủ!', text: 'Vui lòng chọn cả màu sắc và kích thước.' });
+        Swal.fire({
+            icon: 'error',
+            title: 'Chưa chọn đủ!',
+            text: 'Vui lòng chọn cả màu sắc và kích thước.'
+        });
         return;
     }
     var matchingDetail = currentProduct.sanPhamChiTiets.find(function(ct) {
         return ct.mauSac.ten === selectedColor && ct.kichThuoc.ten === selectedSize;
     });
     if (!matchingDetail) {
-        Swal.fire({ icon: 'error', title: 'Lỗi!', text: 'Không tìm thấy chi tiết sản phẩm phù hợp!' });
+        Swal.fire({
+            icon: 'error',
+            title: 'Lỗi!',
+            text: 'Không tìm thấy chi tiết sản phẩm phù hợp!'
+        });
         return;
     }
     if (matchingDetail.soLuong < quantity) {
-        Swal.fire({ icon: 'error', title: 'Hết hàng!', text: 'Số lượng tồn kho không đủ.' });
+        Swal.fire({
+            icon: 'error',
+            title: 'Hết hàng!',
+            text: 'Số lượng tồn kho không đủ.'
+        });
         return;
     }
-    var totalAmount = quantity * matchingDetail.giaBan;
+
+    // Tính giá hiệu quả dựa trên khuyến mại nếu có
+    var effectivePrice = matchingDetail.giaBan;
+    if (matchingDetail.isPromotionProduct && matchingDetail.dotGiamGia && isDiscountActive(matchingDetail)) {
+        if (matchingDetail.dotGiamGia.loaiChietKhau === 'PHAN_TRAM') {
+            effectivePrice = matchingDetail.giaChietKhau;
+        } else {
+            effectivePrice = matchingDetail.giaBan - matchingDetail.dotGiamGia.giaTriGiam;
+        }
+    }
+
+    var totalAmount = quantity * effectivePrice;
     if (totalAmount > 5000000) {
-        Swal.fire({ icon: 'error', title: 'Giới hạn mua!', text: 'Tổng tiền mua phải dưới 5 triệu VNĐ.' });
+        Swal.fire({
+            icon: 'error',
+            title: 'Giới hạn mua!',
+            text: 'Tổng tiền mua phải dưới 5 triệu VNĐ.'
+        });
         return;
     }
+
     var info = {
-        sanPhamChiTietId: matchingDetail.id,
-        mauSac: matchingDetail.mauSac.ten,
-        kichThuoc: matchingDetail.kichThuoc.ten,
-        soLuong: quantity,
-        gia: matchingDetail.giaBan,
-        tongTien: totalAmount
+        idSanPhamChiTiet: parseInt(matchingDetail.id),
+        idKhachHang: 1,
+        soLuong: parseInt(quantity),
     };
     console.log("Thông tin giỏ hàng:", info);
-    Swal.fire({ icon: 'success', title: 'Thành công!', text: 'Sản phẩm đã được thêm vào giỏ hàng.' });
-    $("#addCartModal").modal("hide");
+    fetch("/api/gio-hang", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(info),
+    })
+        .then(response => {
+            console.log("Response status:", response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log("Phản hồi từ API:", data);
+            if (data.id) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Thành công!",
+                    text: "Sản phẩm đã được thêm vào giỏ hàng.",
+                    showConfirmButton: false,
+                    timer: 1500,
+                });
+                $("#addCartModal").modal("hide");
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi",
+                    text: "Không thể thêm sản phẩm vào giỏ hàng.",
+                });
+            }
+        })
+        .catch(error => {
+            console.error("Lỗi API giỏ hàng:", error);
+            Swal.fire({
+                icon: "error",
+                title: "Lỗi hệ thống",
+                text: "Vui lòng thử lại sau.",
+            });
+        });
 });
+
 
 /***************** Các sự kiện khởi tạo *****************/
 $(document).ready(function() {
-    loadFilterOptions();
-    fetchProducts({});
+    // Khi load trang, lấy tham số lọc từ URL (nếu có) và gọi API
+    var initialParams = getFilterParams();
+    fetchProducts(initialParams);
 
+    // Sự kiện áp dụng filter khi submit form
     $("#filter-form").on("submit", function(e) {
         e.preventDefault();
         var queryParams = getFilterParams();
@@ -456,14 +631,18 @@ $(document).ready(function() {
         fetchProducts(queryParams);
     });
 
+    // Reset form filter và gọi lại API với các tham số rỗng (hoặc theo URL nếu có)
     $("#filter-form").on("reset", function() {
         setTimeout(function() {
             $("#thuongHieuSelect, #chatLieuSelect, #kieuDangSelect, #mauSacSelect").val("");
             $("#danhMucSelect").val("");
-            fetchProducts({});
+            $("#minPrice, #maxPrice, #sortSelect").val("");
+            $("input[name='priceRange']").prop("checked", false);
+            fetchProducts(getFilterParams());
         }, 100);
     });
 
+    // Mở modal thêm giỏ hàng khi click
     $(document).on("click", ".add-to-cart-btn", function() {
         var productData = $(this).data("product");
         openAddToCartModal(productData);

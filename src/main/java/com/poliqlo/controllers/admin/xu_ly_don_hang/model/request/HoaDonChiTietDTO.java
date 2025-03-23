@@ -16,6 +16,8 @@ public class HoaDonChiTietDTO {
     private Integer hoaDonId;
     private Integer sanPhamChiTietId;
     private String tenSanPham;
+    private String mauSac;
+    private String kichThuoc;
     private BigDecimal giaGoc;
     private BigDecimal giaKhuyenMai;
     private Integer soLuong;

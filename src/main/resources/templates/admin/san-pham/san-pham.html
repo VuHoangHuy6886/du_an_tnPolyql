@@ -7,8 +7,44 @@
     <th:block layout:fragment="head_link">
         <link href="/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
         <script src="/vendor/sweetalert2/sweetalert2.min.js"></script>
+        <link href="/vendor/select2/select2.min.css" rel="stylesheet">
     </th:block>
+<style>
+    /* Spinner tùy chỉnh */
+    .dataTables_processing {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        background: rgba(255, 255, 255, 0.8);
+        padding: 10px 20px;
+        border-radius: 8px;
+        transform: translate(-50%, -50%);
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
 
+    .dataTables_processing::before {
+        content: "";
+        width: 24px;
+        height: 24px;
+        border: 4px solid #007bff;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    .modal-body {
+        max-height: 400px; /* Chiều cao tối đa, bạn có thể thay đổi tùy ý */
+        overflow-y: auto;  /* Hiển thị thanh cuộn dọc khi nội dung vượt quá chiều cao này */
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+</style>
 </head>
 <body layout:fragment="content">
 <div class="row">
@@ -23,25 +59,13 @@
                         </span>
                         <span class="text">Làm mới</span>
                     </a>
-                    <a href="#" class="btn btn-primary btn-icon-split mr-2" id="btn-add">
+                    <a href="/admin/san-pham/add" class="btn btn-primary btn-icon-split mr-2" id="btn-add">
                         <span class="icon text-white-50">
                             <i class="fas fa-plus"></i>
                         </span>
                         <span class="text">Thêm mới</span>
                     </a>
-                    <a href="#" class="btn btn-primary btn-icon-split mr-2" id="btn-import">
-                        <span class="icon text-white-50">
-                            <i class="fas fa-file-import"></i>
-                        </span>
-                        <span class="text">Import</span>
-                    </a>
-                    <input type="file" class="d-none" id="import-file"/>
-                    <a th:href="@{/admin/san-pham/export-excel}" class="btn btn-primary btn-icon-split" id="btn-export">
-                        <span class="icon text-white-50">
-                            <i class="fas fa-file-export"></i>
-                        </span>
-                        <span class="text">Export</span>
-                    </a>
+
                 </div>
             </div>
         </div>
@@ -118,7 +142,7 @@
 
             <div class="table-responsive">
                 <!-- Bảng DataTable hiển thị sản phẩm -->
-                <table class="table table-bordered" id="dataTable">
+                <table class="table table-bordered" id="dataTable" style="width: 100%">
                     <thead>
                     <tr>
                         <th>ID</th>
@@ -339,57 +363,14 @@
 </div>
 
 <!-- Modal Add -->
-<div class="modal fade" id="modal-add" tabindex="-1" role="dialog" aria-labelledby="modal-addLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modal-addLabel">Thêm sản phẩm mới</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Đóng">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="form-add" class="needs-validation" novalidate>
-                    <div class="form-group">
-                        <label for="add-ma-san-pham">Mã sản phẩm:</label>
-                        <input type="text" class="form-control" id="add-ma-san-pham" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="add-ten">Tên:</label>
-                        <input type="text" class="form-control" id="add-ten" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="add-trang-thai">Trạng thái:</label>
-                        <select class="form-control" id="add-trang-thai">
-                            <option value="IN_STOCK">Còn hàng</option>
-                            <option value="OUT_OF_STOCK">Hết hàng</option>
-                            <option value="TEMPORARILY_OUT_OF_STOCK">Hết hàng tạm thời</option>
-                            <option value="COMING_SOON">Sắp ra mắt</option>
-                            <option value="DISCONTINUED">Không kinh doanh</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="add-mo-ta">Mô tả:</label>
-                        <textarea class="form-control" id="add-mo-ta" rows="3"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="add-anh-url">Ảnh URL:</label>
-                        <input type="text" class="form-control" id="add-anh-url">
-                    </div>
-                    <div class="form-group d-flex justify-content-end">
-                        <button type="button" class="btn btn-secondary mr-3" data-dismiss="modal">Hủy</button>
-                        <button type="submit" class="btn btn-primary">Xác nhận</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+
 
 </body>
 <th:block layout:fragment="bottom_link">
+
     <script src="/vendor/datatables/jquery.dataTables.min.js"></script>
     <script src="/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+    <script src="/vendor/select2/select2.min.js"></script>
     <script type="module" src="/js/admin/san-pham/san-pham.js"></script>
 
 

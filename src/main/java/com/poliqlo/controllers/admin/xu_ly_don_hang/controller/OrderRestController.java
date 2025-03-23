@@ -1,14 +1,10 @@
 package com.poliqlo.controllers.admin.xu_ly_don_hang.controller;
 
 
-import com.poliqlo.controllers.admin.xu_ly_don_hang.model.request.AddPhieuGiamGiaRequest;
-import com.poliqlo.controllers.admin.xu_ly_don_hang.model.request.HoaDonChiTietDTO;
-import com.poliqlo.controllers.admin.xu_ly_don_hang.model.request.UpdatePhieuGiamGiaRequest;
+import com.poliqlo.controllers.admin.gio_hang.model.response.Response;
+import com.poliqlo.controllers.admin.xu_ly_don_hang.model.request.*;
 import com.poliqlo.controllers.admin.xu_ly_don_hang.service.OrderService;
-import com.poliqlo.models.HoaDon;
-import com.poliqlo.models.HoaDonChiTiet;
-import com.poliqlo.models.KhachHang;
-import com.poliqlo.models.PhieuGiamGia;
+import com.poliqlo.models.*;
 import com.poliqlo.repositories.HoaDonChiTietRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -53,53 +49,60 @@ public class OrderRestController {
         }
         return ResponseEntity.ok(danhSachChiTiet);
     }
+    @GetMapping("/{hoaDonId}/chi-tiet")
+    public ResponseEntity<List<HoaDonChiTietDTO>> getChiTietHoaDon(@PathVariable Integer hoaDonId) {
+        List<HoaDonChiTietDTO> chiTietList = hoaDonChiTietRepository.findByHoaDonId(hoaDonId);
+        return ResponseEntity.ok(chiTietList);
+    }
 
     // Cập nhật trạng thái đơn hàng
     @PostMapping("/{id}/updateStatus")
-    public ResponseEntity<HoaDon> updateOrderStatus(@PathVariable Integer id,
-                                                    @RequestParam String trangThai) {
-        HoaDon updatedOrder = orderService.updateOrderStatus(id, trangThai);
-        if (updatedOrder != null) {
-            return ResponseEntity.ok(updatedOrder);
-        }
-        return ResponseEntity.notFound().build();
+    public ResponseEntity<HoaDon> updateStatus(@PathVariable Integer id,
+                                               @RequestBody HoaDonStatusUpdateDTO dto) {
+        HoaDon updated = orderService.updateOrderStatus(id, dto, 1);
+        return ResponseEntity.ok(updated);
     }
 
     // Cập nhật số lượng của một chi tiết đơn hàng
     @PostMapping("/{orderId}/details/{detailId}/update")
     public ResponseEntity<HoaDonChiTiet> updateOrderDetail(@PathVariable Integer orderId,
-                                                           @PathVariable Integer detailId,
-                                                           @RequestParam Integer soLuong) {
-        HoaDonChiTiet updatedDetail = orderService.updateOrderDetail(orderId, detailId, soLuong);
-        if (updatedDetail != null) {
-            return ResponseEntity.ok(updatedDetail);
-        }
-        return ResponseEntity.notFound().build();
+                                                         @PathVariable Integer detailId,
+                                                         @RequestBody HoaDonChiTietUpdateDTO dto) {
+        HoaDonChiTiet updatedDetail = orderService.updateOrderDetailQuantity(orderId, detailId, dto.getSoLuong());
+        return ResponseEntity.ok(updatedDetail);
     }
 
     // Xóa (soft delete) sản phẩm khỏi đơn hàng
     @PostMapping("/{orderId}/details/{detailId}/delete")
-    public ResponseEntity<Void> deleteOrderDetail(@PathVariable Integer orderId,
-                                                  @PathVariable Integer detailId) {
-        boolean result = orderService.deleteOrderDetail(orderId, detailId);
-        if (result) {
-            return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.notFound().build();
+    public ResponseEntity<HoaDonChiTiet> deleteOrderDetail(@PathVariable Integer orderId,
+                                                         @PathVariable Integer detailId) {
+        HoaDonChiTiet updatedDetail = orderService.deleteOrderDetail(orderId, detailId);
+        return ResponseEntity.ok(updatedDetail);
     }
 
     // Hoàn tác xóa sản phẩm (undo soft delete)
     @PostMapping("/{orderId}/details/{detailId}/undo")
     public ResponseEntity<HoaDonChiTiet> undoDeleteOrderDetail(@PathVariable Integer orderId,
-                                                               @PathVariable Integer detailId) {
+                                                             @PathVariable Integer detailId) {
         HoaDonChiTiet restoredDetail = orderService.undoDeleteOrderDetail(orderId, detailId);
-        if (restoredDetail != null) {
-            return ResponseEntity.ok(restoredDetail);
-        }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(restoredDetail);
     }
 
-    // Xóa hoàn toàn sản phẩm khỏi đơn hàng (final delete)
+    @GetMapping("/{orderId}/history")
+    public List<LichSuHoaDonDTO> getLichSuHoaDon(@PathVariable Integer orderId) {
+        return orderService.getLichSuHoaDon(orderId);
+    }
+
+    // Ghi nhận lịch sử
+    @PostMapping("/{hoaDonId}")
+    public void addLichSuHoaDon(
+            @PathVariable Integer hoaDonId,
+            @RequestParam String tieuDe,
+            @RequestParam String moTa,
+            @RequestParam(required = false) Integer taiKhoanId) {
+        orderService.addLichSuHoaDon(hoaDonId, tieuDe, moTa, taiKhoanId);
+    }
+
     @PostMapping("/{orderId}/details/{detailId}/finalDelete")
     public ResponseEntity<Void> finalDeleteOrderDetail(@PathVariable Integer orderId,
                                                        @PathVariable Integer detailId) {
@@ -108,5 +111,22 @@ public class OrderRestController {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
+    }
+    @PostMapping("/{orderId}/cancel")
+    public ResponseEntity<HoaDon> cancelHoaDon(@PathVariable Integer orderId) {
+        HoaDon updatedOrder = orderService.cancelOrder(orderId);
+        return ResponseEntity.ok(updatedOrder);
+    }
+    @PutMapping("/{orderId}/updateInfo")
+    public ResponseEntity<HoaDon> updateOrderInfo(@PathVariable Integer orderId,
+                                                 @RequestBody OrderUpdateInfoDTO dto) {
+        HoaDon updatedOrder = orderService.updateOrderInfo(orderId, dto);
+        return ResponseEntity.ok(updatedOrder);
+    }
+    @PostMapping("/{orderId}/details/add")
+    public ResponseEntity<HoaDonChiTiet> addProductDetail(@PathVariable Integer orderId,
+                                                        @RequestBody AddProductDetailDTO dto) {
+        HoaDonChiTiet detail = orderService.addOrUpdateOrderDetail(orderId, dto);
+        return ResponseEntity.ok(detail);
     }
 }
