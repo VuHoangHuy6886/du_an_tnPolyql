@@ -2,10 +2,10 @@ package com.poliqlo.controllers.client.carts.service;
 
 import com.poliqlo.controllers.client.carts.dto.BillRequestDTO;
 import com.poliqlo.controllers.client.carts.dto.CartDetailResponseDTO;
-import com.poliqlo.controllers.client.address.dto.AddressResponseDTO;
 import com.poliqlo.controllers.client.carts.dto.MessageResponse;
 import com.poliqlo.controllers.client.carts.mapper.BillMapper;
 import com.poliqlo.controllers.client.carts.mapper.CartDetailMapper;
+import com.poliqlo.controllers.common.auth.service.AuthService;
 import com.poliqlo.models.*;
 import com.poliqlo.repositories.*;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,7 +31,8 @@ public class CartDetailService {
     public static MessageResponse messageResponse = new MessageResponse();
     private final HoaDonRepository hoaDonRepository;
     private final HoaDonChiTietRepository hoaDonChiTietRepository;
-
+    private final AuthService authService;
+    private final LichSuHoaDonRepository lichSuHoaDonRepository;
     // show card detail by id customer
     public List<CartDetailResponseDTO> getCartDetailByIdCustomer(Integer id) {
         List<GioHangChiTiet> cartsByIdCustomer = gioHangChiTietRepository.gioHangChiTietFindByIdKH(id);
@@ -227,82 +229,105 @@ public class CartDetailService {
 
     // thanh toán tao hoa don
     @Transactional
-    public String saveBill(BillRequestDTO billRequestDTO) {
-        // list cart detail id
+    public void saveBill(BillRequestDTO billRequestDTO) {
+        // 1. Lấy danh sách ID của các sản phẩm trong giỏ hàng
         List<Integer> cartIDs = Arrays.stream(billRequestDTO.getCartDetailIds().split(","))
                 .map(Integer::parseInt)
                 .collect(Collectors.toList());
         List<GioHangChiTiet> gioHangChiTietList = gioHangChiTietRepository.findByListGioHangIds(cartIDs);
-        // khach hang
-        KhachHang khachHang = khachHangRepository.findById(Integer.parseInt(billRequestDTO.getCustomerId())).get();
-        // phieu giam gia
+
+        // 2. Lấy thông tin khách hàng
+        KhachHang khachHang = khachHangRepository.findById(Integer.parseInt(billRequestDTO.getCustomerId())).orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng"));
+
+        // 3. Kiểm tra và lấy thông tin phiếu giảm giá nếu có
         PhieuGiamGia phieuGiamGia = null;
         String voucherIdStr = billRequestDTO.getVoucherId();
-        System.out.println(voucherIdStr);
-        if (voucherIdStr != null && Integer.parseInt(voucherIdStr) != 0) {
-            PhieuGiamGia check = phieuGiamGiaRepository.findById(Integer.parseInt(voucherIdStr)).get();
-            if (check.getSoLuong() < 1) {
-                throw new RuntimeException("phiếu giảm giá số lượng không đủ");
-            } else {
-                phieuGiamGia = check;
+        if (voucherIdStr != null && !voucherIdStr.isEmpty() && Integer.parseInt(voucherIdStr) != 0) {
+            PhieuGiamGia pggKho = phieuGiamGiaRepository.findById(Integer.parseInt(voucherIdStr))
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy phiếu giảm giá"));
+            if (pggKho.getSoLuong() < 1) {
+                throw new RuntimeException("Phiếu Giảm : " + pggKho.getMa() + " - Đã hết số lượng hoặc hiệu lực vui lòng chọn lại");
             }
+            phieuGiamGia = pggKho;
         }
-        // 2. kiem tra so luong san pham trong gio hang trc
+
+        // 4. Kiểm tra số lượng sản phẩm trong giỏ hàng trước khi tạo hóa đơn
         for (GioHangChiTiet check : gioHangChiTietList) {
-            SanPhamChiTiet sanPhamChiTiet = sanPhamChiTietRepository.findById(check.getId()).get();
+            SanPhamChiTiet sanPhamChiTiet = sanPhamChiTietRepository.findById(check.getSanPhamChiTiet().getId())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm chi tiết"));
             if (check.getSoLuong() > sanPhamChiTiet.getSoLuong()) {
-                throw new RuntimeException("số lượng sản phẩm không đủ không đủ");
+                throw new RuntimeException("Sản phẩm : " + sanPhamChiTiet.getSanPham().getTen()
+                        + " -  màu : " + sanPhamChiTiet.getMauSac().getTen()
+                        + " - kích thước : " + sanPhamChiTiet.getKichThuoc().getTen()
+                        + " - số lượng không đủ số lượng trong kho còn : " + sanPhamChiTiet.getSoLuong()
+                );
             }
         }
-        // dia chi
-        DiaChi diaChi = diaChiRepository.findById(Integer.parseInt(billRequestDTO.getAddressId())).get();
+
+        // 5. Lấy thông tin địa chỉ giao hàng
+        DiaChi diaChi = diaChiRepository.findById(Integer.parseInt(billRequestDTO.getAddressId()))
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy địa chỉ"));
+
+        // 6. Tạo và lưu hóa đơn
         HoaDon hoaDon = BillMapper.BillRequestToBill(billRequestDTO, phieuGiamGia, khachHang, diaChi);
         hoaDonRepository.save(hoaDon);
-        // tru di 1 phieu giam gia va save
+        // su ly lich su hoa don
+        LichSuHoaDon lichSuHoaDon = new LichSuHoaDon();
+        lichSuHoaDon.setHoaDon(hoaDon);
+        lichSuHoaDon.setTaiKhoan(authService.getCurrentUserDetails().get());
+        lichSuHoaDon.setTieuDe(HoaDonRepository.CHO_XAC_NHAN);
+        lichSuHoaDon.setMoTa("Đơn hàng vừa được tạo ra, chờ xác nhận từ người bán");
+        lichSuHoaDon.setThoiGian(LocalDateTime.now());
+        lichSuHoaDon.setIsDeleted(false);
+        lichSuHoaDonRepository.save(lichSuHoaDon);
+
+        // 7. Cập nhật số lượng phiếu giảm giá (nếu có)
         if (phieuGiamGia != null) {
-            Integer soLuongVoucherNew = phieuGiamGia.getSoLuong() - 1;
-            phieuGiamGia.setSoLuong(soLuongVoucherNew);
+            phieuGiamGia.setSoLuong(phieuGiamGia.getSoLuong() - 1);
             phieuGiamGiaRepository.save(phieuGiamGia);
         }
-        // su ly lich su hoa don
 
-
-
-        // su ly gio hang va san pham + dot giam gia
+        // 8. Xử lý giỏ hàng và cập nhật thông tin hóa đơn chi tiết
         for (GioHangChiTiet gh : gioHangChiTietList) {
-            // sản phẩm chi tiết
-            SanPhamChiTiet sanPhamChiTiet = sanPhamChiTietRepository.findById(gh.getSanPhamChiTiet().getId()).get();
-            // dot giam gia
+            // Lấy thông tin sản phẩm chi tiết
+            SanPhamChiTiet sanPhamChiTiet = sanPhamChiTietRepository.findById(gh.getSanPhamChiTiet().getId())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm chi tiết"));
+
+            // Lấy đợt giảm giá nếu có
             DotGiamGia dotGiamGia = this.getLatestDiscountForProductDetail(sanPhamChiTiet.getId());
-            // lay gia sau khi giam
-            BigDecimal giaKhuyenMai;
-            if (dotGiamGia != null) {
-                giaKhuyenMai = this.calculatingPriceOfProductDetail(sanPhamChiTiet, dotGiamGia);
-            } else {
-                giaKhuyenMai = sanPhamChiTiet.getGiaBan();
-            }
-            BigDecimal giaGoc = gh.getSanPhamChiTiet().getGiaBan();
+
+            // Xác định giá sau khuyến mãi
+            BigDecimal giaKhuyenMai = (dotGiamGia != null) ? this.calculatingPriceOfProductDetail(sanPhamChiTiet, dotGiamGia) : sanPhamChiTiet.getGiaBan();
+            BigDecimal giaGoc = sanPhamChiTiet.getGiaBan();
             Integer soLuong = gh.getSoLuong();
+
+            // Tạo và lưu hóa đơn chi tiết
             HoaDonChiTiet hoaDonChiTiet = new HoaDonChiTiet();
             hoaDonChiTiet.setHoaDon(hoaDon);
             hoaDonChiTiet.setSanPhamChiTiet(sanPhamChiTiet);
-            if (dotGiamGia != null) {
-                hoaDonChiTiet.setDotGiamGia(dotGiamGia);
-            }
             hoaDonChiTiet.setGiaGoc(giaGoc);
             hoaDonChiTiet.setGiaKhuyenMai(giaKhuyenMai);
             hoaDonChiTiet.setSoLuong(soLuong);
             hoaDonChiTiet.setIsDeleted(false);
+            if (dotGiamGia != null) {
+                hoaDonChiTiet.setDotGiamGia(dotGiamGia);
+            }
             hoaDonChiTietRepository.save(hoaDonChiTiet);
-            // tiep theo tru di so luong san pham trong gio hang
-            Integer soLuongMoi = sanPhamChiTiet.getSoLuong() - soLuong;
-            sanPhamChiTiet.setSoLuong(soLuongMoi);
+
+            // 9. Cập nhật số lượng sản phẩm trong kho
+            sanPhamChiTiet.setSoLuong(sanPhamChiTiet.getSoLuong() - soLuong);
             sanPhamChiTietRepository.save(sanPhamChiTiet);
-            // ẩn gio hang chi tiet
+            // su ly san pham chi tiet khi so luong = 0
+//            if (sanPhamChiTiet.getSoLuong() == 0){
+//                sanPhamChiTiet.se
+//                sanPhamChiTietRepository.save(sanPhamChiTiet);
+//            }
+
+            // 10. Ẩn sản phẩm khỏi giỏ hàng chi tiết
             gh.setIsDeleted(true);
             gioHangChiTietRepository.save(gh);
         }
-        return "Thêm Thành Công";
+
     }
 
     public MessageResponse getMessageResponse() {

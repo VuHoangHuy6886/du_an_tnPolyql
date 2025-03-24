@@ -31,6 +31,7 @@ public class CartClientController {
     private final DiaChiRepository diaChiRepository;
     private final PhieuGiamGiaRepository phieuGiamGiaRepository;
     private final AuthService authService;
+    private String messagePayments;
 
     @GetMapping("/cart/all")
     public String showCart(Model model) {
@@ -38,6 +39,7 @@ public class CartClientController {
         model.addAttribute("idCustomer", authService.getCurrentUserDetails().get().getKhachHang().getId());
         model.addAttribute("messageResponse", service.getMessageResponse());
         model.addAttribute("carts", responseDTOList);
+        model.addAttribute("messagePayments", messagePayments);
         return "client/cart";
     }
 
@@ -151,7 +153,6 @@ public class CartClientController {
         model.addAttribute("carts", responseDTOList);
         model.addAttribute("totalPrice", totalPrice);
         model.addAttribute("tongTienSauKhiApDungVoucher", tongTien);
-
         return "client/payment";
     }
 
@@ -160,9 +161,29 @@ public class CartClientController {
         try {
             service.saveBill(billRequestDTO);
         } catch (Exception e) {
-            System.out.printf("lỗi thanh toán");
-            e.printStackTrace();
+            messagePayments = e.getMessage();
+            System.out.println("lỗi khi tạo hóa đơn : "+e.getMessage());
+            return "redirect:/cart/all";
         }
+        messagePayments = null;
         return "redirect:/";
     }
+    @GetMapping("/api/get-total-product-in-cart")
+    public Integer getTotalProductInCart() {
+        List<CartDetailResponseDTO> responseDTOList = service.getCartDetailByIdCustomer(authService.getCurrentUserDetails().get().getKhachHang().getId());
+
+        int totalQuantity = responseDTOList.stream()
+                .mapToInt(item -> {
+                    try {
+                        return item.getQuantity() != null ? Integer.parseInt(item.getQuantity()) : 0;
+                    } catch (NumberFormatException e) {
+                        return 0; // Nếu quantity không phải số, bỏ qua
+                    }
+                })
+                .sum();
+
+        System.out.println("Tổng số lượng: " + totalQuantity);
+        return totalQuantity;
+    }
+
 }
