@@ -90,9 +90,9 @@
                             <a th:href="@{'/cart/increase/'+${cart.id}}" class="btn btn-outline-danger">+</a>
                             <form id="formUpdateQuantity">
                                 <input type="hidden" id="idCart" name="idCart" th:value="${cart.id}">
-                                <input id="inputQuantity" type="text" th:value="${cart.quantity}"
-                                       class="form-control h-100"
-                                       style="width: 50px;" readonly>
+                                <input id="inputQuantity"  type="text" th:value="${cart.quantity}"
+                                       class="form-control h-100 inputSoLuong"
+                                       style="width: 50px;">
                             </form>
                             <a th:href="@{'/cart/decrease/'+${cart.id}}" class="btn btn-outline-danger">-</a>
                         </div>
@@ -158,10 +158,11 @@
                 <!--Modal-->
                 <hr>
                 <form method="post" th:action="@{/cart/trang-thanh-toan}">
-                    <input type="hidden" id="idKhachHang" name="idKH" th:value="${idCustomer}">
-                    <input type="hidden" id="cartIds" name="cartIds" value="">
-                    <input type="hidden" id="voucherId" name="voucherId" value="">
-                    <span id="soTienGiam" style="display: none; color: red"></span>
+                    <input type="text" id="idKhachHang" name="idKH" th:value="${idCustomer}">
+                    <input type="text" id="cartIds" name="cartIds" value="">
+                    <input type="text" id="voucherId" name="voucherId" value="">
+                    <h5>Tổng Tiền trước khi giảm giá : <span id="totalPriceAfterDiscounts" class="text-danger"></span></h5>
+                    <h5>Giá Trị Giảm của voucher : <span id="soTienGiam" class="text-danger"></span></h5>
                     <h4 class="fw-bold text-dark">Tổng Tiền: <span id="showTongTien"
                                                                    class="text-danger font-weight-bold">0 ₫</span>
                     </h4>

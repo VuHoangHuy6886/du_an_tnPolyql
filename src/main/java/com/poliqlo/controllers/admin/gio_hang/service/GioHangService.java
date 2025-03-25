@@ -36,7 +36,6 @@ public class GioHangService {
     public void saveGioHangChiTiet(GioHangChiTiet gioHang) {
         gioHangChiTietRepository.save(gioHang);
     }
-
     public GioHangChiTiet addToCart(Response request) {
         KhachHang khachHang = khachHangRepository.findById(authService.getCurrentUserDetails().get().getKhachHang().getId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng"));
@@ -54,11 +53,9 @@ public class GioHangService {
 
         return gioHangChiTietRepository.save(gioHangChiTiet);
     }
-
     public List<GioHangChiTiet> getAllGioHangChiTiet() {
         return gioHangChiTietRepository.findAll();
     }
-
     public GioHangChiTiet findById(Integer id) {
         return gioHangChiTietRepository.findById(id).orElse(null);
     }

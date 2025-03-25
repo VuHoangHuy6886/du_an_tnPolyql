@@ -19,8 +19,10 @@ const addressData = {
 };
 console.log("customer id : ", customerId)
 checkDiaChi()
+
 // render ten dia chi ra view
 async function displayAddress(addressData) {
+    console.log("gọi ham render địa chỉ")
     // showInformationAddress
     if (!addressData || !addressData.province || !addressData.district ||
         !addressData.ward || !addressData.ten || !addressData.sdt || !addressData.id) {
@@ -28,7 +30,7 @@ async function displayAddress(addressData) {
         thongTin.textContent = "Khách hàng không có địa chỉ mặc định"
         thongTin.style.color = "red"
         document.getElementById("showInformationAddress").style.display = "none"
-        checkDiaChi()
+        console.log("khách haàng không có ịa chi default ")
     } else {
         try {
             document.getElementById("showInformationAddress").style.display = "block"
@@ -110,30 +112,44 @@ async function findDiaChiById(id) {
 
 // tim kiem dia chi mac dinh theo id khach hang
 async function findDiaChiByIdCustomer(customerId) {
-    fetch("/api/find-address-by-id-customer", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(customerId)
-    }).then(response => response.json())
-        .then(result => {
-            let newAddress = {
-                id: result.id,
-                province: result.provinceId,
-                district: result.districtId,
-                ward: result.wardId,
-                ten: result.ten,
-                sdt: result.soDienThoai,
-                defaultValue: result.defaultValue
-            }
-            Object.assign(addressData, newAddress)
-            displayAddress(addressData)
-            calculateShippingFee()
-        })
-        .catch(error => {
-            console.error("Lỗi:", error);
+    try {
+        let response = await fetch("/api/find-address-by-id-customer", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({customerId}) // Đảm bảo gửi đúng dạng JSON
         });
+
+        if (!response.ok) {
+            document.getElementById("showMessage").innerText = "Khách hàng không có địa chỉ mặc định"
+            document.getElementById("showMessage").style.color = "red"
+            document.getElementById("showInformationAddress").style.display = "none"
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        let text = await response.text(); // Lấy dữ liệu dưới dạng text trước
+        let result = text ? JSON.parse(text) : {}; // Kiểm tra dữ liệu có rỗng không
+
+        if (!result || Object.keys(result).length === 0) {
+            throw new Error("API response is empty");
+        }
+
+        let newAddress = {
+            id: result.id,
+            province: result.provinceId,
+            district: result.districtId,
+            ward: result.wardId,
+            ten: result.ten,
+            sdt: result.soDienThoai,
+            defaultValue: result.defaultValue
+        };
+
+        Object.assign(addressData, newAddress);
+        displayAddress(addressData);
+        calculateShippingFee();
+    } catch (error) {
+        console.error("Lỗi:", error);
+    }
 }
 
 // hien thi toan bo danh sach dia chi cua khach hang

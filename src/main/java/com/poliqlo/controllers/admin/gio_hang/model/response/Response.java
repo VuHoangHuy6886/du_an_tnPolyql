@@ -18,7 +18,6 @@ import java.time.Instant;
 @Getter
 @Setter
 public class Response implements Serializable {
-
     @NotNull
     private Integer idSanPhamChiTiet;
     @NotNull
