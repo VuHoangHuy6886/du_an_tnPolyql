@@ -71,7 +71,7 @@
               <!-- Mã nhân viên (readonly) -->
               <div class="mb-3">
                 <label for="employeeCode" class="form-label required-field">Mã nhân viên</label>
-                <input type="text" id="employeeCode" name="employeeCode" class="form-control" readonly required>
+                <input type="text" id="employeeCode" name="employeeCode" class="form-control" readonly required placeholder="Mã nhân viên sẽ tự động tạo">
                 <div class="invalid-feedback">Không được để trống mã nhân viên.</div>
               </div>
               <!-- Tên nhân viên -->
@@ -84,18 +84,21 @@
               <!-- Email -->
               <div class="mb-3">
                 <label for="email" class="form-label required-field">Email</label>
-                <input type="email" id="email" name="email" class="form-control" required>
-                <div class="invalid-feedback">Vui lòng nhập email hợp lệ.</div>
+                <input type="email" id="email" name="email" class="form-control" pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" required>
+                <div class="invalid-feedback">Vui lòng nhập email hợp lệ (VD: example@domain.com).</div>
                 <div id="emailFeedback" class="validation-feedback">Email này đã được sử dụng, vui lòng chọn email khác.</div>
               </div>
             </div>
             <div class="col-md-6">
               <!-- Số điện thoại -->
+              <!-- Số điện thoại -->
               <div class="mb-3">
                 <label for="soDienThoai" class="form-label required-field">Số điện thoại</label>
-                <input type="text" id="soDienThoai" name="soDienThoai" class="form-control" pattern="^0\d{9}$" required>
-                <div class="invalid-feedback">Số điện thoại phải bắt đầu bằng 0 và có đúng 10 số.</div>
+                <input type="text" id="soDienThoai" name="soDienThoai" class="form-control"
+                       pattern="^(0|(\+?84))(3|5|7|8|9)\d{8}$" required>
+                <div class="invalid-feedback">Số điện thoại không đúng định dạng Việt Nam (bắt đầu bằng 0 hoặc +84, theo sau là 9 chữ số).</div>
                 <div id="phoneFeedback" class="validation-feedback">Số điện thoại này đã được sử dụng, vui lòng chọn số điện thoại khác.</div>
+                <small class="form-text text-muted">Ví dụ: 0912345678, 84912345678 hoặc +84912345678</small>
               </div>
               <!-- Mật khẩu -->
               <div class="mb-3">
@@ -166,6 +169,15 @@
       phoneInput.addEventListener("blur", function() {
         const phoneValue = phoneInput.value.trim();
         if (!phoneValue) return;
+
+        const phoneRegex = /^(0|(\+?84))(3|5|7|8|9)\d{8}$/;
+        if (!phoneRegex.test(phoneValue)) {
+          phoneInput.setCustomValidity("Số điện thoại không đúng định dạng Việt Nam");
+          form.classList.add("was-validated");
+          return;
+        } else {
+          phoneInput.setCustomValidity("");
+        }
 
         fetch(`/admin/api/nhan-vien/check-phone?phone=${encodeURIComponent(phoneValue)}`)
                 .then(response => response.json())

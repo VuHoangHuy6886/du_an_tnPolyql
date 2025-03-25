@@ -214,11 +214,10 @@
             <div class="filter-row">
                 <div class="filter-label">Hiển thị:</div>
                 <select class="filter-input" name="displayDays" onchange="this.form.submit()">
-                    <option value="">Tùy chỉnh</option>
+                    <option value="0" th:selected="${displayDays == null || displayDays == 0}">Tất cả</option>
                     <option value="7" th:selected="${displayDays == 7}">7 ngày</option>
                     <option value="30" th:selected="${displayDays == 30}">30 ngày</option>
                     <option value="60" th:selected="${displayDays == 60}">60 ngày</option>
-                    <option value="0" th:selected="${displayDays == 0}">Tất cả</option>
                 </select>
             </div>
             <div class="filter-row">
@@ -229,9 +228,9 @@
             </div>
             <div class="filter-row">
                 <div class="filter-label">Sau:</div>
-                <input type="date" class="filter-input" name="fromDate" th:value="${fromDate}" placeholder="Từ ngày">
+                <input type="datetime-local" class="filter-input" name="fromDate" th:value="${fromDate}" placeholder="Từ ngày">
                 <div class="filter-label">Trước:</div>
-                <input type="date" class="filter-input" name="toDate" th:value="${toDate}" placeholder="Đến ngày">
+                <input type="datetime-local" class="filter-input" name="toDate" th:value="${toDate}" placeholder="Đến ngày">
             </div>
             <div class="filter-row">
                 <button type="submit" class="search-button">Tìm kiếm</button>

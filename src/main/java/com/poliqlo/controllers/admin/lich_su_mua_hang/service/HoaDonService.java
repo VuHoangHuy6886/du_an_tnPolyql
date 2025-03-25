@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -92,7 +93,7 @@ public class HoaDonService {
         return hoaDonRepository.findByPriceRangePaged(minAmount, maxAmount, pageable);
     }
 
-    public Page<HoaDon> searchByDateRange(LocalDate fromDate, LocalDate toDate, Pageable pageable) {
+    public Page<HoaDon> searchByDateRange(LocalDateTime fromDate, LocalDateTime toDate, Pageable pageable) {
         return hoaDonRepository.findByDateRangePaged(fromDate, toDate, pageable);
     }
 
@@ -101,14 +102,15 @@ public class HoaDonService {
             String trangThai,
             BigDecimal minAmount,
             BigDecimal maxAmount,
-            LocalDate fromDate,
-            LocalDate toDate,
+            LocalDateTime fromDate,
+            LocalDateTime toDate,
             Pageable pageable) {
         return hoaDonRepository.searchOrdersPaged(id, trangThai, minAmount, maxAmount, fromDate, toDate, pageable);
     }
 
     public Page<HoaDon> getRecentOrders(int days, Pageable pageable) {
-        LocalDate fromDate = LocalDate.now().minusDays(days);
+        // Lấy ngày hiện tại, trừ đi số ngày cần xem, và chuyển sang LocalDateTime
+        LocalDateTime fromDate = LocalDate.now().minusDays(days).atStartOfDay();
         return hoaDonRepository.findRecentOrdersPaged(fromDate, pageable);
     }
 

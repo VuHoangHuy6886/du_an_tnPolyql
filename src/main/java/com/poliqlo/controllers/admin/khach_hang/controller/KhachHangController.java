@@ -138,9 +138,16 @@ public class KhachHangController {
     }
     // Danh sách khach hang bị xóa
     @GetMapping("/list-customer-deleted")
-    public String listDeletedKhachHang(Model model) {
-        List<KhachHang> danhSachKhachHangDaXoa = khachHangService.getAllKhachHangDeleted();
-        model.addAttribute("khachHangs", danhSachKhachHangDaXoa);
+    public String listDeletedKhachHang(Model model ,
+                                       @RequestParam(defaultValue = "0") int page,
+                                       @RequestParam(defaultValue = "5") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<KhachHang> danhSachKhachHangDaXoa = khachHangService.getAllKhachHangDeleted(pageable);
+//        model.addAttribute("khachHangs", danhSachKhachHangDaXoa);
+        model.addAttribute("khachHangs", danhSachKhachHangDaXoa.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", danhSachKhachHangDaXoa.getTotalPages());
+        model.addAttribute("totalItems", danhSachKhachHangDaXoa.getTotalElements());
         return "admin/khach-hang/list-customer-deleted";
     }
     @GetMapping("/restore/{id}")

@@ -284,7 +284,7 @@
                 <a class="nav-link" th:classappend="${trangThai == null} ? 'active'" th:href="@{/lichsumuahang}">Tất cả</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" th:classappend="${trangThai == 'Chờ xác nhận'} ? 'active'" th:href="@{/lichsumuahang/trangthai/Chờ xác nhận}">Chờ xác nhận</a>
+                <a class="nav-link" th:classappend="${trangThai == 'CHO_XAC_NHAN'} ? 'active'" th:href="@{/lichsumuahang/trangthai/CHO_XAC_NHAN}">Chờ xác nhận</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" th:classappend="${trangThai == 'Chờ đóng gói'} ? 'active'" th:href="@{/lichsumuahang/trangthai/Chờ đóng gói}">Chờ đóng gói</a>
@@ -347,7 +347,7 @@
         </div>
 
         <!-- Phân trang -->
-        <div th:if="${totalPages > 1}" class="d-flex justify-content-center mt-4">
+        <div th:if="${totalPages > 1}" class="d-flex justify-content-center mt-4" style="margin-bottom: 20px">
             <nav aria-label="Phân trang">
                 <ul class="pagination">
                     <!-- Nút Previous -->
@@ -507,7 +507,6 @@
             }
         });
     });
-
     // // Hàm hủy đơn hàng
     // function cancelOrder(orderId) {
     //     if (confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')) {

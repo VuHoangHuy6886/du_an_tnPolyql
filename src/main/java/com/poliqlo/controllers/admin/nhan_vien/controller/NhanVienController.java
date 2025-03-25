@@ -3,9 +3,6 @@ package com.poliqlo.controllers.admin.nhan_vien.controller;
 
 
 import com.azure.core.annotation.Get;
-import com.poliqlo.controllers.admin.nhan_vien.model.request.AddRequest;
-import com.poliqlo.controllers.admin.nhan_vien.model.request.EditReq;
-import com.poliqlo.controllers.admin.nhan_vien.model.request.ImportReq;
 import com.poliqlo.controllers.admin.nhan_vien.model.response.Response;
 import com.poliqlo.controllers.admin.nhan_vien.service.NhanVienService;
 import com.poliqlo.controllers.admin.nhan_vien.service.TaiKhoanService;

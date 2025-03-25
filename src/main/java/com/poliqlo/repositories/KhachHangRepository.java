@@ -15,7 +15,7 @@ public interface KhachHangRepository extends JpaRepository<KhachHang, Integer>, 
 
     Optional<KhachHang> findByIdAndIsDeletedFalse(Integer id);
 
-    List<KhachHang> findByIsDeletedTrue();
+    Page<KhachHang> findByIsDeletedTrue(Pageable pageable);
 
     @Query("select kh from KhachHang kh where kh.taiKhoan.soDienThoai like :searchKey or kh.ten like :searchKey")
     Page<KhachHang> findKhachHangBySoDienThoai(String searchKey,Pageable pageable);
