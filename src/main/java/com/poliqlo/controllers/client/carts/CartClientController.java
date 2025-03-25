@@ -162,14 +162,15 @@ public class CartClientController {
             service.saveBill(billRequestDTO);
         } catch (Exception e) {
             messagePayments = e.getMessage();
-            System.out.println("lỗi khi tạo hóa đơn : "+e.getMessage());
+            System.out.println("lỗi khi tạo hóa đơn : " + e.getMessage());
             return "redirect:/cart/all";
         }
         messagePayments = null;
         return "redirect:/";
     }
+
     @GetMapping("/api/get-total-product-in-cart")
-    public Integer getTotalProductInCart() {
+    public ResponseEntity<?> getTotalProductInCart() {
         List<CartDetailResponseDTO> responseDTOList = service.getCartDetailByIdCustomer(authService.getCurrentUserDetails().get().getKhachHang().getId());
 
         int totalQuantity = responseDTOList.stream()
@@ -181,9 +182,8 @@ public class CartClientController {
                     }
                 })
                 .sum();
-
         System.out.println("Tổng số lượng: " + totalQuantity);
-        return totalQuantity;
+        return ResponseEntity.ok(totalQuantity);
     }
 
 }
