@@ -150,3 +150,16 @@ function fillData(response) {
 
     })
 }
+
+// get total cart
+document.addEventListener("DOMContentLoaded", () => {
+    function getNumberInCart() {
+        fetch("/api/get-total-product-in-cart")
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("cart-number").innerText = data;
+                console.log("so san pham trong cart : ", data)
+            })
+    }
+    getNumberInCart()
+})
