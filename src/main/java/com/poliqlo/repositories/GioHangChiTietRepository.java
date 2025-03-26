@@ -2,6 +2,8 @@ package com.poliqlo.repositories;
 
 import com.poliqlo.models.DotGiamGia;
 import com.poliqlo.models.GioHangChiTiet;
+import com.poliqlo.models.KhachHang;
+import com.poliqlo.models.SanPhamChiTiet;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -30,5 +32,6 @@ public interface GioHangChiTietRepository extends JpaRepository<GioHangChiTiet, 
 
     @Query(value = "SELECT gh FROM GioHangChiTiet gh WHERE gh.id IN :gioHangIds AND gh.isDeleted = false")
     List<GioHangChiTiet> findByListGioHangIds(@Param("gioHangIds") List<Integer> gioHangIds);
+    Optional<GioHangChiTiet> findByKhachHangAndSanPhamChiTietAndIsDeletedFalse(KhachHang khachHang, SanPhamChiTiet sanPhamChiTiet);
 
 }

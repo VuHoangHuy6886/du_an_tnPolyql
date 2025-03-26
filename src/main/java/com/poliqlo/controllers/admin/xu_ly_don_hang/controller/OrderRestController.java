@@ -4,6 +4,7 @@ package com.poliqlo.controllers.admin.xu_ly_don_hang.controller;
 import com.poliqlo.controllers.admin.gio_hang.model.response.Response;
 import com.poliqlo.controllers.admin.xu_ly_don_hang.model.request.*;
 import com.poliqlo.controllers.admin.xu_ly_don_hang.service.OrderService;
+import com.poliqlo.controllers.common.auth.service.AuthService;
 import com.poliqlo.models.*;
 import com.poliqlo.repositories.HoaDonChiTietRepository;
 import jakarta.validation.Valid;
@@ -33,6 +34,8 @@ public class OrderRestController {
     private OrderService orderService;
     @Autowired
     private HoaDonChiTietRepository hoaDonChiTietRepository;
+    @Autowired
+    private AuthService authService;
 
     // Lấy thông tin đơn hàng theo id (bao gồm cả chi tiết)
     @GetMapping("/{id}")
@@ -59,7 +62,7 @@ public class OrderRestController {
     @PostMapping("/{id}/updateStatus")
     public ResponseEntity<HoaDon> updateStatus(@PathVariable Integer id,
                                                @RequestBody HoaDonStatusUpdateDTO dto) {
-        HoaDon updated = orderService.updateOrderStatus(id, dto, 1);
+        HoaDon updated = orderService.updateOrderStatus(id, dto,  authService.getCurrentUserDetails().get().getKhachHang().getTaiKhoan().getId());
         return ResponseEntity.ok(updated);
     }
 
@@ -129,4 +132,17 @@ public class OrderRestController {
         HoaDonChiTiet detail = orderService.addOrUpdateOrderDetail(orderId, dto);
         return ResponseEntity.ok(detail);
     }
+
+    @PostMapping("/{orderId}/return")
+    public HoaDon returnOrder(@PathVariable Integer orderId) {
+        return orderService.returnOrder(orderId);
+    }
+
+    @PostMapping("/{orderId}/restore")
+    public HoaDon restoreOrder(@PathVariable Integer orderId) {
+        return orderService.restoreOrder(orderId);
+    }
+
+
+
 }
