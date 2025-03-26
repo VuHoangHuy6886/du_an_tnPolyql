@@ -123,7 +123,6 @@ document.addEventListener("DOMContentLoaded", function() {
         // Nút "Thêm sản phẩm"
         const addBtn = document.getElementById('addProductBtn');
         if (addBtn) addBtn.disabled = status;
-        console.log("Oke 1")
         // Các ô input cập nhật số lượng
         // Các ô input cập nhật số lượng
         document.querySelectorAll('.updateQtyInput').forEach(input => input.disabled = status);
@@ -134,6 +133,8 @@ document.addEventListener("DOMContentLoaded", function() {
         // Nút hủy đơn
         const cancelBtn = document.getElementById('cancelOrderBtn');
         if (cancelBtn) cancelBtn.disabled = status;
+        const btnUpdate = document.getElementById('btn-info-khach-hang');
+        if (btnUpdate) btnUpdate.disabled = status;
 
         // Vô hiệu hóa luôn các thành phần trong bảng #productListBody
         const productListBody = document.getElementById('productListBody');
@@ -373,20 +374,17 @@ document.addEventListener("DOMContentLoaded", function() {
             })
             .then(order => {
                 currentOrder = order;
+                       // Giả sử bạn có hàm này để hiển thị danh sách sản phẩm
+                fetchAndPopulateProductList(orderId);
                 // updateUI
                 updateUI(order);
                 // Hiển thị thông tin đơn hàng
                 populateOrderDetails(order);
 
-                // Giả sử bạn có hàm này để hiển thị danh sách sản phẩm
-                fetchAndPopulateProductList(orderId);
 
                 // Nếu đơn hàng đang ở "LAY_HANG_THANH_CONG", disable thêm/sửa
                 if (order.trangThai === 'LAY_HANG_THANH_CONG') {
-                    const addBtn = document.getElementById('addProductBtn');
-                    if (addBtn) addBtn.disabled = true;
-                    document.querySelectorAll('.updateQtyInput').forEach(input => input.disabled = true);
-                    document.querySelectorAll('.deleteDetailBtn').forEach(btn => btn.disabled = true);
+                    disableOrderActions(true)
                 }
             })
             .catch(error => {
@@ -499,11 +497,13 @@ document.addEventListener("DOMContentLoaded", function() {
                         })
                         .then(() => {
                             Swal.fire('Thành công', 'Xóa sản phẩm thành công!', 'success');
-                            // Hiển thị thông báo hoàn tác
-                            fetchAndPopulateProductList(orderId)
-                            showUndoNotification();
-                            fetchOrderDetails();
                             // Nếu muốn cập nhật lại giao diện ngay, gọi fetchOrderDetails();
+                            fetchAndPopulateProductList(orderId)
+                            // Hiển thị thông báo hoàn tác
+                            fetchOrderDetails();
+
+                            showUndoNotification();
+
                         })
                         .catch(error => {
                             console.error("Error deleting product detail:", error);

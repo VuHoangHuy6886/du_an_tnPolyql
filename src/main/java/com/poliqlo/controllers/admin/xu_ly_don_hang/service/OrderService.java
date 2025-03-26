@@ -544,6 +544,9 @@ public class OrderService {
                 }
             }
         }
+        // Ghi log lịch sử
+        String logMsg = "Hoàn hàng ";
+        addHistoryLog(orderId, "Hoàn trả sản phẩm", logMsg,  authService.getCurrentUserDetails().get().getKhachHang().getTaiKhoan().getId());
         hoaDonRepository.save(order);
         return order;
     }
@@ -576,6 +579,8 @@ public class OrderService {
                 }
             }
         }
+        String logMsg = "Khôi phục đơn hàng có id: "+order.getId();
+        addHistoryLog(orderId, "Khôi phục đơn hàng", logMsg,  authService.getCurrentUserDetails().get().getKhachHang().getTaiKhoan().getId());
         hoaDonRepository.save(order);
         return order;
     }
