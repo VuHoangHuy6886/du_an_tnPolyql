@@ -1,12 +1,14 @@
 package com.poliqlo.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import net.minidev.json.annotate.JsonIgnore;
 import org.hibernate.annotations.ColumnDefault;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Builder
 @AllArgsConstructor
@@ -18,12 +20,15 @@ import java.time.Instant;
 public class LichSuHoaDon {
     @Id
     @Column(name = "ID", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "HOA_DON_ID", nullable = false)
+    @JsonBackReference
     private HoaDon hoaDon;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TAI_KHOAN_ID")
@@ -40,7 +45,7 @@ public class LichSuHoaDon {
 
     @NotNull
     @Column(name = "THOI_GIAN", nullable = false)
-    private Instant thoiGian;
+    private LocalDateTime thoiGian;
 
     @NotNull
     @ColumnDefault("b'0'")

@@ -35,7 +35,7 @@ public class MailService {
         String attachments;
 
         public MailInfo(String to, String subject, String body) {
-            this.from = "nbchuc@hotmail.com";
+            this.from = "chucnb9@gmail.com";
             this.to = to;
             this.subject = subject;
             this.body = body;
@@ -82,11 +82,11 @@ public class MailService {
 
     }
     public void send(String to, String subject, String body, String attachment) throws MessagingException, IOException {
-        send("nbchuc@hotmail.com", to, subject, body, attachment);
+        send("chucnb9@gmail.com", to, subject, body, attachment);
     }
     public void send(String to, String subject, String tempalte, Context context, String attachment) throws MessagingException, IOException {
         String htmlContent = templateEngine.process(tempalte, context);
-        send("nbchuc@hotmail.com", to, subject, htmlContent, attachment);
+        send("chucnb9@gmail.com", to, subject, htmlContent, attachment);
     }
 
 }

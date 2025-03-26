@@ -3,7 +3,6 @@ package com.poliqlo.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -32,12 +31,6 @@ public class SanPhamChiTietDotGiamGia {
     @JoinColumn(name = "san_pham_chi_tiet_id", nullable = false)
     private SanPhamChiTiet sanPhamChiTiet;
 
-    @NotNull
-    @Column(name = "so_luong", nullable = false)
-    private Integer soLuong;
 
-    @ColumnDefault("0")
-    @Column(name = "is_active")
-    private Boolean isActive;
 
 }

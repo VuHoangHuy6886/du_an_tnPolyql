@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/client/layout/layout-client.html"
+>
+<head>
+    <!--    Custom link-->
+    <th:block layout:fragment="head_link">
+        <!-- Bootstrap CSS -->
+        <link href="/css/client/client.css" rel="stylesheet">
+        </style>
+    </th:block>
+
+</head>
+
+<!-- Custom styles for this page -->
+
+<body layout:fragment="content">
+<!--    Nội dung chính -->
+
+<div class="container mt-5">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3">
+            <div class="card p-3">
+<!--                <div class="text-center">-->
+<!--                    <p class="fw-bold">Xin chào !</p>-->
+<!--                    <h5 class="fw-bold">Tên tài khoản</h5>-->
+<!--                </div>-->
+                <ul class="nav flex-column">
+                    <li class="nav-item"><a th:href="@{'/thong-tin-khach-hang'}"
+                                            class="nav-link active text-primary fw-bold">Thông tin tài khoản</a></li>
+                    <li class="nav-item"><a th:href="@{'/address'}" class="nav-link">Số địa chỉ</a></li>
+<!--                    <li class="nav-item"><a href="#" class="nav-link">Lịch sử đơn hàng</a></li>-->
+<!--                    <li class="nav-item"><a href="#" class="nav-link text-danger fw-bold">Đăng xuất</a></li>-->
+                </ul>
+            </div>
+        </div>
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <div class="card p-4 shadow-sm">
+                <h4 class="mb-4 fw-bold text-center">Thông tin tài khoản</h4>
+                <form id="myForm" method="POST" th:action="@{/update}" th:object="${Response}"
+                      onsubmit="return validateForm(event)">
+                    <input type="hidden" th:field="*{id}">
+                    <input type="hidden" th:field="*{idTaiKhoan}">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Họ Tên</label>
+                        <input type="text" class="form-control" name="ten" placeholder="Nhập họ tên" th:field="*{ten}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Giới tính</label>
+                        <div style="margin-left: 30px;">
+                            <input type="radio" class="form-check-input" name="gioiTinh"
+                                   th:field="*{gioiTinh}" value="Nam"
+                                   th:checked="${gioiTinh == 'Nam'}"> Nam
+                            <br>
+                            <input type="radio" class="form-check-input ms-3" name="gioiTinh"
+                                   th:field="*{gioiTinh}" value="Nu"
+                                   th:checked="${gioiTinh == 'Nu'}"> Nữ
+
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Số điện thoại</label>
+                        <input type="text" class="form-control" name="soDienThoai" placeholder="Nhập số điện thoại"
+                               th:field="*{soDienThoai}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Ngày sinh</label>
+                        <input type="date" class="form-control" name="ngaySinh" th:field="*{ngaySinh}">
+                    </div>
+
+                    <button type="submit" class="btn btn-warning w-100 fw-bold">LƯU THAY ĐỔI</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+
+<th:block layout:fragment="bottom_link">
+    <!-- jQuery and Bootstrap JS -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
+    <script src="/js/client/iphone.js"></script>
+    <script src="/js/client/thong-tin-tai-khoan.js"></script>
+
+</th:block>
+</html>

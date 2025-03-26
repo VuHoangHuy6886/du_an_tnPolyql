@@ -55,8 +55,8 @@ public class NhanVienService {
         return nhanVienRepository.findAllByIsDeletedFalse(pageable);
     }
 
-    public List<NhanVien> getAllNhanVienDeleted() {
-        return nhanVienRepository.findByIsDeletedTrue();
+    public Page<NhanVien> getAllNhanVienDeleted(Pageable pageable) {
+        return nhanVienRepository.findByIsDeletedTrue(pageable);
     }
 
     @Transactional

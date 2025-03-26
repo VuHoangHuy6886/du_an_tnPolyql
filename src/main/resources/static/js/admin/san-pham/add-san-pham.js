@@ -102,7 +102,7 @@ const cloneData = new Promise(function (resolve, reject) {
 $(document).ready(function () {
     cloneData.then(function (data) {
         dataList = data;
-        console.log(data.congNgheManHinh)
+        console.log(dataList.mauSac)
         $('#selected-template').select2({
             data: dataList.sanPham,
             placeholder: "Chọn sản phẩm mẫu"

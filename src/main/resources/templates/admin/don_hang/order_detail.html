@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/admin/layout-dashboard/layout.html">
+<head>
+
+        <!-- Bootstrap 5 CSS -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+        <!-- SweetAlert2 CSS -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+        <!-- DataTables Bootstrap 5 CSS -->
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="/css/client/trang-san-pham.css">
+        <!-- Custom CSS -->
+        <style>
+            .step-container {
+                display: flex;
+                justify-content: space-between;
+                margin: 20px 0;
+                position: relative;
+            }
+            .step {
+                text-align: center;
+                position: relative;
+                flex: 1;
+            }
+            .step:before {
+                content: "";
+                position: absolute;
+                top: 50%;
+                left: 0;
+                right: 0;
+                height: 2px;
+                background-color: #ddd;
+                z-index: 1;
+            }
+            .step:first-child:before { left: 50%; }
+            .step:last-child:before { right: 50%; }
+            .step-indicator {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                background-color: #ddd;
+                color: #fff;
+                z-index: 2;
+                position: relative;
+                font-size: 20px;
+                margin: 0 auto;
+            }
+            .step-name {
+                margin-top: 10px;
+                font-size: 14px;
+                font-weight: 500;
+                color: #333;
+            }
+            .step {
+                text-align: center;
+                position: relative;
+                flex: 1;
+            }
+            .step:before {
+                content: "";
+                position: absolute;
+                top: 50%;
+                left: 0;
+                right: 0;
+                height: 2px;
+                background-color: #ddd;
+                z-index: 1;
+            }
+            .step:first-child:before {
+                left: 50%;
+            }
+            .step:last-child:before {
+                right: 50%;
+            }
+            .disabled-table {
+                pointer-events: none;
+            }
+            .disabled-table .deleteDetailBtn{
+                opacity: 0.5;
+            }
+            /* Vòng tròn hiển thị icon */
+            .step-indicator {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                background-color: #ddd;
+                color: #fff;
+                z-index: 2;
+                position: relative;
+                font-size: 20px;
+            }
+
+            /* Chưa thực hiện => màu ghi */
+            .step.not-started .step-indicator {
+                background-color: #ddd;
+            }
+            /* Đang thực hiện => màu xanh lá */
+            .step.active .step-indicator {
+                background-color: #28a745;
+            }
+            /* Đã hoàn thành => màu xanh dương */
+            .step.completed .step-indicator {
+                background-color: #007bff;
+            }
+            /* Class hidden để ẩn phần tử, có ưu tiên cao */
+            .hidden {
+                display: none !important;
+            }
+            .step-container {
+                display: flex;
+                justify-content: space-between;
+                margin: 20px 0;
+                position: relative;
+            }
+
+            .hidden { display: none !important; }
+        </style>
+
+</head>
+<body layout:fragment="content">
+<div class="container mt-4">
+    <div id="undoNotification" class="alert alert-warning d-flex align-items-center hidden">
+        <i class="fa-solid fa-undo fa-lg me-2"></i>
+        <span id="undoMessage" class="flex-grow-1">
+        Sản phẩm đã bị xóa. Bạn có 120 giây để hoàn tác.
+    </span>
+        <button id="undoBtn" class="btn btn-sm btn-link">Hoàn tác</button>
+        <span id="undoTimer" class="ms-2"></span>
+    </div>
+
+    <!-- Các nút điều khiển đơn hàng -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3><i class="fa-solid fa-file-invoice"></i> Chi tiết đơn hàng</h3>
+        <div style="display: flex; gap: 10px;">
+            <button id="openOrderHistoryBtn" class="btn btn-secondary me-2">
+                <i class="fa-solid fa-clock-rotate-left"></i> Lịch sử đơn hàng
+            </button>
+            <button class="btn btn-info " id="btn-info-khach-hang" data-bs-toggle="modal"  data-bs-target="#updateOrderModal">
+                <i class="fa-solid fa-pen"></i> Cập nhật thông tin
+            </button>
+            <div id="specialActionContainer"></div>
+            <button id="cancelOrderBtn" class="btn btn-danger ms-2">
+                <i class="fa-solid fa-ban"></i> Hủy đơn hàng
+            </button>
+        </div>
+    </div>
+
+    <!-- Timeline trạng thái -->
+    <div class="step-container" id="timeline"></div>
+    <!-- Phần cập nhật trạng thái -->
+    <div class="card" id="updateStatusCard">
+        <div class="card-body">
+                    <button id="openUpdateStatusModalBtn" class="btn btn-primary mt-4" type="button">
+                        Cập nhật trạng thái
+                    </button>
+        </div>
+    </div>
+    <!-- Thông tin đơn hàng -->
+    <div class="card mb-4" id="orderInfoCard">
+        <div class="card-header"><strong>Thông tin đơn hàng</strong></div>
+        <div class="card-body row" id="orderInfo"></div>
+    </div>
+
+
+
+    <!-- Thông tin người nhận -->
+    <div class="card mb-4" id="customerInfoCard">
+        <div class="card-header"><strong>Thông tin người nhận</strong></div>
+        <div class="card-body row" id="customerInfo"></div>
+    </div>
+
+    <!-- Danh sách sản phẩm trong đơn hàng -->
+    <div class="card mb-4" id="productListCard">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <strong>Sản phẩm trong đơn hàng</strong>
+            <button id="addProductBtn" class="btn btn-success">
+                <i class="fa-solid fa-plus"></i> Thêm sản phẩm
+            </button>
+        </div>
+        <div class="card-body p-0">
+            <table class="table mb-0">
+                <thead class="thead-light">
+                <tr>
+                    <th>#</th>
+                    <th>Mã SP Chi Tiết</th>
+                    <th>Tên sản phẩm</th>
+                    <th>Màu sắc</th>
+                    <th>Kích thước</th>
+                    <th>Giá gốc</th>
+                    <th>Giá KM</th>
+                    <th>Số lượng</th>
+                    <th>Thành tiền</th>
+                    <th>Hành động</th>
+                </tr>
+                </thead>
+                <tbody id="productListBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal cập nhật thông tin đơn hàng -->
+<div class="modal fade" id="updateOrderModal" tabindex="-1" aria-labelledby="updateOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="updateOrderInfoForm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="updateOrderModalLabel" class="modal-title">Cập nhật thông tin đơn hàng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="tenNguoiNhan" class="form-label">Tên người nhận</label>
+                        <input type="text" class="form-control" id="tenNguoiNhan" name="tenNguoiNhan">
+                    </div>
+                    <div class="mb-3">
+                        <label for="diaChi" class="form-label">Địa chỉ nhận</label>
+                        <input type="text" class="form-control" id="diaChi" name="diaChi">
+                    </div>
+                    <div class="mb-3">
+                        <label for="soDienThoai" class="form-label">Số điện thoại nhận</label>
+                        <input type="text" class="form-control" id="soDienThoai" name="soDienThoai">
+                    </div>
+                    <div class="mb-3">
+                        <label for="phiVanChuyen" class="form-label">Phí vận chuyển</label>
+                        <input type="number" class="form-control" id="phiVanChuyen" name="phiVanChuyen" step="0.01">
+                    </div>
+                    <div class="mb-3">
+                        <label for="ghiChu" class="form-label">Ghi chú</label>
+                        <textarea class="form-control" id="ghiChu" name="ghiChu" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal thêm sản phẩm (DataTable) -->
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="addProductModalLabel" class="modal-title">Chọn sản phẩm để thêm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <!-- Bảng DataTable hiển thị sản phẩm -->
+                    <table id="dataTable" class="table table-bordered" style="width: 100%">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Mã sản phẩm</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Thương hiệu</th>
+                            <th>Số lượng</th>
+                            <th>Ảnh</th>
+                            <th>Hành động</th>
+                        </tr>
+                        </thead>
+                        <tfoot>
+                        <tr>
+                            <th>ID</th>
+                            <th>Mã sản phẩm</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Thương hiệu</th>
+                            <th>Số lượng</th>
+                            <th>Ảnh</th>
+                            <th>Hành động</th>
+                        </tr>
+                        </tfoot>
+                        <tbody>
+                        <!-- DataTables sẽ load dữ liệu -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal cập nhật trạng thái đơn hàng -->
+<div class="modal fade" id="updateStatusModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="updateStatusForm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="updateStatusModalLabel" class="modal-title">Cập nhật trạng thái đơn hàng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="statusUpdateMessage"></p>
+                    <div class="mb-3">
+                        <label for="statusNote" class="form-label">Ghi chú cập nhật</label>
+                        <textarea class="form-control" id="statusNote" name="statusNote" rows="3"></textarea>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Xác nhận cập nhật</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+//
+<div class="modal fade" id="addCartModal" tabindex="-1" aria-labelledby="addCartModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-shopping-cart"></i> <span id="modal-product-name"></span> - Chọn tùy chọn</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <!-- Left: Carousel slider cho ảnh sản phẩm -->
+                    <div class="col-md-5">
+                        <div id="modal-carousel" class="carousel slide" data-ride="carousel">
+                            <div class="carousel-inner" id="modal-carousel-inner">
+                                <!-- Các slide được tạo động -->
+                            </div>
+                            <a class="carousel-control-prev" href="#modal-carousel" role="button" data-slide="prev">
+                                <span class="carousel-control-prev-icon"></span>
+                                <span class="sr-only">Previous</span>
+                            </a>
+                            <a class="carousel-control-next" href="#modal-carousel" role="button" data-slide="next">
+                                <span class="carousel-control-next-icon"></span>
+                                <span class="sr-only">Next</span>
+                            </a>
+                        </div>
+                    </div>
+                    <!-- Right: Tùy chọn biến thể -->
+                    <div class="col-md-7" id="modal-right-col">
+                        <!-- Container render tùy chọn biến thể -->
+                        <div id="modal-variant-container"></div>
+                        <form id="modal-form">
+                            <div class="form-group">
+                                <label for="modal-quantity"><i class="fas fa-sort-numeric-up"></i> Số lượng</label>
+                                <input type="number" class="form-control" id="modal-quantity" value="1" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label>  <span id="modal-price">Giá: N/A</span></label>
+                            </div>
+                            <div class="form-group">
+                                <p id="modal-total" style="font-weight: bold;">N/A</p>
+                                <small id="modal-total-warning" class="text-danger"></small>
+                            </div>
+                            <button type="submit" class="btn btn-success btn-block"><i class="fas fa-check"></i> Thêm</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal xem lịch sử đơn hàng -->
+<div class="modal fade" id="orderHistoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="orderHistoryModalLabel" class="modal-title">Lịch sử đơn hàng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body">
+                <table id="orderHistoryTable" class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Tiêu đề</th>
+                        <th>Mô tả</th>
+                        <th>Thời gian</th>
+                        <th>Người thực hiện</th>
+                    </tr>
+                    </thead>
+                    <tbody id="orderHistoryBody">
+                    <!-- Nội dung sẽ được thêm động -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+<th:block layout:fragment="bottom_link">
+    <!-- JS: Load theo thứ tự chuẩn cho Bootstrap 5, DataTables, SweetAlert2 -->
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Bootstrap Bundle (bao gồm Popper) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables Core & Integration cho Bootstrap 5 -->
+    <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/js/admin/quan-ly-don-hang/quan-ly-don-hang.js"></script>
+
+</th:block>
+</html>

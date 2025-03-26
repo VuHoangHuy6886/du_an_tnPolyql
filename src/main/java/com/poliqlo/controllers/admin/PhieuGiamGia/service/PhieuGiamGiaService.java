@@ -5,9 +5,11 @@ import com.poliqlo.controllers.admin.PhieuGiamGia.model.request.UpdatePhieuGiamG
 import com.poliqlo.models.KhachHang;
 import com.poliqlo.models.PhieuGiamGia;
 import com.poliqlo.models.PhieuGiamGiaKhachHang;
+import com.poliqlo.models.TaiKhoan;
 import com.poliqlo.repositories.KhachHangRepository;
 import com.poliqlo.repositories.PhieuGiamGiaKhachHangRepository;
 import com.poliqlo.repositories.PhieuGiamGiaRepository;
+import com.poliqlo.repositories.TaiKhoanRepository;
 import com.poliqlo.utils.CouponStatusUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,7 +31,9 @@ public class PhieuGiamGiaService {
 
     private final PhieuGiamGiaRepository phieuGiamGiaRepository;
     private final KhachHangRepository khachHangRepository;
+    private final TaiKhoanRepository taiKhoanRepository;
     private final PhieuGiamGiaKhachHangRepository phieuGiamGiaKhachHangRepository;
+
 
     public Page<PhieuGiamGia> findAll(Integer pageNo, Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNo, pageSize);
@@ -37,14 +41,25 @@ public class PhieuGiamGiaService {
         return phieuGiamGiaPage;
     }
 
+
     //ham loc
     public Page<PhieuGiamGia> findAll(int page, int size, String name, String status, LocalDateTime startTime, LocalDateTime endTime) {
         Pageable pageable = PageRequest.of(page, size);
         return phieuGiamGiaRepository.filterAllCoupon(pageable, name, status, startTime, endTime);
     }
 
+//    tim kiem khach hang theo ten
+    public Page<KhachHang> timKhachHangTheoTen(String ten, Pageable pageable) {
+        return phieuGiamGiaRepository.searchByTen(ten, pageable);
+    }
+
     //ham them
     public String save(AddPhieuGiamGiaRequest request, List<Integer> ids) {
+//        boolean exists = phieuGiamGiaRepository.existsByTen(request.getTen());
+//        if (exists) {
+//            return "Tên phiếu giảm giá đã tồn tại!";
+//        }
+
         System.out.println("request gia tri giam ; " + request.getGiaTriGiam());
         PhieuGiamGia add = new PhieuGiamGia();
         add.setMa(genMa());
@@ -118,8 +133,8 @@ public class PhieuGiamGiaService {
     }
 
     public void updateStatusCoupon(List<PhieuGiamGia> phieuGiamGiaList
+
     ) {
-        System.out.println("abc");
         LocalDateTime timeNow = LocalDateTime.now();
         // Định dạng thời gian để hiển thị
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd-MM-yyyy");
@@ -130,20 +145,16 @@ public class PhieuGiamGiaService {
             LocalDateTime endTime = pgg.getNgayKetThuc();
             Integer sl = pgg.getSoLuong();
 
-            //xet so luong
-            if (sl <= 0) {
-                pgg.setTrangThai(CouponStatusUtil.DA_KET_THUC);
-                phieuGiamGiaRepository.save(pgg);
-            }
 
             //xet trang thai
-            if (timeNow.isBefore(startTime) && sl >= 1) {
+
+            if (timeNow.isBefore(startTime) && !pgg.getTrangThai().equals(CouponStatusUtil.DA_KET_THUC)) {
                 pgg.setTrangThai(CouponStatusUtil.SAP_DIEN_RA);
                 phieuGiamGiaRepository.save(pgg);
             } else if (timeNow.isAfter(endTime)) {
                 pgg.setTrangThai(CouponStatusUtil.DA_KET_THUC);
                 phieuGiamGiaRepository.save(pgg);
-            } else if (sl >= 1) {
+            } else if (!pgg.getTrangThai().equals(CouponStatusUtil.DA_KET_THUC)) {
                 pgg.setTrangThai(CouponStatusUtil.DANG_DIEN_RA);
                 phieuGiamGiaRepository.save(pgg);
             }
@@ -153,19 +164,36 @@ public class PhieuGiamGiaService {
 
     }
 
-    public List<KhachHang> getAllCustomers() {
-        return phieuGiamGiaRepository.findAllCustomers();
+    public Page<KhachHang> getAllCustomers(Pageable pageable) {
+        return khachHangRepository.findAll(pageable);
     }
 
+
+
     public void savePhieuGiamChoKhachHang(List<Integer> ids, PhieuGiamGia phieuGiamGia) {
-        for (Integer id : ids) {
-            KhachHang kh = khachHangRepository.findById(id).get();
-            PhieuGiamGiaKhachHang pggKH = new PhieuGiamGiaKhachHang();
-            pggKH.setPhieuGiamGia(phieuGiamGia);
-            pggKH.setKhachHang(kh);
-            pggKH.setIsUsed(false);
-            phieuGiamGiaKhachHangRepository.save(pggKH);
+        if (ids != null && !ids.isEmpty()) {
+            for (Integer id : ids) {
+                KhachHang kh = khachHangRepository.findById(id).get();
+                PhieuGiamGiaKhachHang pggKH = new PhieuGiamGiaKhachHang();
+                pggKH.setPhieuGiamGia(phieuGiamGia);
+                pggKH.setKhachHang(kh);
+                pggKH.setIsUsed(false);
+                phieuGiamGiaKhachHangRepository.save(pggKH);
+            }
         }
     }
+
+    //thay doi trang thai
+    public void changeStatus(Integer id) {
+        PhieuGiamGia phieuGiamGia = findById(id);
+        if (phieuGiamGia.getTrangThai().equals(CouponStatusUtil.DANG_DIEN_RA)) {
+            phieuGiamGia.setTrangThai(CouponStatusUtil.DA_KET_THUC);
+            phieuGiamGiaRepository.save(phieuGiamGia);
+        } else if (phieuGiamGia.getTrangThai().equals(CouponStatusUtil.DA_KET_THUC)) {
+            phieuGiamGia.setTrangThai(CouponStatusUtil.DANG_DIEN_RA);
+            phieuGiamGiaRepository.save(phieuGiamGia);
+        }
+    }
+
 ///END
 }

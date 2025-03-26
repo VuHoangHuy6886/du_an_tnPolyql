@@ -6,6 +6,8 @@
 <head>
     <th:block layout:fragment="head_link">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <style>
             .update-container {
                 max-width: 900px;
@@ -93,6 +95,61 @@
                 border: none;
             }
 
+            /* Confirmation Modal Styles */
+            .modal {
+                display: none;
+                position: fixed;
+                z-index: 1000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+            }
+
+            .modal-content {
+                position: relative;
+                background-color: #fff;
+                margin: 10% auto;
+                padding: 20px;
+                border-radius: 10px;
+                width: 400px;
+                text-align: center;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            }
+
+            .modal-icon {
+                color: #ff9800;
+                font-size: 3rem;
+                margin-bottom: 15px;
+            }
+
+            .modal-title {
+                font-size: 1.5rem;
+                font-weight: bold;
+                margin-bottom: 15px;
+            }
+
+            .modal-message {
+                margin-bottom: 20px;
+            }
+
+            .modal-buttons {
+                display: flex;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .btn-confirm {
+                background-color: #28a745;
+                color: white;
+            }
+
+            .btn-cancel {
+                background-color: #dc3545;
+                color: white;
+            }
+
         </style>
     </th:block>
 </head>
@@ -110,7 +167,7 @@
             <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
             <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
 
-            <form th:action="@{/admin/khach-hang/update-khach-hang/{id}(id=${khachHang.id})}"
+            <form id="updateCustomerForm" th:action="@{/admin/khach-hang/update-khach-hang/{id}(id=${khachHang.id})}"
                   th:object="${khachHang}"
                   method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
 
@@ -138,8 +195,8 @@
                         </div>
                         <div class="form-group">
                             <label for="ten">Tên khách hàng</label>
-                            <input type="text" id="ten" class="form-control" th:field="*{ten}" required>
-                            <div class="invalid-feedback">Vui lòng nhập tên khách hàng.</div>
+                            <input type="text" id="ten" class="form-control" th:field="*{ten}" pattern="^[A-Za-zÀ-ỹ\s]+$" required>
+                            <div class="invalid-feedback">Vui lòng nhập tên khách hàng chỉ chứa chữ cái. </div>
                         </div>
                         <div class="form-group">
                             <label for="gioiTinh">Giới tính</label>
@@ -158,25 +215,26 @@
                             <div class="invalid-feedback">Vui lòng chọn ngày sinh hợp lệ.</div>
                         </div>
                     </div>
-
                     <!-- Cột 3: Số điện thoại, chức vụ, trạng thái -->
                     <div class="form-column">
                         <div class="form-group">
                             <label for="email">Email</label>
-                            <input type="email" id="email" class="form-control" th:field="*{taiKhoan.email}" required>
-                            <div class="invalid-feedback">Vui lòng nhập email hợp lệ.</div>
+                            <input type="email" id="email" class="form-control" th:field="*{taiKhoan.email}"
+                                   pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" required>
+                            <div class="invalid-feedback">Vui lòng nhập email hợp lệ (VD: example@domain.com).</div>
                         </div>
                         <div class="form-group">
                             <label for="soDienThoai">Số điện thoại</label>
-                            <input type="text" id="soDienThoai" class="form-control" th:field="*{taiKhoan.soDienThoai}" pattern="^[0-9]{10,11}$"  inputmode="numeric" required>
-                            <div class="invalid-feedback">Vui lòng nhập số điện thoại hợp lệ (10-11 chữ số).</div>
+                            <input type="text" id="soDienThoai" class="form-control" th:field="*{taiKhoan.soDienThoai}" pattern="^(0|(\+?84))[235789]\d{8}$" inputmode="numeric" required>
+                            <div class="invalid-feedback">Số điện thoại không đúng định dạng Việt Nam (bắt đầu bằng 0 hoặc +84, theo sau là 9 chữ số).</div>
+                            <small class="form-text text-muted">Ví dụ: 0912345678, 0235456789, 84912345678 hoặc +84912345678</small>
                         </div>
                     </div>
                 </div>
 
                 <!-- Nút cập nhật -->
                 <div class="text-center mt-4">
-                    <button type="submit" class="btn btn-success">
+                    <button type="button" id="saveBtn" class="btn btn-success">
                         <i class="bi bi-check-circle"></i> Lưu thay đổi
                     </button>
                     <a href="/admin/khach-hang/list-khach-hang" class="btn btn-secondary">
@@ -189,47 +247,208 @@
     </div>
 </div>
 
+<!-- Modal xác nhận cập nhật -->
+<div id="updateConfirmModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-icon">
+            <i class="bi bi-exclamation-circle"></i>
+        </div>
+        <h2 class="modal-title">Xác nhận cập nhật</h2>
+        <p class="modal-message">Bạn có chắc chắn muốn cập nhật thông tin khách hàng này?</p>
+        <div class="modal-buttons">
+            <button id="confirmUpdate" class="btn btn-confirm">Xác nhận</button>
+            <button id="cancelUpdate" class="btn btn-cancel">Hủy</button>
+        </div>
+    </div>
+</div>
+
 </body>
 <th:block layout:fragment="bottom_link">
     <script>
-        const fileInput = document.getElementById("anhUrl");
-        const imagePreview = document.getElementById("imagePreview");
-        fileInput.addEventListener("change", function () {
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-            reader.onloadend = function () {
-                imagePreview.innerHTML = `<img src="${reader.result}" alt="Ảnh preview" class="img-thumbnail" style="max-width: 100px; max-height: 100px;">`;
-            };
-            if (file) {
-                reader.readAsDataURL(file);
-            }
-        });
-        (function () {
-            "use strict";
-            const forms = document.querySelectorAll(".needs-validation");
+        // Thêm thư viện SweetAlert2
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("updateCustomerForm");
+            const saveBtn = document.getElementById("saveBtn");
+            const emailInput = document.getElementById("email");
+            const phoneInput = document.getElementById("soDienThoai");
+            const accountId = document.querySelector("input[name='taiKhoan.id']").value;
 
-            Array.prototype.slice.call(forms).forEach(function (form) {
-                form.addEventListener("submit", function (event) {
-                    if (!form.checkValidity()) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
-                    // Kiểm tra ngày sinh không lớn hơn ngày hiện tại
-                    const ngaySinhInput = document.getElementById("ngaySinh");
-                    if (ngaySinhInput) {
-                        const ngaySinh = new Date(ngaySinhInput.value);
-                        const today = new Date();
-                        if (ngaySinh > today) {
-                            ngaySinhInput.setCustomValidity("Ngày sinh không được lớn hơn ngày hiện tại.");
-                        } else {
-                            ngaySinhInput.setCustomValidity("");
-                        }
-                    }
+            let emailValid = true;
+            let phoneValid = true;
 
-                    form.classList.add("was-validated");
-                }, false);
+            // Hiển thị ảnh xem trước khi chọn file
+            const fileInput = document.getElementById("anhUrl");
+            const imagePreview = document.getElementById("imagePreview");
+
+            fileInput.addEventListener("change", function () {
+                const file = fileInput.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = function () {
+                        imagePreview.innerHTML = `<img src="${reader.result}" alt="Ảnh preview" class="img-thumbnail" style="max-width: 100px; max-height: 100px;">`;
+                    };
+                    reader.readAsDataURL(file);
+                }
             });
-        })();
+
+            // Kiểm tra email trùng lặp
+            emailInput.addEventListener("blur", function() {
+                const email = emailInput.value;
+                if (!email || !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) return;
+
+                fetch(`/admin/api/khach-hang/check-email?email=${encodeURIComponent(email)}&excludeId=${accountId}`)
+                    .then(response => response.json())
+                    .then(exists => {
+                        emailValid = !exists;
+
+                        if (exists) {
+                            emailInput.setCustomValidity("Email này đã được sử dụng");
+                            // Hiển thị thông báo lỗi
+                            let feedbackElement = emailInput.nextElementSibling;
+                            if (!feedbackElement || !feedbackElement.classList.contains("invalid-feedback")) {
+                                feedbackElement = document.createElement("div");
+                                feedbackElement.className = "invalid-feedback";
+                                emailInput.parentNode.appendChild(feedbackElement);
+                            }
+                            feedbackElement.textContent = "Email này đã được sử dụng";
+                            emailInput.classList.add("is-invalid");
+                        } else {
+                            emailInput.setCustomValidity("");
+                            emailInput.classList.remove("is-invalid");
+                            emailInput.classList.add("is-valid");
+                        }
+                    });
+            });
+
+            // Kiểm tra số điện thoại trùng lặp
+            phoneInput.addEventListener("blur", function() {
+                const phone = phoneInput.value;
+                if (!phone || !phone.match(/^(0|(\+?84))[235789]\d{8}$/)) return;
+
+                fetch(`/admin/api/khach-hang/check-phone?phone=${encodeURIComponent(phone)}&excludeId=${accountId}`)
+                    .then(response => response.json())
+                    .then(exists => {
+                        phoneValid = !exists;
+
+                        if (exists) {
+                            phoneInput.setCustomValidity("Số điện thoại này đã được sử dụng");
+                            // Hiển thị thông báo lỗi
+                            let feedbackElement = phoneInput.nextElementSibling;
+                            if (!feedbackElement || !feedbackElement.classList.contains("invalid-feedback")) {
+                                feedbackElement = document.createElement("div");
+                                feedbackElement.className = "invalid-feedback";
+                                phoneInput.parentNode.appendChild(feedbackElement);
+                            }
+                            feedbackElement.textContent = "Số điện thoại này đã được sử dụng";
+                            phoneInput.classList.add("is-invalid");
+                        } else {
+                            phoneInput.setCustomValidity("");
+                            phoneInput.classList.remove("is-invalid");
+                            phoneInput.classList.add("is-valid");
+                        }
+                    });
+            });
+            // Nút cập nhật
+            saveBtn.addEventListener("click", function() {
+                // Kiểm tra form hợp lệ
+                let isValid = true;
+
+                const ngaySinhInput = document.getElementById("ngaySinh");
+                if (ngaySinhInput && ngaySinhInput.value) {
+                    const ngaySinh = new Date(ngaySinhInput.value);
+                    const today = new Date();
+                    const ageLimitDate = new Date();
+                    ageLimitDate.setFullYear(today.getFullYear() - 6); // Ngày cách đây 6 năm
+
+                    if (ngaySinh > today) {
+                        ngaySinhInput.setCustomValidity("Ngày sinh không thể vượt quá ngày hiện tại.");
+                        isValid = false;
+                    } else if (ngaySinh > ageLimitDate) {
+                        ngaySinhInput.setCustomValidity("Khách hàng cần ít nhất 6 tuổi để đăng ký.");
+                        isValid = false;
+                    } else {
+                        ngaySinhInput.setCustomValidity("");
+                    }
+
+                    // Hiển thị thông báo lỗi tùy chỉnh
+                    const feedbackElement = ngaySinhInput.nextElementSibling;
+                    if (!isValid && feedbackElement && feedbackElement.classList.contains("invalid-feedback")) {
+                        feedbackElement.textContent = ngaySinhInput.validationMessage;
+                    }
+                }
+                // Validate all form fields
+                if (!form.checkValidity()) {
+                    form.classList.add("was-validated");
+                    isValid = false;
+                }
+
+                // Kiểm tra trùng email và SĐT
+                if (!emailValid || !phoneValid) {
+                    if (!emailValid) {
+                        emailInput.classList.add("is-invalid");
+                    }
+                    if (!phoneValid) {
+                        phoneInput.classList.add("is-invalid");
+                    }
+                    return;
+                }
+
+                // Nếu hợp lệ, hiển thị SweetAlert xác nhận
+                if (isValid) {
+                    Swal.fire({
+                        icon: 'question',
+                        title: 'Xác nhận cập nhật',
+                        text: 'Bạn có chắc chắn muốn cập nhật thông tin khách hàng không?',
+                        showCancelButton: true,
+                        confirmButtonText: 'Xác nhận',
+                        cancelButtonText: 'Hủy',
+                        confirmButtonColor: '#6c5ce7',
+                        cancelButtonColor: '#636e72'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Sử dụng FormData và fetch để gửi form
+                            const formData = new FormData(form);
+
+                            fetch(form.action, {
+                                method: "POST",
+                                body: formData
+                            })
+                                .then(response => {
+                                    if (response.ok) {
+                                        // Hiển thị thông báo thành công
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Cập nhật thành công!',
+                                            text: 'Thông tin khách hàng đã được cập nhật.',
+                                            showConfirmButton: false,
+                                            timer: 1500
+                                        }).then(() => {
+                                            window.location.href = "/admin/khach-hang/list-khach-hang";
+                                        });
+                                    } else {
+                                        // Xử lý lỗi
+                                        response.text().then(text => {
+                                            Swal.fire({
+                                                icon: 'error',
+                                                title: 'Cập nhật thất bại',
+                                                text: 'Có lỗi xảy ra: ' + text
+                                            });
+                                        });
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error("Error:", error);
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Cập nhật thất bại',
+                                        text: 'Có lỗi xảy ra khi gửi dữ liệu.'
+                                    });
+                                });
+                        }
+                    });
+                }
+            });
+        });
     </script>
 </th:block>
 </html>

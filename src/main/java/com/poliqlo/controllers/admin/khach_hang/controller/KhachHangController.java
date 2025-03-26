@@ -60,17 +60,17 @@ public class KhachHangController {
                               @RequestParam("soDienThoai") String soDienThoai,
                               @RequestParam("anhUrl") MultipartFile file,
                               RedirectAttributes redirectAttributes) {
-        // Kiểm tra email đã tồn tại
-        if (taiKhoanService.existsByEmail(email)) {
-            redirectAttributes.addFlashAttribute("errorEmail01", "Email đã tồn tại, vui lòng nhập email khác.");
-            return "redirect:/admin/khach-hang/add-khach-hang";
-        }
-
-        // Kiểm tra số điện thoại đã tồn tại
-        if (taiKhoanService.existsBySoDienThoai(soDienThoai)) {
-            redirectAttributes.addFlashAttribute("errorPhone01", "Số điện thoại đã tồn tại, vui lòng nhập số khác.");
-            return "redirect:/admin/khach-hang/add-khach-hang";
-        }
+//        // Kiểm tra email đã tồn tại
+//        if (taiKhoanService.existsByEmail(email)) {
+//            redirectAttributes.addFlashAttribute("errorEmail", "Email đã tồn tại, vui lòng nhập email khác.");
+//            return "redirect:/admin/khach-hang/add-khach-hang";
+//        }
+//
+//        // Kiểm tra số điện thoại đã tồn tại
+//        if (taiKhoanService.existsBySoDienThoai(soDienThoai)) {
+//            redirectAttributes.addFlashAttribute("errorPhone", "Số điện thoại đã tồn tại, vui lòng nhập số khác.");
+//            return "redirect:/admin/khach-hang/add-khach-hang";
+//        }
 
         TaiKhoan taiKhoan = new TaiKhoan();
         taiKhoan.setEmail(email);
@@ -91,7 +91,7 @@ public class KhachHangController {
         khachHang.setTaiKhoan(taiKhoan);
         khachHangService.saveKhachHang(khachHang);
 
-        redirectAttributes.addFlashAttribute("successMessage", "Thêm nhân viên thành công!");
+        redirectAttributes.addFlashAttribute("successMessage", "Thêm khách hàng thành công!");
         return "redirect:/admin/khach-hang/list-khach-hang";
     }
     @GetMapping("/xem-chi-tiet/{id}")
@@ -138,9 +138,16 @@ public class KhachHangController {
     }
     // Danh sách khach hang bị xóa
     @GetMapping("/list-customer-deleted")
-    public String listDeletedKhachHang(Model model) {
-        List<KhachHang> danhSachKhachHangDaXoa = khachHangService.getAllKhachHangDeleted();
-        model.addAttribute("khachHangs", danhSachKhachHangDaXoa);
+    public String listDeletedKhachHang(Model model ,
+                                       @RequestParam(defaultValue = "0") int page,
+                                       @RequestParam(defaultValue = "5") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<KhachHang> danhSachKhachHangDaXoa = khachHangService.getAllKhachHangDeleted(pageable);
+//        model.addAttribute("khachHangs", danhSachKhachHangDaXoa);
+        model.addAttribute("khachHangs", danhSachKhachHangDaXoa.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", danhSachKhachHangDaXoa.getTotalPages());
+        model.addAttribute("totalItems", danhSachKhachHangDaXoa.getTotalElements());
         return "admin/khach-hang/list-customer-deleted";
     }
     @GetMapping("/restore/{id}")

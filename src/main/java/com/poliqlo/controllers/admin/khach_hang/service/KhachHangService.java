@@ -69,8 +69,8 @@ public class KhachHangService {
         khachHang.setGioiTinh(updatedKhachHang.getGioiTinh());
         khachHangRepository.save(khachHang);
     }
-    public List<KhachHang> getAllKhachHangDeleted() {
-        return khachHangRepository.findByIsDeletedTrue();
+    public Page<KhachHang> getAllKhachHangDeleted(Pageable pageable) {
+        return khachHangRepository.findByIsDeletedTrue(pageable);
     }
     @Transactional
     public void restoreKhachHang(Integer khachHangId) {
