@@ -1,9 +1,11 @@
 package com.poliqlo.models;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import net.minidev.json.annotate.JsonIgnore;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
@@ -80,14 +82,20 @@ public class HoaDon {
 
     @NotNull
     @OneToMany(mappedBy = "hoaDon", cascade = CascadeType.ALL,orphanRemoval = true)
+    @JsonManagedReference
     private List<HoaDonChiTiet> hoaDonChiTiets = new ArrayList<>();
 
     @OneToMany(mappedBy = "hoaDon")
+    @JsonManagedReference
     private List<LichSuHoaDon> lichSuHoaDons = new ArrayList<>();
 
     @Size(max = 20)
     @ColumnDefault("'DA_THANH_TOAN'")
     @Column(name = "TRANG_THAI_THANH_TOAN", length = 20)
     private String trangThaiThanhToan;
+
+    @ColumnDefault("CURRENT_TIMESTAMP")
+    @Column(name = "NGAY_TAO")
+    private LocalDateTime ngayTao;
 
 }

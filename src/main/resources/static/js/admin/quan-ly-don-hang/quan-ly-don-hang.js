@@ -53,19 +53,320 @@ const statusIconMap = {
 };
 
 document.addEventListener("DOMContentLoaded", function() {
+// Render timeline theo loại đơn hàng
+    // Vẽ timeline
+    function renderTimeline(order) {
+        const timeline = document.getElementById('timeline');
+        if (!timeline) return;
+        timeline.innerHTML = '';
 
-    // Khi mở modal cập nhật thông tin, load dữ liệu cũ vào input
-    $('#updateOrderModal').on('show.bs.modal', function () {
-        if (currentOrder) {
-            document.getElementById('tenNguoiNhan').value = currentOrder.tenNguoiNhan || '';
-            document.getElementById('diaChi').value = currentOrder.diaChi || '';
-            document.getElementById('soDienThoai').value = currentOrder.soDienThoai || '';
-            document.getElementById('phiVanChuyen').value = currentOrder.phiVanChuyen || '';
-            document.getElementById('ghiChu').value = currentOrder.ghiChu || '';
+        // Tùy theo trạng thái đơn hàng, xác định các bước hiển thị
+        let timelineData = [];
+        if (order.trangThai === "DA_HUY") {
+            // Đơn hàng hủy: hiển thị đến CHO_LAY_HANG, rồi DA_HUY
+            let idx = statuses.indexOf("CHO_LAY_HANG");
+            timelineData = statuses.slice(0, idx + 1);
+            timelineData.push("DA_HUY");
+        } else if (
+            order.trangThai === "GIAO_HANG_THAT_BAI" ||
+            order.trangThai === "CHO_CHUYEN_HOAN" ||
+            order.trangThai === "THAT_LAC"
+        ) {
+            // Giao thất bại / Chờ hoàn / Thất lạc => hiển thị đến GIAO_HANG_THAT_BAI, rồi CHO_CHUYEN_HOAN
+            let idx = statuses.indexOf("DANG_GIAO");
+            timelineData = statuses.slice(0, idx + 1);
+            timelineData.push("GIAO_HANG_THAT_BAI");
+            timelineData.push("CHO_CHUYEN_HOAN");
+        } else {
+            // Đơn hàng bình thường => hiển thị đến GIAO_HANG_THANH_CONG
+            let idx = statuses.indexOf("GIAO_HANG_THANH_CONG");
+            timelineData = statuses.slice(0, idx + 1);
+
+            // Nếu đơn hàng thực tế đã sang GIAO_HANG_THAT_BAI hay THANH_CONG, thêm chúng
+            if (order.trangThai === "GIAO_HANG_THAT_BAI") {
+                timelineData.push("GIAO_HANG_THAT_BAI");
+            }
+            if (order.trangThai === "THANH_CONG") {
+                timelineData.push("THANH_CONG");
+            }
         }
-    });
 
-    // Hàm lấy thông tin đơn hàng
+        // Xác định chỉ số hiện tại
+        let currentTimelineIndex = timelineData.indexOf(order.trangThai);
+        if (currentTimelineIndex === -1) currentTimelineIndex = 0;
+
+        // Vẽ
+        timelineData.forEach((status, index) => {
+            const stepDiv = document.createElement('div');
+            stepDiv.classList.add('step');
+            if (index < currentTimelineIndex) stepDiv.classList.add('completed');
+            else if (index === currentTimelineIndex) stepDiv.classList.add('active');
+
+            const indicator = document.createElement('span');
+            indicator.classList.add('step-indicator');
+            const icon = document.createElement('i');
+            icon.classList.add('fa-solid', statusIconMap[status] || 'fa-circle');
+            indicator.appendChild(icon);
+
+            const nameDiv = document.createElement('div');
+            nameDiv.classList.add('step-name');
+            nameDiv.textContent = convertToVietnamese(status);
+
+            stepDiv.appendChild(indicator);
+            stepDiv.appendChild(nameDiv);
+            timeline.appendChild(stepDiv);
+        });
+    }
+
+// Vô hiệu hóa các thao tác chỉnh sửa
+    function disableOrderActions(status) {
+        // Nút "Thêm sản phẩm"
+        const addBtn = document.getElementById('addProductBtn');
+        if (addBtn) addBtn.disabled = status;
+        // Các ô input cập nhật số lượng
+        // Các ô input cập nhật số lượng
+        document.querySelectorAll('.updateQtyInput').forEach(input => input.disabled = status);
+
+        // Nút xóa chi tiết
+        document.querySelectorAll('.deleteDetailBtn').forEach(btn => btn.disabled = status);
+
+        // Nút hủy đơn
+        const cancelBtn = document.getElementById('cancelOrderBtn');
+        if (cancelBtn) cancelBtn.disabled = status;
+        const btnUpdate = document.getElementById('btn-info-khach-hang');
+        if (btnUpdate) btnUpdate.disabled = status;
+
+        // hoặc chính <table> có id="myTable"
+        // Vô hiệu hóa luôn các thành phần trong bảng #productListBody
+        const productListBody = document.getElementById('productListBody');
+        if (productListBody) {
+            if(status){productListBody.classList.add("disabled-table");}
+            else {productListBody.classList.remove("disabled-table");}
+        }
+    }
+
+// Nút hành động đặc biệt (nếu cần)
+    function setupSpecialActions(order) {
+        const container = document.getElementById('specialActionContainer');
+        if (!container) return;
+
+        container.innerHTML = '';
+        if (order.trangThai === "GIAO_HANG_THAT_BAI" || order.trangThai === "THAT_LAC") {
+            // Chuyển sang CHO_CHUYEN_HOAN
+            const btn = document.createElement('button');
+            btn.textContent = (order.trangThai === "GIAO_HANG_THAT_BAI") ? "Hoàn hàng" : "Xử lý khiếu nại";
+            btn.classList.add('btn', (order.trangThai === "GIAO_HANG_THAT_BAI") ? 'btn-warning' : 'btn-info');
+            btn.addEventListener('click', function() {
+                selectedNewStatus = "CHO_CHUYEN_HOAN";
+                document.getElementById('statusUpdateMessage').textContent =
+                    `Chuyển sang "${convertToVietnamese(selectedNewStatus)}"? (Sẽ cập nhật số lượng sản phẩm về kho)`;
+                $('#updateStatusModal').modal('show');
+            });
+            container.appendChild(btn);
+        }
+    }
+
+// Cập nhật UI đơn hàng
+    function updateUI(order) {
+        // Vẽ timeline
+        renderTimeline(order);
+        // Nút đặc biệt
+        setupSpecialActions(order);
+
+        // Từ "LAY_HANG_THANH_CONG" trở đi, hoặc DA_HUY, CHO_CHUYEN_HOAN, THANH_CONG, GIAO_HANG_THAT_BAI => disable
+        // Từ "LAY_HANG_THANH_CONG" trở đi, hoặc DA_HUY, CHO_CHUYEN_HOAN, THANH_CONG, GIAO_HANG_THAT_BAI => disable
+        const disableIndex = statuses.indexOf("LAY_HANG_THANH_CONG");
+        const currentIndex = statuses.indexOf(order.trangThai);
+
+        // Chia làm 2 khối để rõ ràng:
+        // 1) Nếu đơn hàng vẫn là DA_HUY => disable
+        if (order.trangThai === "DA_HUY") {
+            disableOrderActions(true);
+        }
+        // 2) Hoặc nếu >= LAY_HANG_THANH_CONG, HOẶC CHO_CHUYEN_HOAN, THÀNH_CÔNG, GIAO_HANG_THẤT_BẠI => disable
+        else if (
+            currentIndex >= disableIndex ||
+            order.trangThai === "CHO_CHUYEN_HOAN" ||
+            order.trangThai === "THANH_CONG" ||
+            order.trangThai === "GIAO_HANG_THAT_BAI"
+        ) {
+            disableOrderActions(true);
+        }
+    }
+
+// ---------------- Xử lý cập nhật trạng thái ---------------- //
+
+// Tính trạng thái kế tiếp (ngoại trừ "DANG_GIAO" => hiển thị popup)
+    function computeNextStatus(order) {
+        const current = order.trangThai;
+
+        // Đơn hàng bị hủy => khôi phục => DANG_CHUAN_BI_HANG
+        if (current === "DA_HUY") return "DANG_CHUAN_BI_HANG";
+
+        // Giao hàng thất bại => sang CHO_CHUYEN_HOAN
+        if (current === "GIAO_HANG_THAT_BAI") return "CHO_CHUYEN_HOAN";
+
+        // CHO_CHUYEN_HOAN hoặc THANH_CONG => null
+        if (current === "CHO_CHUYEN_HOAN" || current === "THANH_CONG") return null;
+
+        // Nếu đang DANG_GIAO => null => code chặn => hiển popup chọn
+        if (current === "DANG_GIAO") return null;
+
+        // Bình thường => tìm trạng thái kế tiếp
+        let idx = statuses.indexOf(current);
+        if (idx === -1) return null;
+
+        if (current !== "GIAO_HANG_THANH_CONG") {
+            if (idx + 1 < statuses.length) {
+                return statuses[idx + 1];
+            } else {
+                return null;
+            }
+        }
+        // Nếu đang GIAO_HANG_THANH_CONG => sang GIAO_HANG_THAT_BAI
+        return "GIAO_HANG_THAT_BAI";
+    }
+
+// Mở modal cập nhật trạng thái
+    function setupUpdateStatusModal() {
+        const openBtn = document.getElementById('openUpdateStatusModalBtn');
+        if (!openBtn) return;
+
+        openBtn.addEventListener('click', function() {
+            // Nếu đang DANG_GIAO => cho user chọn
+            if (currentOrder && currentOrder.trangThai === "DANG_GIAO") {
+                Swal.fire({
+                    title: 'Trạng thái kế tiếp?',
+                    text: 'Vui lòng chọn kết quả giao hàng',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Giao hàng thành công',
+                    cancelButtonText: 'Giao hàng thất bại',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        selectedNewStatus = "GIAO_HANG_THANH_CONG";
+                        showConfirmModal(selectedNewStatus);
+                    } else if (result.dismiss === Swal.DismissReason.cancel) {
+                        selectedNewStatus = "GIAO_HANG_THAT_BAI";
+                        showConfirmModal(selectedNewStatus);
+                    }
+                });
+                return;
+            }
+
+            // Nếu không phải DANG_GIAO => logic cũ
+            if (!currentOrder) return;
+            const nextStatus = computeNextStatus(currentOrder);
+            if (!nextStatus) {
+                Swal.fire('Thông báo', 'Không thể chuyển trạng thái từ trạng thái hiện tại', 'info');
+                return;
+            }
+            selectedNewStatus = nextStatus;
+            let message = `Bạn có chắc muốn chuyển sang "${convertToVietnamese(nextStatus)}"?`;
+
+            if (currentOrder.trangThai === "DA_HUY") {
+                message += " (Khôi phục đơn hàng - trừ số lượng sản phẩm từ kho)";
+            } else if (currentOrder.trangThai === "GIAO_HANG_THAT_BAI" || currentOrder.trangThai === "THAT_LAC") {
+                message += " (Trả hàng về kho - cộng số lượng sản phẩm)";
+            }
+            document.getElementById('statusUpdateMessage').textContent = message;
+
+            $('#updateStatusModal').modal('show');
+        });
+    }
+
+// Hàm hiển thị xác nhận (sau khi user chọn GIAO_HANG_THANH_CONG hoặc GIAO_HANG_THAT_BAI)
+    function showConfirmModal(nextStatus) {
+        selectedNewStatus = nextStatus;
+        let message = `Bạn có chắc muốn chuyển sang "${convertToVietnamese(nextStatus)}"?`;
+
+        if (nextStatus === "GIAO_HANG_THAT_BAI") {
+            message += " (Trả hàng về kho)";
+        }
+        document.getElementById('statusUpdateMessage').textContent = message;
+
+        $('#updateStatusModal').modal('show');
+    }
+
+// Submit form cập nhật trạng thái
+    function setupUpdateStatusForm() {
+        const form = document.getElementById('updateStatusForm');
+        if (!form) return;
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const statusNote = document.getElementById('statusNote').value;
+            const payload = {
+                trangThai: selectedNewStatus,
+                ghiChu: statusNote
+            };
+
+            // Nếu đang "DA_HUY" => gọi /restore, nếu không => /updateStatus
+            let endpoint = '/api/orders/' + orderId + '/updateStatus';
+            if (currentOrder && currentOrder.trangThai === "DA_HUY") {
+                endpoint = '/api/orders/' + orderId + '/restore';
+                disableOrderActions(true);
+            }
+            fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error('Lỗi cập nhật trạng thái');
+                    return response.json();
+                })
+                .then(() => {
+                    Swal.fire('Thành công', 'Cập nhật trạng thái thành công!', 'success');
+
+                    $('#updateStatusModal').modal('hide');
+                    fetchOrderDetails();
+                    if (currentOrder && currentOrder.trangThai === "DA_HUY") {
+                        disableOrderActions(false);
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                    Swal.fire('Lỗi', error.message, 'error');
+                });
+        });
+    }
+
+// Xử lý nút hủy đơn hàng
+    function setupCancelOrderButton() {
+        const cancelBtn = document.getElementById('cancelOrderBtn');
+        if (!cancelBtn) return;
+
+        cancelBtn.addEventListener('click', function() {
+            Swal.fire({
+                title: 'Xác nhận hủy đơn hàng?',
+                text: 'Bạn có chắc chắn muốn hủy đơn hàng này?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Đồng ý',
+                cancelButtonText: 'Hủy'
+            }).then(result => {
+                if (result.isConfirmed) {
+                    fetch('/api/orders/' + orderId + '/cancel', { method: 'POST' })
+                        .then(response => {
+                            if (!response.ok) throw new Error('Lỗi hủy đơn hàng: ' + response.statusText);
+                            return response.json();
+                        })
+                        .then(() => {
+                            Swal.fire('Thành công', 'Đơn hàng đã được hủy', 'success');
+                            fetchOrderDetails();
+                        })
+                        .catch(error => {
+                            console.error("Error canceling order:", error);
+                            Swal.fire('Lỗi', error.message, 'error');
+                        });
+                }
+            });
+        });
+    }
+
+// ========== Lấy thông tin đơn hàng & cập nhật UI ========== //
     function fetchOrderDetails() {
         fetch('/api/orders/' + orderId)
             .then(response => {
@@ -74,12 +375,17 @@ document.addEventListener("DOMContentLoaded", function() {
             })
             .then(order => {
                 currentOrder = order;
-                populateOrderDetails(order);
+                       // Giả sử bạn có hàm này để hiển thị danh sách sản phẩm
                 fetchAndPopulateProductList(orderId);
+                // updateUI
+                updateUI(order);
+                // Hiển thị thông tin đơn hàng
+                populateOrderDetails(order);
+
+
+                // Nếu đơn hàng đang ở "LAY_HANG_THANH_CONG", disable thêm/sửa
                 if (order.trangThai === 'LAY_HANG_THANH_CONG') {
-                    document.getElementById('addProductBtn').disabled = true;
-                    document.querySelectorAll('.updateQtyInput').forEach(input => input.disabled = true);
-                    document.querySelectorAll('.deleteDetailBtn').forEach(btn => btn.disabled = true);
+                    disableOrderActions(true)
                 }
             })
             .catch(error => {
@@ -88,102 +394,127 @@ document.addEventListener("DOMContentLoaded", function() {
             });
     }
 
-    // Hàm hiển thị thông tin đơn hàng, timeline và thông tin người nhận
+// Hiển thị thông tin đơn hàng, timeline, người nhận
     function populateOrderDetails(order) {
-        // Timeline
-        const timeline = document.getElementById('timeline');
-        timeline.innerHTML = '';
-        let currentStatus = order.trangThai ? order.trangThai.trim() : "";
-        let currentIndex = statuses.indexOf(currentStatus);
-        if (currentIndex === -1) currentIndex = 0;
-        statuses.forEach((status, index) => {
-            const stepDiv = document.createElement('div');
-            stepDiv.classList.add('step');
-            if (index < currentIndex) {
-                stepDiv.classList.add('completed');
-            } else if (index === currentIndex) {
-                stepDiv.classList.add('active');
-            }
-            const indicator = document.createElement('span');
-            indicator.classList.add('step-indicator');
-            const icon = document.createElement('i');
-            icon.classList.add('fa-solid', statusIconMap[status] || 'fa-circle');
-            indicator.appendChild(icon);
-            const nameDiv = document.createElement('div');
-            nameDiv.classList.add('step-name');
-            nameDiv.textContent = convertToVietnamese(status);
-            stepDiv.appendChild(indicator);
-            stepDiv.appendChild(nameDiv);
-            timeline.appendChild(stepDiv);
-        });
-
-        // Thông tin đơn hàng
+        // Chỉ hiển thị data, KHÔNG setup event listener ở đây (tránh bind nhiều lần)
         const orderInfo = document.getElementById('orderInfo');
-        orderInfo.innerHTML = `
-                    <div class="col-md-4 mb-2">
-                        <label><strong>Mã đơn hàng:</strong></label>
-                        <div>#HD${order.id}</div>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <label><strong>Trạng thái:</strong></label>
-                        <div>${convertToVietnamese(order.trangThai || "")}</div>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <label><strong>Tổng tiền:</strong></label>
-                        <div>${order.tongTien || 0}</div>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <label><strong>Phí giảm giá:</strong></label>
-                        <div>${order.phiGiamGia || 0}</div>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <label><strong>Phương thức thanh toán:</strong></label>
-                        <div>${convertToVietnamese(order.phuongThucThanhToan || "")}</div>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <label><strong>Phí vận chuyển:</strong></label>
-                        <div>${order.phiVanChuyen || 0}</div>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <label><strong>Loại hóa đơn:</strong></label>
-                        <div>${convertToVietnamese(order.loaiHoaDon || "")}</div>
-                    </div>
-                    <div class="col-md-12 mb-2">
-                        <label><strong>Ghi chú:</strong></label>
-                        <div>${order.ghiChu || ''}</div>
-                    </div>
-                `;
-
-        // Thông tin người nhận
-        const customerInfo = document.getElementById('customerInfo');
-        if (order) {
-            customerInfo.innerHTML = `
-                        <div class="col-md-4 mb-2">
-                            <label><strong>Tên người nhận:</strong></label>
-                            <div>${order.tenNguoiNhan || 'Chưa cập nhật'}</div>
-                        </div>
-                        <div class="col-md-4 mb-2">
-                            <label><strong>Địa chỉ giao hàng:</strong></label>
-                            <div>${order.diaChi || ''}</div>
-                        </div>
-                        <div class="col-md-4 mb-2">
-                            <label><strong>Số điện thoại:</strong></label>
-                            <div>${order.soDienThoai || ''}</div>
-                        </div>
-                    `;
-        } else {
-            customerInfo.innerHTML = `
-                        <div class="col-md-12 mb-2">
-                            <label><strong>Thông tin người nhận:</strong></label>
-                            <div>Chưa cập nhật</div>
-                        </div>
-                    `;
+        if (orderInfo) {
+            orderInfo.innerHTML = `
+            <div class="col-md-4 mb-2">
+                <label><strong>Mã đơn hàng:</strong></label>
+                <div>#HD${order.id}</div>
+            </div>
+            <div class="col-md-4 mb-2">
+                <label><strong>Trạng thái:</strong></label>
+                <div>${convertToVietnamese(order.trangThai || "")}</div>
+            </div>
+            <div class="col-md-4 mb-2">
+                <label><strong>Tổng tiền:</strong></label>
+                <div>${order.tongTien || 0}</div>
+            </div>
+            <div class="col-md-4 mb-2">
+                <label><strong>Phí giảm giá:</strong></label>
+                <div>${order.phiGiamGia || 0}</div>
+            </div>
+            <div class="col-md-4 mb-2">
+                <label><strong>Phương thức thanh toán:</strong></label>
+                <div>${convertToVietnamese(order.phuongThucThanhToan || "")}</div>
+            </div>
+            <div class="col-md-4 mb-2">
+                <label><strong>Phí vận chuyển:</strong></label>
+                <div>${order.phiVanChuyen || 0}</div>
+            </div>
+            <div class="col-md-4 mb-2">
+                <label><strong>Loại hóa đơn:</strong></label>
+                <div>${convertToVietnamese(order.loaiHoaDon || "")}</div>
+            </div>
+            <div class="col-md-12 mb-2">
+                <label><strong>Ghi chú:</strong></label>
+                <div>${order.ghiChu || ''}</div>
+            </div>
+        `;
         }
-        // updateStatusButtons();
+
+        const customerInfo = document.getElementById('customerInfo');
+        if (customerInfo) {
+            if (order) {
+                customerInfo.innerHTML = `
+                <div class="col-md-4 mb-2">
+                    <label><strong>Tên người nhận:</strong></label>
+                    <div>${order.tenNguoiNhan || 'Chưa cập nhật'}</div>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <label><strong>Địa chỉ giao hàng:</strong></label>
+                    <div>${order.diaChi || ''}</div>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <label><strong>Số điện thoại:</strong></label>
+                    <div>${order.soDienThoai || ''}</div>
+                </div>
+            `;
+            } else {
+                customerInfo.innerHTML = `
+                <div class="col-md-12 mb-2">
+                    <label><strong>Thông tin người nhận:</strong></label>
+                    <div>Chưa cập nhật</div>
+                </div>
+            `;
+            }
+        }
+
+        // Nếu có nút "Thêm" để mở modal add-to-cart
+        $(document).on("click", ".addProductToOrderBtn", function () {
+            const productData = $(this).data("product");
+            openAddToCartModal(productData);
+        });
     }
 
+// Khi DOM load
+    let pendingDeletion = null;
+    let deletionTimer = null;
+    const undoDuration = 120; // thời gian hoàn tác (giây)
 
-    // Hàm hiển thị danh sách sản phẩm
+    document.getElementById('productListBody').addEventListener('click', function(e) {
+        if (e.target.closest('.deleteDetailBtn')) {
+            const btn = e.target.closest('.deleteDetailBtn');
+            const detailId = btn.getAttribute('data-detail-id');
+            Swal.fire({
+                title: 'Xóa sản phẩm?',
+                text: 'Bạn có chắc muốn xóa sản phẩm này khỏi đơn hàng?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Đồng ý',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Lưu lại detailId để có thể hoàn tác
+                    pendingDeletion = detailId;
+                    fetch('/api/orders/' + orderId + '/details/' + detailId + '/delete', {
+                        method: 'POST'
+                    })
+                        .then(response => {
+                            if (!response.ok) throw new Error('Lỗi xóa sản phẩm');
+                            return response.json();
+                        })
+                        .then(() => {
+                            Swal.fire('Thành công', 'Xóa sản phẩm thành công!', 'success');
+                            // Nếu muốn cập nhật lại giao diện ngay, gọi fetchOrderDetails();
+                            fetchAndPopulateProductList(orderId)
+                            // Hiển thị thông báo hoàn tác
+                            fetchOrderDetails();
+
+                            showUndoNotification();
+
+                        })
+                        .catch(error => {
+                            console.error("Error deleting product detail:", error);
+                            Swal.fire('Lỗi', error.message, 'error');
+                        });
+                }
+            });
+        }
+    });
+
     function fetchAndPopulateProductList(hoaDonId) {
         fetch('/api/orders/' + hoaDonId + '/chi-tiet')
             .then(response => {
@@ -201,6 +532,17 @@ document.addEventListener("DOMContentLoaded", function() {
                 Swal.fire('Lỗi', error.message, 'error');
             });
     }
+    // 1. Setup event listener CHỈ 1 lần
+        setupUpdateStatusModal();
+        setupUpdateStatusForm();
+        setupCancelOrderButton();
+
+        // 2. Gọi hàm fetchOrderDetails() để lấy và hiển thị đơn hàng
+        fetchOrderDetails();
+
+
+    // Hàm hiển thị danh sách sản phẩm
+
 
 // Hàm render danh sách sản phẩm (không cần kiểm tra isDeleted vì API đã lọc)
     function populateProductList(productList) {
@@ -742,48 +1084,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Xóa sản phẩm (soft delete)
     // Biến toàn cục để lưu detailId của sản phẩm vừa xóa và timer hoàn tác
-    let pendingDeletion = null;
-    let deletionTimer = null;
-    const undoDuration = 120; // thời gian hoàn tác (giây)
-
-    document.getElementById('productListBody').addEventListener('click', function(e) {
-        if (e.target.closest('.deleteDetailBtn')) {
-            const btn = e.target.closest('.deleteDetailBtn');
-            const detailId = btn.getAttribute('data-detail-id');
-            Swal.fire({
-                title: 'Xóa sản phẩm?',
-                text: 'Bạn có chắc muốn xóa sản phẩm này khỏi đơn hàng?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Đồng ý',
-                cancelButtonText: 'Hủy'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Lưu lại detailId để có thể hoàn tác
-                    pendingDeletion = detailId;
-                    fetch('/api/orders/' + orderId + '/details/' + detailId + '/delete', {
-                        method: 'POST'
-                    })
-                        .then(response => {
-                            if (!response.ok) throw new Error('Lỗi xóa sản phẩm');
-                            return response.json();
-                        })
-                        .then(() => {
-                            Swal.fire('Thành công', 'Xóa sản phẩm thành công!', 'success');
-                            // Hiển thị thông báo hoàn tác
-                            fetchAndPopulateProductList(orderId)
-                            showUndoNotification();
-                            fetchOrderDetails();
-                            // Nếu muốn cập nhật lại giao diện ngay, gọi fetchOrderDetails();
-                        })
-                        .catch(error => {
-                            console.error("Error deleting product detail:", error);
-                            Swal.fire('Lỗi', error.message, 'error');
-                        });
-                }
-            });
-        }
-    });
 
 // Hàm hiển thị thông báo hoàn tác với countdown
     function showUndoNotification() {
@@ -881,7 +1181,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         })
                         .then(() => {
                             Swal.fire('Thành công', 'Cập nhật số lượng thành công!', 'success');
-                            $('#addProductModal').modal('hide');
+                            $('#addCartModal').modal('hide');
                             fetchOrderDetails();
                         })
                         .catch(error => {
@@ -899,11 +1199,8 @@ document.addEventListener("DOMContentLoaded", function() {
                             return response.json();
                         })
                         .then(result => {
-                            const detail = result;
-                            const logMsg = `Thêm mới "${detail.tenSanPham} - ${detail.mauSac?.ten || ""} - ${detail.kichThuoc?.ten || ""}" với số lượng ${detail.soLuong}`;
-                            addHistoryLog("Thêm sản phẩm", logMsg);
                             Swal.fire('Thành công', 'Thêm sản phẩm thành công!', 'success');
-                            $('#addProductModal').modal('hide');
+                            $('#addCartModal').modal('hide');
                             fetchOrderDetails();
                         })
                         .catch(error => {
@@ -924,70 +1221,6 @@ document.addEventListener("DOMContentLoaded", function() {
         addProduct(productId, 1);
     });
 
-    // Cập nhật trạng thái (có ghi chú)
-    document.getElementById('openUpdateStatusModalBtn').addEventListener('click', function() {
-        const currentIndex = statuses.indexOf(currentOrder.trangThai);
-        if (currentIndex < statuses.length - 1) {
-            selectedNewStatus = statuses[currentIndex + 1];
-            document.getElementById('statusUpdateMessage').textContent =
-                `Bạn có chắc muốn chuyển sang trạng thái "${convertToVietnamese(selectedNewStatus)}"?`;
-            $('#updateStatusModal').modal('show');
-        } else {
-            Swal.fire('Thông báo', 'Đơn hàng đã ở trạng thái cuối cùng', 'info');
-        }
-    });
-    document.getElementById('updateStatusForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const statusNote = document.getElementById('statusNote').value;
-        fetch('/api/orders/' + orderId + '/updateStatus', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ trangThai: selectedNewStatus, ghiChu: statusNote })
-        })
-            .then(response => {
-                if (!response.ok) throw new Error('Lỗi cập nhật trạng thái');
-                return response.json();
-            })
-            .then(() => {
-                const logMsg = `Cập nhật trạng thái thành "${convertToVietnamese(selectedNewStatus)}" với ghi chú: ${statusNote}`;
-                // addHistoryLog("Cập nhật trạng thái", logMsg);
-                Swal.fire('Thành công', 'Cập nhật trạng thái thành công!', 'success');
-                $('#updateStatusModal').modal('hide');
-                fetchOrderDetails();
-            })
-            .catch(error => {
-                console.error(error);
-                Swal.fire('Lỗi', error.message, 'error');
-            });
-    });
-
-    // Hủy đơn hàng
-    document.getElementById('cancelOrderBtn').addEventListener('click', function() {
-        Swal.fire({
-            title: 'Xác nhận hủy đơn hàng?',
-            text: 'Bạn có chắc chắn muốn hủy đơn hàng này?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Đồng ý',
-            cancelButtonText: 'Hủy'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                fetch('/api/orders/' + orderId + '/cancel', { method: 'POST' })
-                    .then(response => {
-                        if (!response.ok) throw new Error('Lỗi hủy đơn hàng: ' + response.statusText);
-                        return response.json();
-                    })
-                    .then(() => {
-                        Swal.fire('Thành công', 'Đơn hàng đã được hủy', 'success');
-                        fetchOrderDetails();
-                    })
-                    .catch(error => {
-                        console.error("Error canceling order:", error);
-                        Swal.fire('Lỗi', error.message, 'error');
-                    });
-            }
-        });
-    });
 
 
     // Cập nhật thông tin đơn hàng (người nhận, phí vận chuyển, ghi chú)
@@ -1060,6 +1293,5 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // Gọi hàm load dữ liệu ban đầu
-    fetchOrderDetails();
+
 });

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,8 +39,8 @@ public class HoaDonController {
             @RequestParam(value = "orderId", required = false) Integer orderId,
             @RequestParam(value = "minAmount", required = false) BigDecimal minAmount,
             @RequestParam(value = "maxAmount", required = false) BigDecimal maxAmount,
-            @RequestParam(value = "fromDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
-            @RequestParam(value = "toDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
+            @RequestParam(value = "fromDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd[ HH:mm:ss]") LocalDateTime fromDate,
+            @RequestParam(value = "toDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd[ HH:mm:ss]") LocalDateTime toDate,
             @RequestParam(value = "displayDays", required = false) Integer displayDays,
             Model model) {
 
@@ -64,8 +65,8 @@ public class HoaDonController {
             @RequestParam(value = "orderId", required = false) Integer orderId,
             @RequestParam(value = "minAmount", required = false) BigDecimal minAmount,
             @RequestParam(value = "maxAmount", required = false) BigDecimal maxAmount,
-            @RequestParam(value = "fromDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
-            @RequestParam(value = "toDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
+            @RequestParam(value = "fromDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd[ HH:mm:ss]") LocalDateTime fromDate,
+            @RequestParam(value = "toDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd[ HH:mm:ss]") LocalDateTime toDate,
             @RequestParam(value = "displayDays", required = false) Integer displayDays,
             Model model) {
 
@@ -92,8 +93,8 @@ public class HoaDonController {
             @RequestParam(value = "orderId", required = false) Integer orderId,
             @RequestParam(value = "minAmount", required = false) BigDecimal minAmount,
             @RequestParam(value = "maxAmount", required = false) BigDecimal maxAmount,
-            @RequestParam(value = "fromDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
-            @RequestParam(value = "toDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
+            @RequestParam(value = "fromDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd[ HH:mm:ss]") LocalDateTime fromDate,
+            @RequestParam(value = "toDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd[ HH:mm:ss]") LocalDateTime toDate,
             @RequestParam(value = "displayDays", required = false) Integer displayDays,
             Model model) {
 
@@ -168,14 +169,22 @@ public class HoaDonController {
             @RequestParam(value = "trangThai", required = false) String trangThai,
             @RequestParam(value = "minAmount", required = false) BigDecimal minAmount,
             @RequestParam(value = "maxAmount", required = false) BigDecimal maxAmount,
-            @RequestParam(value = "fromDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
-            @RequestParam(value = "toDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
+            @RequestParam(value = "fromDate", required = false)  @DateTimeFormat(pattern = "yyyy-MM-dd[ HH:mm:ss]") LocalDateTime fromDate,
+            @RequestParam(value = "toDate", required = false)  @DateTimeFormat(pattern = "yyyy-MM-dd[ HH:mm:ss]") LocalDateTime toDate,
             @RequestParam(value = "displayDays", required = false) Integer displayDays,
             @RequestParam(value = "page", defaultValue = "0") int page,
             Model model) {
 
         Pageable pageable = PageRequest.of(page, PAGE_SIZE);
         Page<HoaDon> hoaDonPage;
+
+        // Xử lý fromDate và toDate để thêm giờ mặc định nếu thiếu
+        if (fromDate != null && fromDate.getHour() == 0 && fromDate.getMinute() == 0 && fromDate.getSecond() == 0) {
+            fromDate = fromDate.withHour(0).withMinute(0).withSecond(0); // Đảm bảo 00:00:00
+        }
+        if (toDate != null && toDate.getHour() == 0 && toDate.getMinute() == 0 && toDate.getSecond() == 0) {
+            toDate = toDate.withHour(23).withMinute(59).withSecond(59); // Đảm bảo 23:59:59
+        }
 
         // Xử lý lọc hiển thị theo số ngày gần đây
         if (displayDays != null && displayDays > 0) {

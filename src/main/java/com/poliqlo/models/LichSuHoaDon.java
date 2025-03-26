@@ -1,9 +1,11 @@
 package com.poliqlo.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import net.minidev.json.annotate.JsonIgnore;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
@@ -24,7 +26,9 @@ public class LichSuHoaDon {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "HOA_DON_ID", nullable = false)
+    @JsonBackReference
     private HoaDon hoaDon;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TAI_KHOAN_ID")

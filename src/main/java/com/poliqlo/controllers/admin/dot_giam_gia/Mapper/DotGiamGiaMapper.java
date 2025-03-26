@@ -21,11 +21,14 @@ public class DotGiamGiaMapper {
                 .filter(str -> !str.trim().isEmpty())
                 .map(BigDecimal::new)
                 .orElse(null);
-
+        String motaUpdate = null;
+        if (request.getMoTa() != null && !request.getMoTa().trim().isEmpty()) {
+            motaUpdate = request.getMoTa();
+        }
         return DotGiamGia.builder()
                 .ma(genMa)
                 .ten(request.getTen())
-                .moTa(request.getMoTa())
+                .moTa(motaUpdate)
                 .thoiGianBatDau(request.getThoiGianBatDau())
                 .thoiGianKetThuc(request.getThoiGianKetThuc())
                 .loaiChietKhau(request.getLoaiChietKhau())
@@ -65,6 +68,10 @@ public class DotGiamGiaMapper {
 
 
     public EditDotGiamGiaRequest dotGiamGiaToEditDotGiamGiaRequest(DotGiamGia dotGiamGia) {
+        String motaUpdate = null;
+        if (dotGiamGia.getMoTa() != null && !dotGiamGia.getMoTa().trim().isEmpty()) {
+            motaUpdate = dotGiamGia.getMoTa();
+        }
         EditDotGiamGiaRequest request = EditDotGiamGiaRequest.builder()
                 .id(dotGiamGia.getId())
                 .ma(dotGiamGia.getMa())

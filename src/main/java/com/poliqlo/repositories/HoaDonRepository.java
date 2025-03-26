@@ -3,23 +3,13 @@ package com.poliqlo.repositories;
 import com.poliqlo.models.HoaDon;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +23,6 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer>, JpaSpe
      final String LAY_HANG_THANH_CONG="LAY_HANG_THANH_CONG";
      final String DANG_VAN_CHUYEN="DANG_VAN_CHUYEN";
      final String DANG_GIAO="DANG_GIAO";
-     final String GIAO_HANG_THANH_CONG="GIAO_HANG_THANH_CONG";
      final String GIAO_HANG_THAT_BAI="GIAO_HANG_THAT_BAI";
      final String CHO_CHUYEN_HOAN="CHO_CHUYEN_HOAN";
      final String THANH_CONG="THANH_CONG";
@@ -85,7 +74,7 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer>, JpaSpe
 
     // Tìm kiếm đơn hàng trong khoảng ngày
     @Query("SELECT hd FROM HoaDon hd WHERE hd.ngayNhanHang >= :fromDate AND hd.ngayNhanHang <= :toDate AND hd.isDeleted = false ORDER BY hd.id DESC")
-    Page<HoaDon> findByDateRangePaged(@Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate, Pageable pageable);
+    Page<HoaDon> findByDateRangePaged(@Param("fromDate") LocalDateTime fromDate, @Param("toDate") LocalDateTime toDate, Pageable pageable);
 
     // Tìm kiếm kết hợp: mã hóa đơn, khoảng tiền, khoảng thời gian, trạng thái
     @Query("SELECT hd FROM HoaDon hd WHERE " +
@@ -101,11 +90,36 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer>, JpaSpe
             @Param("trangThai") String trangThai,
             @Param("minAmount") BigDecimal minAmount,
             @Param("maxAmount") BigDecimal maxAmount,
-            @Param("fromDate") LocalDate fromDate,
-            @Param("toDate") LocalDate toDate,
+            @Param("fromDate") LocalDateTime fromDate,
+            @Param("toDate") LocalDateTime toDate,
             Pageable pageable);
 
     // Phương thức để lấy đơn hàng trong khoảng ngày gần đây
     @Query("SELECT hd FROM HoaDon hd WHERE hd.ngayNhanHang >= :fromDate AND hd.isDeleted = false ORDER BY hd.id DESC")
-    Page<HoaDon> findRecentOrdersPaged(@Param("fromDate") LocalDate fromDate, Pageable pageable);
+    Page<HoaDon> findRecentOrdersPaged(@Param("fromDate") LocalDateTime fromDate, Pageable pageable);
+
+    long countAllByTrangThaiIn(List<String> trangThai);
+
+    @Query("SELECT SUM(hd.tongTien) FROM HoaDon hd WHERE FUNCTION('DATE', hd.ngayTao) = CURRENT_DATE AND (hd.isDeleted = false or hd.isDeleted=null) AND (hd.trangThai != 'DA_HUY'  or hd.trangThai != 'GIAO_HANG_THAT_BAI' or hd.trangThai != 'CHO_CHUYEN_HOAN') ")
+    Optional<Long> getDaylyRevenue();
+
+    @Query("SELECT SUM(hd.tongTien) FROM HoaDon hd " +
+            "WHERE hd.ngayTao >= FUNCTION('DATE_FORMAT', CURRENT_DATE, '%Y-%m-01') AND (hd.isDeleted = false or hd.isDeleted=null) AND (hd.trangThai != 'DA_HUY'  or hd.trangThai != 'GIAO_HANG_THAT_BAI' or hd.trangThai != 'CHO_CHUYEN_HOAN')")
+    Optional<Long> getMonthlyRevenue();
+
+    @Query(value = "SELECT COALESCE(SUM(tong_tien), 0) FROM hoa_don hd " +
+            "WHERE NGAY_TAO >= DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 MONTH), '%Y-%m-01') " +
+            "AND NGAY_TAO < DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 MONTH), '%Y-%m-%d') AND hd.IS_DELETED = false AND (hd.TRANG_THAI != 'DA_HUY'  or hd.TRANG_THAI != 'GIAO_HANG_THAT_BAI' or hd.TRANG_THAI != 'CHO_CHUYEN_HOAN')",
+            nativeQuery = true)
+    Optional<Long> getSamePeriodLastMonthRevenue();
+
+
+
+    @Query("SELECT hd FROM HoaDon hd " +
+            "WHERE hd.ngayTao >= :fromDate and hd.ngayTao<=:toDate")
+    List<HoaDon> findAllByNgayTaoBetween(LocalDateTime fromDate, LocalDateTime toDate);
+
+    @Query("select hdct.sanPhamChiTiet, hdct.soLuong, hdct.giaKhuyenMai  from HoaDonChiTiet hdct where hdct.hoaDon.ngayTao<=:toDate and hdct.hoaDon.ngayTao>=:fromDate AND (hdct.hoaDon.isDeleted = false or hdct.hoaDon.isDeleted=null) AND (hdct.hoaDon.trangThai != 'DA_HUY'  or hdct.hoaDon.trangThai != 'GIAO_HANG_THAT_BAI' or hdct.hoaDon.trangThai != 'CHO_CHUYEN_HOAN')")
+    List<Object[]> getTop10SanPhamBanChayNhat(LocalDateTime fromDate, LocalDateTime toDate);
+
 }

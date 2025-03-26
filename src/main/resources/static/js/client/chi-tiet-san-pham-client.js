@@ -246,7 +246,6 @@ function renderProductDetail(prod) {
             body: JSON.stringify({
                 idSanPhamChiTiet: parseInt(variant.id),
                 soLuong: parseInt(quantity),
-                idKhachHang: 1
             }),
         })
             .then(response => {
