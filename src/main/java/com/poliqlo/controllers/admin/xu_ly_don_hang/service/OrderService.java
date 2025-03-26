@@ -65,27 +65,77 @@ public class OrderService {
 
         lichSuHoaDonRepository.save(lichSu);
     }
+    @Transactional
     public HoaDon updateOrderStatus(Integer hoaDonId, HoaDonStatusUpdateDTO dto, Integer taiKhoanId) {
         HoaDon hoaDon = hoaDonRepository.findById(hoaDonId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với id " + hoaDonId));
         String oldStatus = hoaDon.getTrangThai();
-        hoaDon.setTrangThai(dto.getTrangThai());
+        String newStatus = dto.getTrangThai();
+
+        // Cập nhật trạng thái và ghi chú vào đơn hàng
+        hoaDon.setTrangThai(newStatus);
         hoaDon.setGhiChu(dto.getGhiChu());
+
+        // Xử lý cập nhật tồn kho cho từng chi tiết đơn hàng (nếu có)
+        if (hoaDon.getHoaDonChiTiets() != null) {
+            for (HoaDonChiTiet detail : hoaDon.getHoaDonChiTiets()) {
+                if (!detail.getIsDeleted()) {
+                    SanPhamChiTiet productDetail = sanPhamChiTietRepository.findById(detail.getSanPhamChiTiet().getId())
+                            .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm chi tiết với id "
+                                    + detail.getSanPhamChiTiet().getId()));
+                    // Nếu khôi phục đơn hàng (từ DA_HUY sang DANG_CHUAN_BI_HANG): trừ số lượng từ kho
+                    if ("DA_HUY".equals(oldStatus) && "DANG_CHUAN_BI_HANG".equals(newStatus)) {
+                        if (productDetail.getSoLuong() < detail.getSoLuong()) {
+                            throw new RuntimeException("Số lượng tồn kho không đủ cho sản phẩm với id "
+                                    + detail.getSanPhamChiTiet().getId());
+                        }
+                        productDetail.setSoLuong(productDetail.getSoLuong() - detail.getSoLuong());
+                        sanPhamChiTietRepository.save(productDetail);
+                    }
+                    // Nếu chuyển sang CHO_CHUYEN_HOAN (trả hàng về kho): cộng số lượng về kho
+                    else if ("CHO_CHUYEN_HOAN".equals(newStatus)) {
+                        productDetail.setSoLuong(productDetail.getSoLuong() + detail.getSoLuong());
+                        sanPhamChiTietRepository.save(productDetail);
+                    }
+                }
+            }
+        }
+
         HoaDon updated = hoaDonRepository.save(hoaDon);
 
-        // Ghi log lịch sử (giả sử hàm này ghi vào bảng lịch sử hóa đơn)
+        // Ghi log lịch sử (sử dụng tiện ích chuyển đổi trạng thái sang tiếng Việt)
         String oldStatusVi = TrangThaiUtils.convertTrangThai(oldStatus);
-        String newStatusVi = TrangThaiUtils.convertTrangThai(dto.getTrangThai());
-
+        String newStatusVi = TrangThaiUtils.convertTrangThai(newStatus);
         String logMsg = "Chuyển trạng thái từ " + oldStatusVi + " -> " + newStatusVi;
         if (dto.getGhiChu() != null && !dto.getGhiChu().isEmpty()) {
             logMsg += ". Ghi chú: " + dto.getGhiChu();
         }
-
-
         addHistoryLog(hoaDonId, "Cập nhật trạng thái", logMsg, taiKhoanId);
+
         return updated;
     }
+
+//    public HoaDon updateOrderStatus(Integer hoaDonId, HoaDonStatusUpdateDTO dto, Integer taiKhoanId) {
+//        HoaDon hoaDon = hoaDonRepository.findById(hoaDonId)
+//                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với id " + hoaDonId));
+//        String oldStatus = hoaDon.getTrangThai();
+//        hoaDon.setTrangThai(dto.getTrangThai());
+//        hoaDon.setGhiChu(dto.getGhiChu());
+//        HoaDon updated = hoaDonRepository.save(hoaDon);
+//
+//        // Ghi log lịch sử (giả sử hàm này ghi vào bảng lịch sử hóa đơn)
+//        String oldStatusVi = TrangThaiUtils.convertTrangThai(oldStatus);
+//        String newStatusVi = TrangThaiUtils.convertTrangThai(dto.getTrangThai());
+//
+//        String logMsg = "Chuyển trạng thái từ " + oldStatusVi + " -> " + newStatusVi;
+//        if (dto.getGhiChu() != null && !dto.getGhiChu().isEmpty()) {
+//            logMsg += ". Ghi chú: " + dto.getGhiChu();
+//        }
+//
+//
+//        addHistoryLog(hoaDonId, "Cập nhật trạng thái", logMsg, taiKhoanId);
+//        return updated;
+//    }
 
     public HoaDonChiTiet updateOrderDetailQuantity(Integer orderId, Integer detailId, Integer newQty) {
         HoaDonChiTiet detail = hoaDonChiTietRepository.findById(detailId)
@@ -111,11 +161,12 @@ public class OrderService {
         sanPhamChiTietRepository.save(productDetail);
         HoaDon hoaDon = hoaDonRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với id " + orderId));
-        recalcHoaDonTotal(hoaDon);
+
         detail.setSoLuong(newQty);
         HoaDonChiTiet updatedDetail = hoaDonChiTietRepository.save(detail);
-         Integer idTaiKhoan=authService.getCurrentUserDetails().get().getKhachHang().getId();
-        String logMsg = String.format("Cập nhật số lượng sản phẩm");
+        recalcHoaDonTotal(hoaDon);
+         Integer idTaiKhoan= authService.getCurrentUserDetails().get().getKhachHang().getTaiKhoan().getId();
+        String logMsg = String.format("Cập nhật số lượng sản phẩm\"" + productDetail.getSanPham().getTen() + "\" với số lượng ");
         addHistoryLog(orderId, "Cập nhật số lượng", logMsg, idTaiKhoan);
 
         return updatedDetail;
@@ -150,9 +201,9 @@ public class OrderService {
         if (order.getGiamMaGiamGia()!= null) {
             sum = sum.subtract(order.getGiamMaGiamGia());
         }
-        if (order.getPhiVanChuyen() != null) {
-            sum = sum.add(order.getPhiVanChuyen());
-        }
+//        if (order.getPhiVanChuyen() != null) {
+//            sum = sum.add(order.getPhiVanChuyen());
+//        }
         order.setTongTien(sum);
 
     }
@@ -188,7 +239,7 @@ public class OrderService {
         order.setGhiChu(orderData.getGhiChu());
         recalcHoaDonTotal(order);
         HoaDon updated = hoaDonRepository.save(order);
-        addHistory(orderId, authService.getCurrentUserDetails().get().getKhachHang().getId(), "Cập nhật thông tin", "Cập nhật thông tin người nhận và phí vận chuyển");
+        addHistory(orderId,  authService.getCurrentUserDetails().get().getKhachHang().getTaiKhoan().getId(), "Cập nhật thông tin", "Cập nhật thông tin người nhận và phí vận chuyển");
         return updated;
     }
 
@@ -220,7 +271,7 @@ public class OrderService {
 
         // Ghi log lịch sử cập nhật
         String logMsg = "Cập nhật thông tin người nhận thành";
-        addHistoryLog(orderId, "Cập nhật thông tin", logMsg, authService.getCurrentUserDetails().get().getKhachHang().getId());
+        addHistoryLog(orderId, "Cập nhật thông tin", logMsg,  authService.getCurrentUserDetails().get().getKhachHang().getTaiKhoan().getId());
 
         return updatedOrder;
     }
@@ -262,7 +313,7 @@ public class OrderService {
         String logMsg = "Hủy đơn hàng: chuyển trạng thái từ "
                 + TrangThaiUtils.convertTrangThai(oldStatus)
                 + " sang Đã hủy";
-        addHistoryLog(orderId, "Hủy đơn hàng", logMsg, authService.getCurrentUserDetails().get().getKhachHang().getId());
+        addHistoryLog(orderId, "Hủy đơn hàng", logMsg,  authService.getCurrentUserDetails().get().getKhachHang().getTaiKhoan().getId());
         return updatedOrder;
     }
     // Xóa sản phẩm (soft delete) và log
@@ -296,12 +347,11 @@ public class OrderService {
         hoaDonRepository.save(order);
 
         // Xây dựng log message
-
-        String logMsg = "Xóa sản phẩm ";
-
-        // Ghi log lịch sử
-        addHistoryLog(orderId, "Xóa sản phẩm", logMsg, authService.getCurrentUserDetails().get().getKhachHang().getId());
-
+        String productName = (detail.getSanPhamChiTiet().getSanPham().getTen() != null) ? detail.getSanPhamChiTiet().getSanPham().getTen() : "";
+        String color = (detail.getSanPhamChiTiet().getMauSac().getTen() != null) ? detail.getSanPhamChiTiet().getMauSac().getTen() : "";
+        String size = (detail.getSanPhamChiTiet().getKichThuoc().getTen() != null) ? detail.getSanPhamChiTiet().getKichThuoc().getTen() : "";
+        String logMsg = "Xóa sản phẩm \"" + productName + " - " + color + " - " + size + "\"";
+        addHistoryLog(orderId, "Xóa sản phẩm", logMsg,  authService.getCurrentUserDetails().get().getKhachHang().getTaiKhoan().getId());
         return detail;
     }
     public HoaDonChiTiet undoDeleteOrderDetail(Integer orderId, Integer detailId) {
@@ -333,11 +383,13 @@ public class OrderService {
         hoaDonRepository.save(order);
 
         // Xây dựng log message
-
-        String logMsg = "Hoàn tác sản phẩm ";
+        String productName = (detail.getSanPhamChiTiet().getSanPham().getTen() != null) ? detail.getSanPhamChiTiet().getSanPham().getTen() : "";
+        String color = (detail.getSanPhamChiTiet().getMauSac().getTen() != null) ? detail.getSanPhamChiTiet().getMauSac().getTen() : "";
+        String size = (detail.getSanPhamChiTiet().getKichThuoc().getTen() != null) ? detail.getSanPhamChiTiet().getKichThuoc().getTen() : "";
+        String logMsg = "Hoàn tác sản phẩm\"" + productName + " - " + color + " - " + size + "\"";
 
         // Ghi log lịch sử
-        addHistoryLog(orderId, "Hoàn tác sản phẩm", logMsg, authService.getCurrentUserDetails().get().getKhachHang().getId());
+        addHistoryLog(orderId, "Hoàn tác sản phẩm", logMsg,  authService.getCurrentUserDetails().get().getKhachHang().getTaiKhoan().getId());
 
         return detail;
     }
@@ -426,7 +478,7 @@ public class OrderService {
             // Ghi log lịch sử
             String logMsg = "Cập nhật số lượng sản phẩm \"" + productDetail.getSanPham().getTen() + "\" từ "
                     + (newQuantity - dto.getSoLuong()) + " lên " + newQuantity;
-            addHistoryLog(orderId, "Cập nhật số lượng sản phẩm", logMsg, authService.getCurrentUserDetails().get().getKhachHang().getId());
+            addHistoryLog(orderId, "Cập nhật số lượng sản phẩm", logMsg, authService.getCurrentUserDetails().get().getKhachHang().getTaiKhoan().getId());
 
             // Cập nhật tổng tiền đơn hàng (nếu cần)
             // recalcOrderTotal(order); -> nếu có logic tính lại tổng tiền
@@ -452,15 +504,80 @@ public class OrderService {
 
             // Ghi log lịch sử
             String logMsg = "Thêm mới sản phẩm \"" + productDetail.getSanPham().getTen() + "\" với số lượng " + dto.getSoLuong();
-            addHistoryLog(orderId, "Thêm sản phẩm", logMsg, authService.getCurrentUserDetails().get().getKhachHang().getId());
+            addHistoryLog(orderId, "Thêm sản phẩm", logMsg,  authService.getCurrentUserDetails().get().getKhachHang().getTaiKhoan().getId());
+            List<HoaDonChiTiet> details = hoaDonChiTietRepository.findByHoaDonIdAndIsDeletedFalse(order.getId());
+            BigDecimal sum = BigDecimal.ZERO;
+            for (HoaDonChiTiet detail : details) {
+                BigDecimal unitPrice = detail.getGiaKhuyenMai() != null ? detail.getGiaKhuyenMai() : detail.getGiaGoc();
+                sum = sum.add(unitPrice.multiply(BigDecimal.valueOf(detail.getSoLuong())));
+            }
+            if (order.getGiamMaGiamGia() != null) {
+                sum = sum.subtract(order.getGiamMaGiamGia());
+            }
 
+            order.setTongTien(sum);
+
+            hoaDonRepository.save(order);
             // Cập nhật tổng tiền đơn hàng
             // recalcOrderTotal(order); -> nếu có logic tính lại tổng tiền
-            recalcHoaDonTotal(order);
-            hoaDonRepository.save(order);
+
             return newDetail;
         }
 
+    }
+    @Transactional
+    public HoaDon returnOrder(Integer orderId) {
+        HoaDon order = hoaDonRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với id " + orderId));
+        // Cập nhật trạng thái sang "CHO_CHUYEN_HOAN"
+        order.setTrangThai("CHO_CHUYEN_HOAN");
+
+        // Cập nhật tồn kho: với mỗi chi tiết đơn hàng chưa bị xóa, cộng số lượng về kho.
+        if (order.getHoaDonChiTiets() != null) {
+            for (HoaDonChiTiet detail : order.getHoaDonChiTiets()) {
+                if (!detail.getIsDeleted()) {
+                    SanPhamChiTiet productDetail = sanPhamChiTietRepository.findById(detail.getSanPhamChiTiet().getId())
+                            .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm chi tiết với id "
+                                    + detail.getSanPhamChiTiet().getId()));
+                    productDetail.setSoLuong(productDetail.getSoLuong() + detail.getSoLuong());
+                    sanPhamChiTietRepository.save(productDetail);
+                }
+            }
+        }
+        hoaDonRepository.save(order);
+        return order;
+    }
+
+    @Transactional
+    public HoaDon restoreOrder(Integer orderId) {
+        HoaDon order = hoaDonRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với id " + orderId));
+        String oldStatus = order.getTrangThai();
+        if (!"DA_HUY".equals(oldStatus)) {
+            throw new RuntimeException("Đơn hàng không ở trạng thái hủy nên không thể khôi phục");
+        }
+
+        // Khôi phục đơn hàng: chuyển sang "DANG_CHUAN_BI_HANG"
+        order.setTrangThai("DANG_CHUAN_BI_HANG");
+
+        // Cập nhật tồn kho: với mỗi chi tiết đơn hàng, trừ số lượng đã cộng về kho khi hủy.
+        if (order.getHoaDonChiTiets() != null) {
+            for (HoaDonChiTiet detail : order.getHoaDonChiTiets()) {
+                if (!detail.getIsDeleted()) {
+                    SanPhamChiTiet productDetail = sanPhamChiTietRepository.findById(detail.getSanPhamChiTiet().getId())
+                            .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm chi tiết với id "
+                                    + detail.getSanPhamChiTiet().getId()));
+                    if (productDetail.getSoLuong() < detail.getSoLuong()) {
+                        throw new RuntimeException("Số lượng tồn kho không đủ cho sản phẩm với id "
+                                + detail.getSanPhamChiTiet().getId());
+                    }
+                    productDetail.setSoLuong(productDetail.getSoLuong() - detail.getSoLuong());
+                    sanPhamChiTietRepository.save(productDetail);
+                }
+            }
+        }
+        hoaDonRepository.save(order);
+        return order;
     }
 }
 
