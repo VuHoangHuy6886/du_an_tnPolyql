@@ -94,4 +94,8 @@ public class HoaDon {
     @Column(name = "TRANG_THAI_THANH_TOAN", length = 20)
     private String trangThaiThanhToan;
 
+    @ColumnDefault("CURRENT_TIMESTAMP")
+    @Column(name = "NGAY_TAO")
+    private LocalDateTime ngayTao;
+
 }

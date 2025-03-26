@@ -29,8 +29,8 @@
                         <div class="row no-gutters align-items-center">
                             <div class="col mr-2">
                                 <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                    Earnings (Monthly)</div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">$40,000</div>
+                                    Doanh thu hôm nay</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${dailyRevenue}"></div>
                             </div>
                             <div class="col-auto">
                                 <i class="fas fa-calendar fa-2x text-gray-300"></i>
@@ -47,8 +47,8 @@
                         <div class="row no-gutters align-items-center">
                             <div class="col mr-2">
                                 <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                    Earnings (Annual)</div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">$215,000</div>
+                                    Doanh thu tháng này</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${monthlyRevenue}"></div>
                             </div>
                             <div class="col-auto">
                                 <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
@@ -64,11 +64,11 @@
                     <div class="card-body">
                         <div class="row no-gutters align-items-center">
                             <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Tasks
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Cùng kì tháng trước
                                 </div>
                                 <div class="row no-gutters align-items-center">
                                     <div class="col-auto">
-                                        <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">50%</div>
+                                        <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800" th:text="${revenueLastMonth}"></div>
                                     </div>
                                     <div class="col">
                                         <div class="progress progress-sm mr-2">
@@ -94,11 +94,11 @@
                         <div class="row no-gutters align-items-center">
                             <div class="col mr-2">
                                 <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                    Pending Requests</div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">18</div>
+                                    Đơn hàng cần xử lý</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${totalPendingBills}"></div>
                             </div>
                             <div class="col-auto">
-                                <i class="fas fa-comments fa-2x text-gray-300"></i>
+                                <i class="fas fa-box-open fa-2x text-gray-300"></i>
                             </div>
                         </div>
                     </div>
@@ -109,14 +109,36 @@
         <!-- Content Row -->
 
         <div class="row">
+            <form class="col-12 d-flex justify-content-end align-items-center">
+                <div th:class="${findBy!=null&&findBy.equals('TUY_CHINH') ? 'd-flex' : 'd-none'}">
+                    <div class="form-group d-flex mr-3 align-items-center">
+                        <label for="fromDate" style="width: 100px">Từ ngày</label>
+                        <input type="date" class="form-control form-control-sm" name="fromDate" id="fromDate" th:value="${fromDate}" placeholder="name@example.com">
+                    </div>
+                    <div class="form-group d-flex mr-3 align-items-center">
+                        <label for="toDate" style="width: 100px">Đến ngày</label><input name="toDate" type="date" th:value="${toDate}" class="form-control form-control-sm" id="toDate" placeholder="name@example.com">
+                    </div>
+                </div>
+                <div class="form-group col-md-4">
+                    <select id="findBy" name="findBy" class="form-control form-control-sm">
+                        <option th:selected="${findBy!=null&&findBy.equals('30')}" value="30" selected>30 ngày trước</option>
+                        <option th:selected="${findBy!=null&&findBy.equals('60')}" value="60" >60 ngày trước</option>
+                        <option th:selected="${findBy!=null&&findBy.equals('90')}" value="90" >90 ngày trước</option>
+                        <option th:selected="${findBy!=null&&findBy.equals('TUY_CHINH')}" value="TUY_CHINH">Tùy chỉnh</option>
+                    </select>
+                </div>
 
+                <button type="submit" class="btn btn-sm btn-primary mb-3">Lọc</button>
+
+
+            </form>
             <!-- Area Chart -->
             <div class="col-xl-8 col-lg-7">
                 <div class="card shadow mb-4">
                     <!-- Card Header - Dropdown -->
                     <div
                             class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                        <h6 class="m-0 font-weight-bold text-primary">Earnings Overview</h6>
+                        <h6 class="m-0 font-weight-bold text-primary">Doanh thu</h6>
                         <div class="dropdown no-arrow">
                             <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -124,11 +146,11 @@
                             </a>
                             <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
                                  aria-labelledby="dropdownMenuLink">
-                                <div class="dropdown-header">Dropdown Header:</div>
-                                <a class="dropdown-item" href="#">Action</a>
-                                <a class="dropdown-item" href="#">Another action</a>
+                                <div class="dropdown-header">Thời gian:</div>
+                                <a class="dropdown-item" href="#">Tháng này</a>
+                                <a class="dropdown-item" href="#">Quý này</a>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="#">Something else here</a>
+                                <a class="dropdown-item" href="#">Năm nay</a>
                             </div>
                         </div>
                     </div>
@@ -147,7 +169,7 @@
                     <!-- Card Header - Dropdown -->
                     <div
                             class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                        <h6 class="m-0 font-weight-bold text-primary">Revenue Sources</h6>
+                        <h6 class="m-0 font-weight-bold text-primary">Tỉ lệ đơn hàng</h6>
                         <div class="dropdown no-arrow">
                             <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -170,14 +192,12 @@
                         </div>
                         <div class="mt-4 text-center small">
                                         <span class="mr-2">
-                                            <i class="fas fa-circle text-primary"></i> Direct
+                                            <i class="fas fa-circle text-primary"></i> Doanh thu online
                                         </span>
                             <span class="mr-2">
-                                            <i class="fas fa-circle text-success"></i> Social
+                                            <i class="fas fa-circle text-success"></i> Doanh thu offline
                                         </span>
-                            <span class="mr-2">
-                                            <i class="fas fa-circle text-info"></i> Referral
-                                        </span>
+
                         </div>
                     </div>
                 </div>
@@ -193,109 +213,49 @@
                 <!-- Project Card Example -->
                 <div class="card shadow mb-4">
                     <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Projects</h6>
+                        <h6 class="m-0 font-weight-bold text-primary">Tỉ lệ đơn hàng</h6>
                     </div>
                     <div class="card-body">
-                        <h4 class="small font-weight-bold">Server Migration <span
-                                class="float-right">20%</span></h4>
+
+                        <h4 class="small font-weight-bold">Thành công<span
+                                class="float-right" th:text="${thanhCong}">100%</span></h4>
                         <div class="progress mb-4">
-                            <div class="progress-bar bg-danger" role="progressbar" style="width: 20%"
+                            <div class="progress-bar bg-success" role="progressbar" th:style="${'width: '+thanhCong}"
                                  aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
-                        <h4 class="small font-weight-bold">Sales Tracking <span
-                                class="float-right">40%</span></h4>
+                        <h4 class="small font-weight-bold">Đang xử lý<span
+                                class="float-right"  th:text="${dangXuLy}">20%</span></h4>
                         <div class="progress mb-4">
-                            <div class="progress-bar bg-warning" role="progressbar" style="width: 40%"
-                                 aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress-bar bg-article" role="progressbar" th:style="${'width: '+dangXuLy}"
+                                 aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
-                        <h4 class="small font-weight-bold">Customer Database <span
-                                class="float-right">60%</span></h4>
+
+
+                        <h4 class="small font-weight-bold">Đang giao hàng<span
+                                class="float-right" th:text="${dangGiaoHang}">20%</span></h4>
                         <div class="progress mb-4">
-                            <div class="progress-bar" role="progressbar" style="width: 60%"
+                            <div class="progress-bar bg-warning" role="progressbar" th:style="${'width: '+dangGiaoHang}"
+                                 aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <h4 class="small font-weight-bold">Giao hàng thất bại<span
+                                class="float-right" th:text="${giaoHangThatBai}">60%</span></h4>
+                        <div class="progress mb-4">
+                            <div class="progress-bar bg-danger" role="progressbar" th:style="${'width: '+giaoHangThatBai}"
                                  aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
-                        <h4 class="small font-weight-bold">Payout Details <span
-                                class="float-right">80%</span></h4>
+                        <h4 class="small font-weight-bold">Hủy<span
+                                class="float-right" th:text="${huy}">40%</span></h4>
                         <div class="progress mb-4">
-                            <div class="progress-bar bg-info" role="progressbar" style="width: 80%"
-                                 aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress-bar bg-danger" role="progressbar" th:style="${'width: '+huy}"
+                                 aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
-                        <h4 class="small font-weight-bold">Account Setup <span
-                                class="float-right">Complete!</span></h4>
-                        <div class="progress">
-                            <div class="progress-bar bg-success" role="progressbar" style="width: 100%"
-                                 aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
+
+
+
                     </div>
                 </div>
 
-                <!-- Color System -->
-                <div class="row">
-                    <div class="col-lg-6 mb-4">
-                        <div class="card bg-primary text-white shadow">
-                            <div class="card-body">
-                                Primary
-                                <div class="text-white-50 small">#4e73df</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6 mb-4">
-                        <div class="card bg-success text-white shadow">
-                            <div class="card-body">
-                                Success
-                                <div class="text-white-50 small">#1cc88a</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6 mb-4">
-                        <div class="card bg-info text-white shadow">
-                            <div class="card-body">
-                                Info
-                                <div class="text-white-50 small">#36b9cc</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6 mb-4">
-                        <div class="card bg-warning text-white shadow">
-                            <div class="card-body">
-                                Warning
-                                <div class="text-white-50 small">#f6c23e</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6 mb-4">
-                        <div class="card bg-danger text-white shadow">
-                            <div class="card-body">
-                                Danger
-                                <div class="text-white-50 small">#e74a3b</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6 mb-4">
-                        <div class="card bg-secondary text-white shadow">
-                            <div class="card-body">
-                                Secondary
-                                <div class="text-white-50 small">#858796</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6 mb-4">
-                        <div class="card bg-light text-black shadow">
-                            <div class="card-body">
-                                Light
-                                <div class="text-black-50 small">#f8f9fc</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6 mb-4">
-                        <div class="card bg-dark text-white shadow">
-                            <div class="card-body">
-                                Dark
-                                <div class="text-white-50 small">#5a5c69</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
 
             </div>
 
@@ -304,7 +264,7 @@
                 <!-- Illustrations -->
                 <div class="card shadow mb-4">
                     <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Illustrations</h6>
+                        <h6 class="m-0 font-weight-bold text-primary">Top 10 sản phẩm bán chạy nhất</h6>
                     </div>
                     <div class="card-body">
                         <div class="text-center">
@@ -320,19 +280,7 @@
                     </div>
                 </div>
 
-                <!-- Approach -->
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Development Approach</h6>
-                    </div>
-                    <div class="card-body">
-                        <p>SB Admin 2 makes extensive use of Bootstrap 4 utility classes in order to reduce
-                            CSS bloat and poor page performance. Custom CSS classes are used to create
-                            custom components and custom utility classes.</p>
-                        <p class="mb-0">Before working with this theme, you should become familiar with the
-                            Bootstrap framework, especially the utility classes.</p>
-                    </div>
-                </div>
+
 
             </div>
         </div>
@@ -341,6 +289,12 @@
 
 </div>
 <th:block layout:fragment="bottom_link">
+    <script  th:inline="javascript">
+        var chartAreaData = [[${chartAreaData}]];
+        var chartArealabel = [[${chartArealabel}]];
+        var pieChartData = [[${pieChartData}]];
+        console.log(chartAreaData)
+    </script>
     <!-- Page level plugins -->
     <script src="/vendor/datatables/jquery.dataTables.min.js"></script>
     <script src="/vendor/datatables/dataTables.bootstrap4.min.js"></script>
@@ -351,5 +305,19 @@
     <!-- Page level custom scripts -->
     <script src="/js/admin/chart-area-demo.js"></script>
     <script src="/js/admin/chart-pie-demo.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let findBy = document.getElementById("findBy");
+            findBy.addEventListener("change", function () {
+                if (this.value === "TUY_CHINH") {
+                    document.getElementById("fromDate").parentElement.parentElement.classList.remove("d-none");
+                    document.getElementById("fromDate").parentElement.parentElement.classList.add("d-flex");
+                } else {
+                    document.getElementById("fromDate").parentElement.parentElement.classList.add("d-none");
+                    document.getElementById("fromDate").parentElement.parentElement.classList.remove("d-flex");
+                }
+            });
+        });
+    </script>
 </th:block>
 </html>
