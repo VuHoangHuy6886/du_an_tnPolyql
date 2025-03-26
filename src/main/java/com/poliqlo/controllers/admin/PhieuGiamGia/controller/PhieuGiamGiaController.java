@@ -161,11 +161,11 @@ public class PhieuGiamGiaController {
             thongBao= "Ten da ton tai";
             return "redirect:/admin/phieu-giam-gia/form-add";
         }
-
-        if (repository.existsByGiaTriGiam(BigDecimal.valueOf(Double.parseDouble(request.getGiaTriGiam())))) {
-            thongBao= "Gia tri giam da ton tai";
-            return "redirect:/admin/phieu-giam-gia/form-add";
-        }
+//        Check trung Gia Tri Giam
+//        if (repository.existsByGiaTriGiam(BigDecimal.valueOf(Double.parseDouble(request.getGiaTriGiam())))) {
+//            thongBao= "Gia tri giam da ton tai";
+//            return "redirect:/admin/phieu-giam-gia/form-add";
+//        }
 
 
         service.save(request, listCustomer);
