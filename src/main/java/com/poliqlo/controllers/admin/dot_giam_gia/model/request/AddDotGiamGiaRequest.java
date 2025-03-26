@@ -16,7 +16,6 @@ public class AddDotGiamGiaRequest {
     @NotBlank(message = "Tên không được để trống")
     private String ten;
 
-    @NotBlank(message = "MoTa không được để trống")
     private String moTa;
 
     private LocalDateTime thoiGianBatDau;

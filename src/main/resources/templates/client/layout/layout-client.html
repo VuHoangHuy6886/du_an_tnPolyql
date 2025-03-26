@@ -251,17 +251,17 @@
     <script src="/js/js/main.js"></script>
     <th:block layout:fragment="bottom_link"></th:block>
     <script type="text/javascript">
-        $().ready(function () {
-            $.ajax(
-                {
-                    url: "/client/get-number-items-in-cart",
-                    contentType: 'application/json',
-                    type: 'POST',
-                    success: function (data, textStatus, jqXHR) {
-                        $('#cart-number').html(data);
-                    }
-                }
-            )
+        // get total cart
+        document.addEventListener("DOMContentLoaded", () => {
+            function getNumberInCart() {
+                fetch("/api/get-total-product-in-cart")
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById("cart-number").innerText = data;
+                        console.log("so san pham trong cart : ", data)
+                    })
+            }
+            getNumberInCart()
         })
 
         function validation(){
