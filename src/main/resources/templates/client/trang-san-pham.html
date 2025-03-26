@@ -6,85 +6,14 @@
 >
 <head>
     <meta charset="UTF-8">
-    <title>Trang Sản Phẩm - Chuyên Nghiệp</title>
-    <!-- Bootstrap CSS -->
+    <title>Sản Phẩm</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-    <!-- SweetAlert2 CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
-    <style>
-        /* Sidebar Filter */
-        .filter-sidebar {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .filter-sidebar h4 {
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
-        .filter-sidebar label {
-            font-weight: 500;
-        }
-        /* Product Card */
-        .product-card {
-            margin-bottom: 20px;
-        }
-        .product-card .card-img-top {
-            width: 100%;
-            height: 250px; /* Fixed height */
-            object-fit: contain; /* Hiển thị đầy đủ hình ảnh, không cắt xén */
-            background-color: #fff;
-        }
-        /* Grid sản phẩm */
-        .product-grid {
-            margin-top: 20px;
-        }
-        /* Slider style */
-        #price-slider {
-            margin-top: 10px;
-        }
-        /* Icon trong nút */
-        .btn i {
-            margin-right: 5px;
-        }
-        /* Pagination */
-        #pagination-container {
-            margin-top: 20px;
-        }
-        /* Modal variant options button styles */
-        .variant-label {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        .color-options, .size-options {
-            display: flex;
-            flex-wrap: wrap;
-        }
-        .color-swatch, .size-swatch {
-            border: 1px solid #ccc;
-            padding: 8px 12px;
-            margin: 5px 5px 0 0;
-            cursor: pointer;
-            border-radius: 4px;
-            transition: all 0.2s;
-        }
-        .color-swatch.active, .size-swatch.active {
-            border-color: #007bff;
-            background-color: #007bff;
-            color: #fff;
-        }
-        .color-swatch[disabled], .size-swatch[disabled] {
-            opacity: 0.5;
-            pointer-events: none;
-        }
-    </style>
+    <link href="/vendor/select2/select2.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/client/trang-san-pham.css">
 </head>
 <body layout:fragment="content">
 <div class="container-fluid mt-4">
@@ -98,16 +27,16 @@
                     <div class="form-group mb-3">
                         <label for="thuongHieuSelect"><i class="fas fa-industry"></i> Thương hiệu</label>
                         <select multiple="multiple" class="form-control" id="thuongHieuSelect">
-                            <option value="">Tất cả</option>
+                            <option value="">Tất cả</option>anh
                             <th:block th:each="thuongHieu : ${listThuongHieu}">
                                 <option th:value="${thuongHieu.id}" th:text="${thuongHieu.ten}"></option>
                             </th:block>
                         </select>
                     </div>
-                    <!-- Danh mục (multi-select) -->
+                    <!-- Danh mục -->
                     <div class="form-group mb-3">
                         <label for="danhMucSelect"><i class="fas fa-list"></i> Danh mục</label>
-                        <select multiple="multiple" class="form-control" id="danhMucSelect" style="height: 120px;">
+                        <select multiple="multiple" class="form-control" id="danhMucSelect">
                             <option value="">Tất cả</option>
                             <th:block th:each="danhMuc : ${listDanhMuc}">
                                 <option th:value="${danhMuc.id}" th:text="${danhMuc.ten}"></option>
@@ -128,16 +57,16 @@
                     <div class="form-group mb-3">
                         <label for="kieuDangSelect"><i class="fas fa-ruler"></i> Kiểu dáng</label>
                         <select multiple="multiple" class="form-control" id="kieuDangSelect">
-                            <option value="">Tất cả</option>
+                            <option value="">Tất cả</option>datn
                             <th:block th:each="kieuDang : ${listKieuDang}">
                                 <option th:value="${kieuDang.id}" th:text="${kieuDang.ten}"></option>
                             </th:block>
                         </select>
                     </div>
-                    <!-- Màu sắc (multi-select) -->
+                    <!-- Màu sắc -->
                     <div class="form-group mb-3">
                         <label for="mauSacSelect"><i class="fas fa-palette"></i> Màu sắc</label>
-                        <select multiple="multiple" class="form-control" id="mauSacSelect" style="height: 100px;">
+                        <select multiple="multiple" class="form-control" id="mauSacSelect">
                             <option value="">Tất cả</option>
                             <th:block th:each="mauSac : ${listMauSac}">
                                 <option th:value="${mauSac.id}" th:text="${mauSac.ten}"></option>
@@ -146,12 +75,23 @@
                     </div>
                     <!-- Lọc giá -->
                     <div class="form-group mb-3">
-                        <label for="minPrice"><i class="fas fa-money-bill-wave"></i> Giá từ</label>
-                        <input type="number" class="form-control" id="minPrice" placeholder="Giá tối thiểu">
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="maxPrice"><i class="fas fa-money-bill-wave"></i> Giá đến</label>
-                        <input type="number" class="form-control" id="maxPrice" placeholder="Giá tối đa">
+                        <label><i class="fas fa-money-bill-wave"></i> Lọc theo giá</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="priceRange" id="price-0-200000" value="0-200000">
+                            <label class="form-check-label" for="price-0-200000">0 - 200.000 VNĐ</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="priceRange" id="price-200000-500000" value="200000-500000">
+                            <label class="form-check-label" for="price-200000-500000">200.000 - 500.000 VNĐ</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="priceRange" id="price-500000-800000" value="500000-800000">
+                            <label class="form-check-label" for="price-500000-800000">500.000 - 800.000 VNĐ</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="priceRange" id="price-800000" value="800000-">
+                            <label class="form-check-label" for="price-800000">Trên 800.000 VNĐ</label>
+                        </div>
                     </div>
                     <!-- Sắp xếp -->
                     <div class="form-group mb-3">
@@ -225,7 +165,7 @@
                                 <input type="number" class="form-control" id="modal-quantity" value="1" min="1">
                             </div>
                             <div class="form-group">
-                                <label><i class="fas fa-dollar-sign"></i> Giá: <span id="modal-price">N/A</span></label>
+                                <label>  <span id="modal-price">Giá: N/A</span></label>
                             </div>
                             <div class="form-group">
                                 <p id="modal-total" style="font-weight: bold;">N/A</p>
@@ -241,564 +181,17 @@
 </div>
 
 <!-- Scripts -->
-<!-- Chỉ include một phiên bản jQuery -->
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<!-- Bootstrap JS (phiên bản 4.5.2) -->
+
+<script src="/vendor/datatables/jquery.dataTables.min.js"></script>
+<script src="/vendor/select2/select2.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-<!-- Select2 JS -->
-<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
-
-<script>
-    /***************** Global Variables *****************/
-    var selectedColor = null;
-    var selectedSize = null;
-    var currentProduct = null;
-    var lastQuery = {};
-    $(document).ready(function() {
-        // Khởi tạo slider giá với khoảng từ 0 đến 10 triệu VNĐ (có thể điều chỉnh theo nhu cầu)
-        $("#price-slider").slider({
-            range: true,
-            min: 0,
-            max: 10000000,
-            values: [0, 10000000],
-            slide: function(event, ui) {
-                $("#price-from").text(ui.values[0].toLocaleString());
-                $("#price-to").text(ui.values[1].toLocaleString());
-            }
-        });
-
-        // Các cài đặt Select2, sự kiện filter, fetchProducts, v.v...
-        var initialParams = getFilterParams();
-        fetchProducts(initialParams);
-
-        $("#filter-form").on("submit", function(e) {
-            e.preventDefault();
-            var queryParams = getFilterParams();
-            queryParams.page = 0;
-            fetchProducts(queryParams);
-        });
-
-        $("#filter-form").on("reset", function() {
-            setTimeout(function() {
-                $("#thuongHieuSelect, #chatLieuSelect, #kieuDangSelect, #mauSacSelect").val("");
-                $("#danhMucSelect").val("");
-                // Reset slider về giá trị mặc định
-                $("#price-slider").slider("values", [0, 10000000]);
-                $("#price-from").text("0");
-                $("#price-to").text("10000000");
-                $("#sortSelect").val("");
-                fetchProducts(getFilterParams());
-            }, 100);
-        });
-
-        $(document).on("click", ".add-to-cart-btn", function() {
-            var productData = $(this).data("product");
-            openAddToCartModal(productData);
-        });
-    });
-
-    /***************** Get Filter Parameters *****************/
-    function getFilterParams() {
-        var params = {};
-
-        // Thương hiệu
-        var thuongHieu = $("#thuongHieuSelect").val();
-        if (thuongHieu && thuongHieu.length > 0 && thuongHieu[0] !== "") {
-            params.thuongHieuId = thuongHieu;
-        }
-        // Danh mục
-        var danhMuc = $("#danhMucSelect").val();
-        if (danhMuc && danhMuc.length > 0 && !(danhMuc.length === 1 && danhMuc[0] === "")) {
-            params.danhMucIds = danhMuc;
-        }
-        // Chất liệu
-        var chatLieu = $("#chatLieuSelect").val();
-        if (chatLieu && chatLieu.length > 0 && chatLieu[0] !== "") {
-            params.chatLieuId = chatLieu;
-        }
-        // Kiểu dáng
-        var kieuDang = $("#kieuDangSelect").val();
-        if (kieuDang && kieuDang.length > 0 && kieuDang[0] !== "") {
-            params.kieuDangId = kieuDang;
-        }
-        // Màu sắc
-        var mauSac = $("#mauSacSelect").val();
-        if (mauSac && mauSac.length > 0 && mauSac[0] !== "") {
-            params.mauSacId = mauSac;
-        }
-        // Lọc giá: chuyển sang số nếu có nhập
-        var minPrice = $("#minPrice").val().trim();
-        if(minPrice !== "") {
-            params.minPrice = parseFloat(minPrice);
-        }
-        var maxPrice = $("#maxPrice").val().trim();
-        if(maxPrice !== "") {
-            params.maxPrice = parseFloat(maxPrice);
-        }
-        // Sắp xếp
-        var sort = $("#sortSelect").val();
-        if (sort) {
-            if(sort === 'priceAsc') {
-                params.orderBy = 'sanPhamChiTiets.giaBan';
-                params.sortDirection = 'asc';
-            } else if(sort === 'priceDesc') {
-                params.orderBy = 'sanPhamChiTiets.giaBan';
-                params.sortDirection = 'desc';
-            } else if(sort === 'nameAsc') {
-                params.orderBy = 'ten';
-                params.sortDirection = 'asc';
-            } else if(sort === 'nameDesc') {
-                params.orderBy = 'ten';
-                params.sortDirection = 'desc';
-            }}
-        // Nếu URL có parameter "ten", thêm điều kiện lọc tên sản phẩm và cập nhật tiêu đề
-        var urlParams = new URLSearchParams(window.location.search);
-        if(urlParams.has('ten')) {
-            params.ten = urlParams.get('ten');
-            $("#product-title").text("Sản phẩm có tên: " + params.ten);
-        } else {
-            $("#product-title").text("Tất cả sản phẩm");
-        }
-
-        return params;
-    }
-
-    /***************** Render Products *****************/
-    function renderProducts(data) {
-        $("#product-container").empty();
-        var products = data.content;
-        if (products.length === 0) {
-            $("#product-container").html('<div class="alert alert-info">Không tìm thấy sản phẩm phù hợp!</div>');
-            $("#pagination-container").empty();
-            return;
-        }
-        products.forEach(function(product) {
-            var prices = product.sanPhamChiTiets.map(detail => detail.giaBan);
-            var minPrice = Math.min.apply(null, prices);
-            var maxPrice = Math.max.apply(null, prices);
-            var defaultImage = product.anhUrl;
-            var hoverImage = (product.anhs && product.anhs.length >= 2) ? product.anhs[1].url : defaultImage;
-
-            var card = $(`
-          <div class="col-md-3 product-card mb-3">
-            <div class="card h-100 shadow-sm">
-              <a href="http://localhost:8080/san-pham/${product.id}">
-                <img src="${defaultImage}" class="card-img-top product-img" alt="${product.ten}" data-default="${defaultImage}" data-hover="${hoverImage}">
-              </a>
-              <div class="card-body d-flex flex-column">
-                <h5 class="card-title">
-                  <a href="http://localhost:8080/san-pham/${product.id}" class="text-decoration-none text-dark">${product.ten}</a>
-                </h5>
-                <p class="card-text"><span>Giá: </span> ${minPrice.toLocaleString()} - ${maxPrice.toLocaleString()} VNĐ</p>
-                <p class="card-text"><i class="fas fa-boxes"></i> Tồn: ${product.soLuong.toLocaleString()}</p>
-                <button class="btn btn-primary mt-auto add-to-cart-btn" data-product='${JSON.stringify(product)}'>
-                  <i class="fas fa-shopping-cart"></i> Thêm vào giỏ hàng
-                </button>
-              </div>
-            </div>
-          </div>
-        `);
-            card.find('.product-img').hover(function() {
-                $(this).attr('src', $(this).data('hover'));
-            }, function() {
-                $(this).attr('src', $(this).data('default'));
-            });
-            $("#product-container").append(card);
-        });
-        if (data.totalPages > 1) {
-            renderPagination(data.totalPages, data.number);
-        } else {
-            $("#pagination-container").empty();
-        }
-    }
-
-    /***************** Fetch and Render Products *****************/
-    function fetchProducts(queryParams) {
-        queryParams.page = (typeof queryParams.page !== "undefined") ? queryParams.page : 0;
-        queryParams.pageSize = 10;
-        lastQuery = queryParams;
-
-        $("#product-container").html('<div class="text-center my-3"><i class="fas fa-spinner fa-spin fa-2x"></i> Đang tải sản phẩm...</div>');
-
-        $.ajax({
-            url: 'http://localhost:8080/api/san-pham',
-            type: 'GET',
-            data: queryParams,
-            dataType: 'json',
-            success: function(data) {
-                renderProducts(data);
-            },
-            error: function(err) {
-                console.error("Lỗi khi gọi API:", err);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Lỗi!',
-                    text: 'Không thể tải dữ liệu sản phẩm.'
-                });
-            }
-        });
-    }
-
-    /***************** Render Pagination *****************/
-    function renderPagination(totalPages, currentPage) {
-        var paginationHTML = '';
-        paginationHTML += `<li class="page-item ${currentPage == 0 ? 'disabled' : ''}">
-                           <a class="page-link" href="#" data-page="${currentPage - 1}" aria-label="Previous">
-                             <span aria-hidden="true"><i class="fas fa-angle-left"></i></span>
-                           </a>
-                         </li>`;
-        for (var i = 0; i < totalPages; i++) {
-            paginationHTML += `<li class="page-item ${i == currentPage ? 'active' : ''}">
-                             <a class="page-link" href="#" data-page="${i}">${i + 1}</a>
-                           </li>`;
-        }
-        paginationHTML += `<li class="page-item ${currentPage == totalPages - 1 ? 'disabled' : ''}">
-                           <a class="page-link" href="#" data-page="${currentPage + 1}" aria-label="Next">
-                             <span aria-hidden="true"><i class="fas fa-angle-right"></i></span>
-                           </a>
-                         </li>`;
-        $("#pagination-container").html(paginationHTML);
-    }
-
-    $(document).on("click", "#pagination-container a", function(e) {
-        e.preventDefault();
-        var page = $(this).data("page");
-        if (page >= 0) {
-            lastQuery.page = page;
-            fetchProducts(lastQuery);
-        }
-    });
-
-    /***************** Modal: Add to Cart with Dependent Options and Carousel *****************/
-    function openAddToCartModal(product) {
-        currentProduct = product;
-        $("#modal-product-name").text(product.ten);
-        $("#modal-quantity").val(1);
-        // Reset lựa chọn biến thể
-        selectedColor = null;
-        selectedSize = null;
-
-        // Build Carousel từ product.anhs (nếu có) hoặc dùng ảnh mặc định
-        var carouselInner = $("#modal-carousel-inner");
-        carouselInner.empty();
-        if (product.anhs && product.anhs.length > 0) {
-            product.anhs.forEach(function(imgObj, index) {
-                var activeClass = index === 0 ? " active" : "";
-                var slide = `<div class="carousel-item${activeClass}" data-color="${imgObj.mauSacId}">
-                          <img src="${imgObj.url}" class="d-block w-100" alt="${product.ten}" style="max-height:300px; object-fit:contain;">
-                        </div>`;
-                carouselInner.append(slide);
-            });
-        } else {
-            carouselInner.append(`<div class="carousel-item active">
-                                <img src="${product.anhUrl}" class="d-block w-100" alt="${product.ten}" style="max-height:300px; object-fit:contain;">
-                              </div>`);
-        }
-        $("#modal-carousel").carousel(0);
-
-        // Render lựa chọn biến thể (Màu sắc & Kích thước)
-        renderVariantOptions(product);
-
-        // Reset số lượng, giá biến thể và tổng tiền
-        $("#modal-quantity").val(1);
-        $("#modal-price").text("N/A");
-        $("#modal-total").text("Tổng tiền: N/A");
-        $("#modal-total-warning").text("");
-
-        $("#addCartModal").modal("show");
-    }
-
-    // Hàm render lựa chọn biến thể theo DOM
-    function renderVariantOptions(prod) {
-        var container = document.getElementById("modal-variant-container");
-        container.innerHTML = ""; // Xóa nội dung cũ
-
-        // Tạo phần Màu sắc
-        var colorLabel = document.createElement("div");
-        colorLabel.className = "variant-label mb-1";
-        colorLabel.textContent = "Màu sắc:";
-        container.appendChild(colorLabel);
-
-        var colorOptions = document.createElement("div");
-        colorOptions.className = "color-options d-flex flex-wrap";
-        var uniqueColors = [...new Set(prod.sanPhamChiTiets.map(ct => ct.mauSac.ten))];
-        uniqueColors.forEach((colorName) => {
-            var swatch = document.createElement("div");
-            swatch.className = "color-swatch badge badge-pill badge-light mr-2 mb-2";
-            swatch.style.cursor = "pointer";
-            swatch.style.border = "1px solid #ccc";
-            swatch.style.padding = "5px 10px";
-            swatch.textContent = colorName;
-            swatch.addEventListener("click", function() {
-                if (swatch.classList.contains("active")) {
-                    swatch.classList.remove("active");
-                    selectedColor = null;
-                } else {
-                    document.querySelectorAll(".color-swatch").forEach(el => el.classList.remove("active"));
-                    swatch.classList.add("active");
-                    selectedColor = colorName;
-                }
-                updateDependentOptions(prod);
-                updateImages(prod);
-                updateMainPrice(prod);
-                updateTotalAmount(prod);
-            });
-            colorOptions.appendChild(swatch);
-        });
-        container.appendChild(colorOptions);
-
-        // Tạo phần Kích thước
-        var sizeLabel = document.createElement("div");
-        sizeLabel.className = "variant-label mt-3 mb-1";
-        sizeLabel.textContent = "Kích thước:";
-        container.appendChild(sizeLabel);
-
-        var sizeOptions = document.createElement("div");
-        sizeOptions.className = "size-options d-flex flex-wrap";
-        var uniqueSizes = [...new Set(prod.sanPhamChiTiets.map(ct => ct.kichThuoc.ten))];
-        uniqueSizes.forEach((sizeName) => {
-            var swatch = document.createElement("div");
-            swatch.className = "size-swatch badge badge-pill badge-light mr-2 mb-2";
-            swatch.style.cursor = "pointer";
-            swatch.style.border = "1px solid #ccc";
-            swatch.style.padding = "5px 10px";
-            swatch.textContent = sizeName;
-            swatch.addEventListener("click", function() {
-                if (swatch.classList.contains("active")) {
-                    swatch.classList.remove("active");
-                    selectedSize = null;
-                } else {
-                    document.querySelectorAll(".size-swatch").forEach(el => el.classList.remove("active"));
-                    swatch.classList.add("active");
-                    selectedSize = sizeName;
-                }
-                updateDependentOptions(prod);
-                updateMainPrice(prod);
-                updateTotalAmount(prod);
-            });
-            sizeOptions.appendChild(swatch);
-        });
-        container.appendChild(sizeOptions);
-    }
-
-    // Cập nhật các tùy chọn phụ thuộc giữa màu và kích thước
-    function updateDependentOptions(prod) {
-        var colorToSizes = {};
-        var sizeToColors = {};
-        prod.sanPhamChiTiets.forEach(function(ct) {
-            var color = ct.mauSac.ten;
-            var size = ct.kichThuoc.ten;
-            if (!colorToSizes[color]) {
-                colorToSizes[color] = new Set();
-            }
-            colorToSizes[color].add(size);
-            if (!sizeToColors[size]) {
-                sizeToColors[size] = new Set();
-            }
-            sizeToColors[size].add(color);
-        });
-
-        // Cập nhật trạng thái cho size swatches dựa trên màu đã chọn
-        document.querySelectorAll(".size-swatch").forEach(function(swatch) {
-            var sizeName = swatch.textContent;
-            if (selectedColor) {
-                if (!colorToSizes[selectedColor] || !colorToSizes[selectedColor].has(sizeName)) {
-                    swatch.style.opacity = "0.5";
-                    swatch.style.pointerEvents = "none";
-                    swatch.classList.remove("active");
-                    if (selectedSize === sizeName) selectedSize = null;
-                } else {
-                    swatch.style.opacity = "1";
-                    swatch.style.pointerEvents = "auto";
-                }
-            } else {
-                swatch.style.opacity = "1";
-                swatch.style.pointerEvents = "auto";
-            }
-        });
-
-        // Cập nhật trạng thái cho color swatches dựa trên kích thước đã chọn
-        document.querySelectorAll(".color-swatch").forEach(function(swatch) {
-            var colorName = swatch.textContent;
-            if (selectedSize) {
-                if (!sizeToColors[selectedSize] || !sizeToColors[selectedSize].has(colorName)) {
-                    swatch.style.opacity = "0.5";
-                    swatch.style.pointerEvents = "none";
-                    swatch.classList.remove("active");
-                    if (selectedColor === colorName) selectedColor = null;
-                } else {
-                    swatch.style.opacity = "1";
-                    swatch.style.pointerEvents = "auto";
-                }
-            } else {
-                swatch.style.opacity = "1";
-                swatch.style.pointerEvents = "auto";
-            }
-        });
-    }
-
-    // Cập nhật hình ảnh carousel theo màu đã chọn
-    function updateImages(prod) {
-        if (selectedColor) {
-            var targetSlide = document.querySelector(`#modal-carousel-inner .carousel-item[data-color='${selectedColor}']`);
-            if (targetSlide) {
-                var index = Array.from(document.querySelectorAll("#modal-carousel-inner .carousel-item")).indexOf(targetSlide);
-                $("#modal-carousel").carousel(index);
-            }
-        }
-    }
-
-    // Cập nhật giá của biến thể đã chọn
-    function updateMainPrice(prod) {
-        if (selectedColor && selectedSize) {
-            var matchingDetail = prod.sanPhamChiTiets.find(function(ct) {
-                return ct.mauSac.ten === selectedColor && ct.kichThuoc.ten === selectedSize;
-            });
-            if (matchingDetail) {
-                $("#modal-price").text(matchingDetail.giaBan.toLocaleString() + " VNĐ");
-                return;
-            }
-        }
-        $("#modal-price").text("N/A");
-    }
-
-    // Cập nhật tổng tiền (giá x số lượng) và cảnh báo nếu vượt 5 triệu VNĐ
-    function updateTotalAmount(prod) {
-        if (selectedColor && selectedSize) {
-            var matchingDetail = prod.sanPhamChiTiets.find(function(ct) {
-                return ct.mauSac.ten === selectedColor && ct.kichThuoc.ten === selectedSize;
-            });
-            if (matchingDetail) {
-                var quantity = parseInt($("#modal-quantity").val(), 10) || 0;
-                var totalAmount = quantity * matchingDetail.giaBan;
-                $("#modal-total").text("Tổng tiền: "+totalAmount.toLocaleString() + " VNĐ");
-                if (totalAmount > 5000000) {
-                    $("#modal-total-warning").text("Tổng tiền vượt quá 5 triệu VNĐ!").css("color", "red");
-                } else {
-                    $("#modal-total-warning").text("");
-                }
-                return;
-            }
-        }
-        $("#modal-total").text("Tổng tiền: N/A");
-        $("#modal-total-warning").text("");
-    }
-
-    // Lắng nghe sự thay đổi của số lượng để cập nhật tổng tiền
-    $("#modal-quantity").on("input", function() {
-        if (currentProduct) updateTotalAmount(currentProduct);
-    });
-
-    /***************** Modal Form Submission *****************/
-    $("#modal-form").on("submit", function(e) {
-        e.preventDefault();
-        var quantity = parseInt($("#modal-quantity").val(), 10);
-        if (isNaN(quantity) || quantity < 1) {
-            Swal.fire({ icon: 'error', title: 'Lỗi!', text: 'Số lượng phải là số nguyên dương, ít nhất 1.' });
-            return;
-        }
-        if (!selectedColor || !selectedSize) {
-            Swal.fire({ icon: 'error', title: 'Chưa chọn đủ!', text: 'Vui lòng chọn cả màu sắc và kích thước.' });
-            return;
-        }
-        var matchingDetail = currentProduct.sanPhamChiTiets.find(function(ct) {
-            return ct.mauSac.ten === selectedColor && ct.kichThuoc.ten === selectedSize;
-        });
-        if (!matchingDetail) {
-            Swal.fire({ icon: 'error', title: 'Lỗi!', text: 'Không tìm thấy chi tiết sản phẩm phù hợp!' });
-            return;
-        }
-        if (matchingDetail.soLuong < quantity) {
-            Swal.fire({ icon: 'error', title: 'Hết hàng!', text: 'Số lượng tồn kho không đủ.' });
-            return;
-        }
-        var totalAmount = quantity * matchingDetail.giaBan;
-        if (totalAmount > 5000000) {
-            Swal.fire({ icon: 'error', title: 'Giới hạn mua!', text: 'Tổng tiền mua phải dưới 5 triệu VNĐ.' });
-            return;
-        }
-        var info = {
-            idSanPhamChiTiet: parseInt(matchingDetail.id),
-            idKhachHang:1,
-            soLuong: parseInt(quantity),
-        };
-        console.log("Thông tin giỏ hàng:", info);
-        fetch("http://localhost:8080/api/gio-hang", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(info),
-        })
-            .then(response => {
-                console.log("Response status:", response.status);
-                return response.json();
-            })
-            .then(data => {
-                console.log("Phản hồi từ API:", data);
-
-                if (data.id) {
-                    Swal.fire({
-                        icon: "success",
-                        title: "Thành công!",
-                        text: "Sản phẩm đã được thêm vào giỏ hàng.",
-                        showConfirmButton: false,
-                        timer: 1500,
-                    });
-                    $("#addCartModal").modal("hide");
-                } else {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Lỗi",
-                        text: "Không thể thêm sản phẩm vào giỏ hàng.",
-                    });
-                }
-            })
-            .catch(error => {
-                console.error("Lỗi API giỏ hàng:", error);
-                Swal.fire({
-                    icon: "error",
-                    title: "Lỗi hệ thống",
-                    text: "Vui lòng thử lại sau.",
-                });
-            });
-
-
-    });
-
-    /***************** Các sự kiện khởi tạo *****************/
-    $(document).ready(function() {
-        // Khi load trang, lấy tham số lọc từ URL (nếu có) và gọi API
-        var initialParams = getFilterParams();
-        fetchProducts(initialParams);
-
-        // Sự kiện áp dụng filter khi submit form
-        $("#filter-form").on("submit", function(e) {
-            e.preventDefault();
-            var queryParams = getFilterParams();
-            queryParams.page = 0;
-            fetchProducts(queryParams);
-        });
-
-        // Reset form filter và gọi lại API với các tham số rỗng (hoặc theo URL nếu có)
-        $("#filter-form").on("reset", function() {
-            setTimeout(function() {
-                $("#thuongHieuSelect, #chatLieuSelect, #kieuDangSelect, #mauSacSelect").val("");
-                $("#danhMucSelect").val("");
-                $("#minPrice, #maxPrice, #sortSelect").val("");
-                fetchProducts(getFilterParams());
-            }, 100);
-        });
-
-        // Mở modal thêm giỏ hàng khi click
-        $(document).on("click", ".add-to-cart-btn", function() {
-            var productData = $(this).data("product");
-            openAddToCartModal(productData);
-        });
-    });
-</script>
+<script src="/js/client/iphone.js"></script>
+<script src="/js/client/san-pham-client.js"></script>
 </body>
+
+
+
 </html>

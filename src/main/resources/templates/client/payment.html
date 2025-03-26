@@ -29,20 +29,23 @@
                 <input type="hidden" id="customerid" th:value="${customerId}">
                 <input type="hidden" id="totalQuantity" th:value="${totalQuantity}">
             </div>
-            <div class="w-100 m-2">
-                <h5 id="showInformationAddress">
+            <div class="w-100 m-2 d-flex justify-content-between align-content-center">
+                <h5 id="showMessage"></h5>
+                <h5 id="showInformationAddress" class="ml-5">
                     <span id="addressID"></span>
-                    <span class="font-weight-bold" id="viewTen"></span> -
-                    <span class="font-weight-bold" id="viewSDT"></span> :
+                    <label class="font-weight-bold">Tên : </label>
+                    <span class="font-weight-bold text-danger" id="viewTen"></span> -
+                    <label class="font-weight-bold">SĐT : </label>
+                    <span class="font-weight-bold text-danger" id="viewSDT"></span> -
                     <span id="ward"></span> -
                     <span id="district"></span> -
                     <span id="province"></span>
                     <span id="Default" class="btn btn-sm font-weight-bold">
                     </span>
-                    <button type="button" data-bs-toggle="modal" data-bs-target="#tableModal"
-                            class="btn btn-sm btn-success">Thay đổi
-                    </button>
                 </h5>
+                <button type="button" data-bs-toggle="modal" data-bs-target="#tableModal"
+                        class="btn btn-sm btn-success mr-5">Thay đổi
+                </button>
             </div>
         </div>
         <div class="w-100 card p-3 shadow">
@@ -76,6 +79,9 @@
         </div>
     </div>
     <div class="w-25 p-4">
+        <div th:if="${errorMessage}" class="alert alert-danger">
+            <p th:text="${errorMessage}"></p>
+        </div>
         <div class="w-100 mx-auto bg-light p-4 rounded shadow-sm">
             <h3 class="text-center text-success fw-bold mb-3">Đơn Hàng</h3>
             <div class="border bg-white text-dark p-3 rounded-3 shadow-sm mb-3">
@@ -121,7 +127,7 @@
                 <input type="hidden" id="billPaymentMethod" name="paymentMethod" th:field="*{paymentMethod}">
                 <input type="hidden" id="billNote" name="note" th:field="*{note}">
                 <input type="hidden" id="billCoupon" name="note" th:field="*{coupon}">
-                <button class="btn btn-success btn-lg w-100 fw-bold shadow-sm" type="submit">Đặt Hàng</button>
+                <button id="btnDatHang" class="btn btn-success btn-lg w-100 fw-bold shadow-sm" type="submit">Đặt Hàng</button>
             </form>
         </div>
     </div>

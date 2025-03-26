@@ -18,53 +18,59 @@ const addressData = {
     defaultValue: ''
 };
 console.log("customer id : ", customerId)
+checkDiaChi()
 
 // render ten dia chi ra view
 async function displayAddress(addressData) {
+    console.log("gọi ham render địa chỉ")
     // showInformationAddress
     if (!addressData || !addressData.province || !addressData.district ||
         !addressData.ward || !addressData.ten || !addressData.sdt || !addressData.id) {
-        let thongTin = document.getElementById("showInformationAddress");
+        let thongTin = document.getElementById("showMessage");
         thongTin.textContent = "Khách hàng không có địa chỉ mặc định"
         thongTin.style.color = "red"
-        return;
-    }
+        document.getElementById("showInformationAddress").style.display = "none"
+        console.log("khách haàng không có ịa chi default ")
+    } else {
+        try {
+            document.getElementById("showInformationAddress").style.display = "block"
+            document.getElementById("showMessage").style.display = "none";
+            const provinceName = await getProvinceName(parseInt(addressData.province));
+            const districtName = await getDistrictName(addressData.district);
+            const wardName = await getWardName(addressData.district, addressData.ward);
 
-    try {
-        const provinceName = await getProvinceName(parseInt(addressData.province));
-        const districtName = await getDistrictName(addressData.district);
-        const wardName = await getWardName(addressData.district, addressData.ward);
+            document.getElementById("province").textContent = provinceName;
+            document.getElementById("district").textContent = districtName;
+            document.getElementById("ward").textContent = wardName;
+            document.getElementById("viewTen").textContent = addressData.ten;
+            document.getElementById("viewSDT").textContent = addressData.sdt;
+            //document.getElementById("addressID").textContent = addressData.id;
 
-        document.getElementById("province").textContent = provinceName;
-        document.getElementById("district").textContent = districtName;
-        document.getElementById("ward").textContent = wardName;
-        document.getElementById("viewTen").textContent = addressData.ten;
-        document.getElementById("viewSDT").textContent = addressData.sdt;
-        //document.getElementById("addressID").textContent = addressData.id;
+            let macDinh = addressData.defaultValue;
+            let theSpan = document.getElementById("Default");
 
-        let macDinh = addressData.defaultValue;
-        let theSpan = document.getElementById("Default");
-
-        if (theSpan) {
-            if (macDinh) {
-                //theSpan.style.backgroundColor = "orange";
-                theSpan.style.color = "red";
-                theSpan.textContent = "Mặc định";
-            } else {
-                // theSpan.style.backgroundColor = "#1cc88a";
-                theSpan.style.color = "orange";
-                theSpan.textContent = "Mới chọn";
-                //  theSpan.style.display = "none"
+            if (theSpan) {
+                if (macDinh) {
+                    //theSpan.style.backgroundColor = "orange";
+                    theSpan.style.color = "red";
+                    theSpan.textContent = "Mặc định";
+                } else {
+                    // theSpan.style.backgroundColor = "#1cc88a";
+                    theSpan.style.color = "orange";
+                    theSpan.textContent = "Mới chọn";
+                    //  theSpan.style.display = "none"
+                }
             }
-        }
 
-        // Hiển thị lên bill
-        let billAddressInput = document.getElementById("billAddressID");
-        if (billAddressInput) {
-            billAddressInput.value = addressData.id;
+            // Hiển thị lên bill
+            let billAddressInput = document.getElementById("billAddressID");
+            if (billAddressInput) {
+                billAddressInput.value = addressData.id;
+            }
+            checkDiaChi()
+        } catch (error) {
+            console.error("Lỗi khi xử lý địa chỉ:", error);
         }
-    } catch (error) {
-        console.error("Lỗi khi xử lý địa chỉ:", error);
     }
 
 
@@ -97,6 +103,7 @@ async function findDiaChiById(id) {
             Object.assign(addressData, newAddress)
             displayAddress(addressData)
             calculateShippingFee()
+            checkDiaChi()
         })
         .catch(error => {
             console.error("Lỗi:", error);
@@ -105,30 +112,44 @@ async function findDiaChiById(id) {
 
 // tim kiem dia chi mac dinh theo id khach hang
 async function findDiaChiByIdCustomer(customerId) {
-    fetch("/api/find-address-by-id-customer", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(customerId)
-    }).then(response => response.json())
-        .then(result => {
-            let newAddress = {
-                id: result.id,
-                province: result.provinceId,
-                district: result.districtId,
-                ward: result.wardId,
-                ten: result.ten,
-                sdt: result.soDienThoai,
-                defaultValue: result.defaultValue
-            }
-            Object.assign(addressData, newAddress)
-            displayAddress(addressData)
-            calculateShippingFee()
-        })
-        .catch(error => {
-            console.error("Lỗi:", error);
+    try {
+        let response = await fetch("/api/find-address-by-id-customer", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({customerId}) // Đảm bảo gửi đúng dạng JSON
         });
+
+        if (!response.ok) {
+            document.getElementById("showMessage").innerText = "Khách hàng không có địa chỉ mặc định"
+            document.getElementById("showMessage").style.color = "red"
+            document.getElementById("showInformationAddress").style.display = "none"
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        let text = await response.text(); // Lấy dữ liệu dưới dạng text trước
+        let result = text ? JSON.parse(text) : {}; // Kiểm tra dữ liệu có rỗng không
+
+        if (!result || Object.keys(result).length === 0) {
+            throw new Error("API response is empty");
+        }
+
+        let newAddress = {
+            id: result.id,
+            province: result.provinceId,
+            district: result.districtId,
+            ward: result.wardId,
+            ten: result.ten,
+            sdt: result.soDienThoai,
+            defaultValue: result.defaultValue
+        };
+
+        Object.assign(addressData, newAddress);
+        displayAddress(addressData);
+        calculateShippingFee();
+    } catch (error) {
+        console.error("Lỗi:", error);
+    }
 }
 
 // hien thi toan bo danh sach dia chi cua khach hang
@@ -299,13 +320,13 @@ $(document).ready(function () {
                 isValid = false;
             }
 
-            // Kiểm tra Số Điện Thoại
-            let phonePattern = /^[0-9]{10}$/;
+            // Kiểm tra Số Điện Thoại (phải là số điện thoại Việt Nam)
+            let phonePattern = /^(?:\+84|0)(3[2-9]|5[2689]|7[0-9]|8[1-9]|9[0-9])\d{7}$/;
             if (phone === "") {
                 $("#showErrorSDT").text("Vui lòng nhập số điện thoại.");
                 isValid = false;
             } else if (!phonePattern.test(phone)) {
-                $("#showErrorSDT").text("Số điện thoại không hợp lệ! Vui lòng nhập 10 chữ số.");
+                $("#showErrorSDT").text("Số điện thoại không hợp lệ! Vui lòng nhập số điện thoại Việt Nam.");
                 isValid = false;
             }
 
@@ -384,6 +405,7 @@ document.getElementById("ghiChuText").addEventListener("input", function () {
 })
 // SY LY PHUONG THUC THANH TOAN CHO BILL
 document.addEventListener("DOMContentLoaded", () => {
+    checkDiaChi()
     const btnChecks = document.querySelectorAll(".btn-check");
     const billPaymentMethod = document.getElementById("billPaymentMethod");
     const giamGiaElement = document.getElementById("giamGia");
@@ -391,12 +413,10 @@ document.addEventListener("DOMContentLoaded", () => {
         ? convertVNDToNumber(giamGiaElement.textContent.trim()) || 0
         : 0;
     document.getElementById("billCoupon").value = soTienGiam;
-
     if (btnChecks.length > 0) {
         btnChecks[0].checked = true;  // Chọn mặc định nút đầu tiên
         billPaymentMethod.value = btnChecks[0].value; // Cập nhật giá trị
     }
-
     btnChecks.forEach(item => {
         item.addEventListener("change", () => {
             if (item.checked) {
@@ -531,9 +551,17 @@ function convertVNDToNumber(formattedVND) {
     return Number(formattedVND.replace(/[^0-9]/g, ""));
 }
 
+function checkDiaChi() {
+    let diaChiCheck = document.getElementById("billAddressID").value
+    if (diaChiCheck != null && diaChiCheck.trim().length > 0) {
+        document.getElementById("btnDatHang").style.display = "block"
+    } else {
+        document.getElementById("btnDatHang").style.display = "none"
+    }
+}
+
 findDiaChiByIdCustomer(customerId);
 findAllListDiaChiById(customerId);
-
 // confirm
 document.getElementById("formDatHang").addEventListener("submit", function () {
     event.preventDefault(); // Ngăn form gửi đi ngay lập tức

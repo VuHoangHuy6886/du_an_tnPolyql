@@ -4,13 +4,15 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="/admin/layout-dashboard/layout.html">
 <head>
-    <th:block layout:fragment="head_link">
-        <!-- Bootstrap CSS -->
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-        <!-- FontAwesome CSS -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        <!-- SweetAlert2 CSS (CDN) -->
+
+        <!-- Bootstrap 5 CSS -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+        <!-- SweetAlert2 CSS -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+        <!-- DataTables Bootstrap 5 CSS -->
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="/css/client/trang-san-pham.css">
         <!-- Custom CSS -->
         <style>
             .step-container {
@@ -19,7 +21,43 @@
                 margin: 20px 0;
                 position: relative;
             }
-            /* Mỗi "bước" là 1 cột trên timeline */
+            .step {
+                text-align: center;
+                position: relative;
+                flex: 1;
+            }
+            .step:before {
+                content: "";
+                position: absolute;
+                top: 50%;
+                left: 0;
+                right: 0;
+                height: 2px;
+                background-color: #ddd;
+                z-index: 1;
+            }
+            .step:first-child:before { left: 50%; }
+            .step:last-child:before { right: 50%; }
+            .step-indicator {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                background-color: #ddd;
+                color: #fff;
+                z-index: 2;
+                position: relative;
+                font-size: 20px;
+                margin: 0 auto;
+            }
+            .step-name {
+                margin-top: 10px;
+                font-size: 14px;
+                font-weight: 500;
+                color: #333;
+            }
             .step {
                 text-align: center;
                 position: relative;
@@ -54,15 +92,8 @@
                 z-index: 2;
                 position: relative;
                 font-size: 20px;
-                left: 40px;
             }
-            /* Tên trạng thái dưới icon */
-            .step-name {
-                margin-top: 10px;
-                font-size: 14px;
-                font-weight: 500;
-                color: #333;
-            }
+
             /* Chưa thực hiện => màu ghi */
             .step.not-started .step-indicator {
                 background-color: #ddd;
@@ -79,129 +110,130 @@
             .hidden {
                 display: none !important;
             }
+            .step-container {
+                display: flex;
+                justify-content: space-between;
+                margin: 20px 0;
+                position: relative;
+            }
+            .hidden { display: none !important; }
         </style>
-    </th:block>
+
 </head>
 <body layout:fragment="content">
+<div class="container mt-4">
+    <div id="undoNotification" class="alert alert-warning d-flex align-items-center hidden">
+        <i class="fa-solid fa-undo fa-lg me-2"></i>
+        <span id="undoMessage" class="flex-grow-1">
+        Sản phẩm đã bị xóa. Bạn có 120 giây để hoàn tác.
+    </span>
+        <button id="undoBtn" class="btn btn-sm btn-link">Hoàn tác</button>
+        <span id="undoTimer" class="ms-2"></span>
+    </div>
 
-<div class="row">
-    <div class="card shadow m-2 w-100">
-        <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <h3 class="mb-0"><i class="fa-solid fa-file-invoice"></i> Chi tiết đơn hàng</h3>
-            <!-- Nút mở modal cập nhật thông tin đơn hàng -->
-            <button class="btn btn-info" data-toggle="modal" data-target="#updateOrderModal">
+    <!-- Các nút điều khiển đơn hàng -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3><i class="fa-solid fa-file-invoice"></i> Chi tiết đơn hàng</h3>
+        <div>
+            <button id="openOrderHistoryBtn" class="btn btn-secondary me-2">
+                <i class="fa-solid fa-clock-rotate-left"></i> Lịch sử đơn hàng
+            </button>
+            <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#updateOrderModal">
                 <i class="fa-solid fa-pen"></i> Cập nhật thông tin
             </button>
+            <button id="cancelOrderBtn" class="btn btn-danger ms-2">
+                <i class="fa-solid fa-ban"></i> Hủy đơn hàng
+            </button>
         </div>
+    </div>
 
+    <!-- Timeline trạng thái -->
+    <div class="step-container" id="timeline"></div>
+    <!-- Phần cập nhật trạng thái -->
+    <div class="card" id="updateStatusCard">
         <div class="card-body">
-            <!-- Undo Notification sử dụng class .hidden để ẩn mặc định -->
-            <div id="undoNotification" class="alert alert-warning d-flex align-items-center hidden">
-                <i class="fa-solid fa-undo fa-lg mr-2"></i>
-                <span id="undoMessage" class="flex-grow-1">Sản phẩm đã bị xóa. Bạn có 120 giây để hoàn tác.</span>
-                <button id="undoBtn" class="btn btn-sm btn-link">Hoàn tác</button>
-                <span id="undoTimer" class="ml-2"></span>
-            </div>
+                    <button id="openUpdateStatusModalBtn" class="btn btn-primary mt-4" type="button">
+                        Cập nhật trạng thái
+                    </button>
+        </div>
+    </div>
+    <!-- Thông tin đơn hàng -->
+    <div class="card mb-4" id="orderInfoCard">
+        <div class="card-header"><strong>Thông tin đơn hàng</strong></div>
+        <div class="card-body row" id="orderInfo"></div>
+    </div>
 
-            <!-- Timeline trạng thái đơn hàng -->
-            <div class="step-container" id="timeline"></div>
 
-            <!-- Thông tin đơn hàng -->
-            <div class="card mb-4" id="orderInfoCard">
-                <div class="card-header"><strong>Thông tin đơn hàng</strong></div>
-                <div class="card-body row" id="orderInfo">
-                    <!-- Nội dung động sẽ được JS điền -->
-                </div>
-            </div>
 
-            <!-- Form cập nhật trạng thái đơn hàng -->
-            <div class="card mb-4" id="updateStatusCard">
-                <div class="card-body">
-                    <form id="updateStatusForm">
-                        <div class="form-row align-items-end">
-                            <div class="col-md-4">
-                                <label for="trangThaiSelect">Cập nhật trạng thái đơn hàng</label>
-                                <select class="form-control" id="trangThaiSelect" name="trangThai">
-                                    <!-- Options sẽ được JS điền -->
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <button class="btn btn-primary mt-4" type="submit">
-                                    <i class="fa-solid fa-arrow-rotate-right"></i> Cập nhật
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
+    <!-- Thông tin người nhận -->
+    <div class="card mb-4" id="customerInfoCard">
+        <div class="card-header"><strong>Thông tin người nhận</strong></div>
+        <div class="card-body row" id="customerInfo"></div>
+    </div>
 
-            <!-- Thông tin khách hàng -->
-            <div class="card mb-4" id="customerInfoCard">
-                <div class="card-header"><strong>Thông tin khách hàng</strong></div>
-                <div class="card-body row" id="customerInfo">
-                    <!-- Nội dung động -->
-                </div>
-            </div>
-
-            <!-- Danh sách sản phẩm trong đơn hàng -->
-            <div class="card mb-4" id="productListCard">
-                <div class="card-header"><strong>Sản phẩm trong đơn hàng</strong></div>
-                <div class="card-body p-0">
-                    <table class="table mb-0">
-                        <thead class="thead-light">
-                        <tr>
-                            <th>#</th>
-                            <th>Mã SP Chi Tiết</th>
-                            <th>Tên sản phẩm</th>
-                            <th>Giá gốc</th>
-                            <th>Giá KM</th>
-                            <th>Số lượng</th>
-                            <th>Thành tiền</th>
-                            <th>Hành động</th>
-                        </tr>
-                        </thead>
-                        <tbody id="productListBody">
-                        <!-- Dữ liệu động sẽ được JS điền -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div> <!-- End card-body -->
+    <!-- Danh sách sản phẩm trong đơn hàng -->
+    <div class="card mb-4" id="productListCard">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <strong>Sản phẩm trong đơn hàng</strong>
+            <button id="addProductBtn" class="btn btn-success">
+                <i class="fa-solid fa-plus"></i> Thêm sản phẩm
+            </button>
+        </div>
+        <div class="card-body p-0">
+            <table class="table mb-0">
+                <thead class="thead-light">
+                <tr>
+                    <th>#</th>
+                    <th>Mã SP Chi Tiết</th>
+                    <th>Tên sản phẩm</th>
+                    <th>Màu sắc</th>
+                    <th>Kích thước</th>
+                    <th>Giá gốc</th>
+                    <th>Giá KM</th>
+                    <th>Số lượng</th>
+                    <th>Thành tiền</th>
+                    <th>Hành động</th>
+                </tr>
+                </thead>
+                <tbody id="productListBody"></tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <!-- Modal cập nhật thông tin đơn hàng -->
-<div class="modal fade" id="updateOrderModal" tabindex="-1" role="dialog" aria-labelledby="updateOrderModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+<div class="modal fade" id="updateOrderModal" tabindex="-1" aria-labelledby="updateOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
         <form id="updateOrderInfoForm">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="updateOrderModalLabel">Cập nhật thông tin đơn hàng</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <h5 id="updateOrderModalLabel" class="modal-title">Cập nhật thông tin đơn hàng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
                 </div>
                 <div class="modal-body">
-                    <!-- Các trường bạn muốn cho phép sửa -->
-                    <div class="form-group">
-                        <label for="ngayNhanHang">Ngày nhận hàng</label>
-                        <input type="date" class="form-control" id="ngayNhanHang" name="ngayNhanHang"/>
+                    <div class="mb-3">
+                        <label for="tenNguoiNhan" class="form-label">Tên người nhận</label>
+                        <input type="text" class="form-control" id="tenNguoiNhan" name="tenNguoiNhan">
                     </div>
-                    <div class="form-group">
-                        <label for="diaChi">Địa chỉ giao hàng</label>
-                        <input type="text" class="form-control" id="diaChi" name="diaChi"/>
+                    <div class="mb-3">
+                        <label for="diaChi" class="form-label">Địa chỉ nhận</label>
+                        <input type="text" class="form-control" id="diaChi" name="diaChi">
                     </div>
-                    <div class="form-group">
-                        <label for="soDienThoai">Số điện thoại</label>
-                        <input type="text" class="form-control" id="soDienThoai" name="soDienThoai"/>
+                    <div class="mb-3">
+                        <label for="soDienThoai" class="form-label">Số điện thoại nhận</label>
+                        <input type="text" class="form-control" id="soDienThoai" name="soDienThoai">
                     </div>
-                    <div class="form-group">
-                        <label for="ghiChu">Ghi chú</label>
-                        <textarea class="form-control" id="ghiChu" name="ghiChu"></textarea>
+                    <div class="mb-3">
+                        <label for="phiVanChuyen" class="form-label">Phí vận chuyển</label>
+                        <input type="number" class="form-control" id="phiVanChuyen" name="phiVanChuyen" step="0.01">
+                    </div>
+                    <div class="mb-3">
+                        <label for="ghiChu" class="form-label">Ghi chú</label>
+                        <textarea class="form-control" id="ghiChu" name="ghiChu" rows="2"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
                     <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
                 </div>
             </div>
@@ -209,461 +241,165 @@
     </div>
 </div>
 
+<!-- Modal thêm sản phẩm (DataTable) -->
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="addProductModalLabel" class="modal-title">Chọn sản phẩm để thêm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <!-- Bảng DataTable hiển thị sản phẩm -->
+                    <table id="dataTable" class="table table-bordered" style="width: 100%">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Mã sản phẩm</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Thương hiệu</th>
+                            <th>Số lượng</th>
+                            <th>Ảnh</th>
+                            <th>Hành động</th>
+                        </tr>
+                        </thead>
+                        <tfoot>
+                        <tr>
+                            <th>ID</th>
+                            <th>Mã sản phẩm</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Thương hiệu</th>
+                            <th>Số lượng</th>
+                            <th>Ảnh</th>
+                            <th>Hành động</th>
+                        </tr>
+                        </tfoot>
+                        <tbody>
+                        <!-- DataTables sẽ load dữ liệu -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal cập nhật trạng thái đơn hàng -->
+<div class="modal fade" id="updateStatusModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="updateStatusForm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="updateStatusModalLabel" class="modal-title">Cập nhật trạng thái đơn hàng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="statusUpdateMessage"></p>
+                    <div class="mb-3">
+                        <label for="statusNote" class="form-label">Ghi chú cập nhật</label>
+                        <textarea class="form-control" id="statusNote" name="statusNote" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Xác nhận cập nhật</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+//
+<div class="modal fade" id="addCartModal" tabindex="-1" aria-labelledby="addCartModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-shopping-cart"></i> <span id="modal-product-name"></span> - Chọn tùy chọn</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <!-- Left: Carousel slider cho ảnh sản phẩm -->
+                    <div class="col-md-5">
+                        <div id="modal-carousel" class="carousel slide" data-ride="carousel">
+                            <div class="carousel-inner" id="modal-carousel-inner">
+                                <!-- Các slide được tạo động -->
+                            </div>
+                            <a class="carousel-control-prev" href="#modal-carousel" role="button" data-slide="prev">
+                                <span class="carousel-control-prev-icon"></span>
+                                <span class="sr-only">Previous</span>
+                            </a>
+                            <a class="carousel-control-next" href="#modal-carousel" role="button" data-slide="next">
+                                <span class="carousel-control-next-icon"></span>
+                                <span class="sr-only">Next</span>
+                            </a>
+                        </div>
+                    </div>
+                    <!-- Right: Tùy chọn biến thể -->
+                    <div class="col-md-7" id="modal-right-col">
+                        <!-- Container render tùy chọn biến thể -->
+                        <div id="modal-variant-container"></div>
+                        <form id="modal-form">
+                            <div class="form-group">
+                                <label for="modal-quantity"><i class="fas fa-sort-numeric-up"></i> Số lượng</label>
+                                <input type="number" class="form-control" id="modal-quantity" value="1" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label>  <span id="modal-price">Giá: N/A</span></label>
+                            </div>
+                            <div class="form-group">
+                                <p id="modal-total" style="font-weight: bold;">N/A</p>
+                                <small id="modal-total-warning" class="text-danger"></small>
+                            </div>
+                            <button type="submit" class="btn btn-success btn-block"><i class="fas fa-check"></i> Thêm vào giỏ hàng</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal xem lịch sử đơn hàng -->
+<div class="modal fade" id="orderHistoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="orderHistoryModalLabel" class="modal-title">Lịch sử đơn hàng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body">
+                <table id="orderHistoryTable" class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Tiêu đề</th>
+                        <th>Mô tả</th>
+                        <th>Thời gian</th>
+                        <th>Người thực hiện</th>
+                    </tr>
+                    </thead>
+                    <tbody id="orderHistoryBody">
+                    <!-- Nội dung sẽ được thêm động -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
 </body>
 <th:block layout:fragment="bottom_link">
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- SweetAlert2 JS (CDN) -->
+    <!-- JS: Load theo thứ tự chuẩn cho Bootstrap 5, DataTables, SweetAlert2 -->
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Bootstrap Bundle (bao gồm Popper) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables Core & Integration cho Bootstrap 5 -->
+    <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
+    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/js/admin/quan-ly-don-hang/quan-ly-don-hang.js"></script>
 
-    <script>
-        // Biến lưu thông tin đơn hàng hiện tại để đưa vào modal cập nhật
-        let currentOrder = null;
-
-        document.addEventListener("DOMContentLoaded", function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const orderId = urlParams.get('id') || 1;
-
-            const statuses = [
-                "CHO_XAC_NHAN",
-                "XAC_NHAN",
-                "DANG_CHUAN_BI_HANG",
-                "CHO_LAY_HANG",
-                "LAY_HANG_THANH_CONG",
-                "DANG_VAN_CHUYEN",
-                "DANG_GIAO",
-                "GIAO_HANG_THANH_CONG",
-                "GIAO_HANG_THAT_BAI",
-                "CHO_CHUYEN_HOAN",
-                "THANH_CONG",
-                "DA_HUY",
-                "THAT_LAC"
-            ];
-
-            const statusDisplayMap = {
-                "CHO_XAC_NHAN": "Chờ xác nhận",
-                "XAC_NHAN": "Xác nhận",
-                "DANG_CHUAN_BI_HANG": "Đang chuẩn bị hàng",
-                "CHO_LAY_HANG": "Chờ lấy hàng",
-                "LAY_HANG_THANH_CONG": "Lấy hàng thành công",
-                "DANG_VAN_CHUYEN": "Đang vận chuyển",
-                "DANG_GIAO": "Đang giao",
-                "GIAO_HANG_THANH_CONG": "Giao hàng thành công",
-                "GIAO_HANG_THAT_BAI": "Giao hàng thất bại",
-                "CHO_CHUYEN_HOAN": "Chờ chuyển hoàn",
-                "THANH_CONG": "Thành công",
-                "DA_HUY": "Đã hủy",
-                "THAT_LAC": "Thất lạc"
-            };
-
-            const statusIconMap = {
-                "CHO_XAC_NHAN": "fa-hourglass-start",
-                "XAC_NHAN": "fa-check-circle",
-                "DANG_CHUAN_BI_HANG": "fa-box-open",
-                "CHO_LAY_HANG": "fa-truck-loading",
-                "LAY_HANG_THANH_CONG": "fa-box",
-                "DANG_VAN_CHUYEN": "fa-truck",
-                "DANG_GIAO": "fa-shipping-fast",
-                "GIAO_HANG_THANH_CONG": "fa-check",
-                "GIAO_HANG_THAT_BAI": "fa-times-circle",
-                "CHO_CHUYEN_HOAN": "fa-rotate-left",
-                "THANH_CONG": "fa-trophy",
-                "DA_HUY": "fa-ban",
-                "THAT_LAC": "fa-exclamation-triangle"
-            };
-
-            let pendingDeletion = null;
-            let deletionTimer = null;
-            const undoDuration = 120; // 120 giây
-
-            // 1. Lấy thông tin đơn hàng
-            function fetchOrderDetails() {
-                fetch('/api/orders/' + orderId)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Không tìm thấy đơn hàng');
-                        }
-                        return response.json();
-                    })
-                    .then(order => {
-                        currentOrder = order;
-                        populateOrderDetails(order);
-                        populateStatusOptions(order.trangThai);
-                        if (order.chiTietList) {
-                            populateProductList(order.chiTietList);
-                        }
-                    })
-                    .catch(error => {
-                        console.error(error);
-                        Swal.fire('Lỗi', error.message, 'error');
-                    });
-            }
-
-            // 2. Gọi API riêng lấy danh sách chi tiết sản phẩm (nếu cần)
-            function fetchProductList() {
-                fetch('/api/orders/chi-tiet/' + orderId)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Không tìm thấy chi tiết sản phẩm');
-                        }
-                        return response.json();
-                    })
-                    .then(productList => {
-                        populateProductList(productList);
-                    })
-                    .catch(error => {
-                        console.error('Error fetching product list:', error);
-                        Swal.fire('Lỗi', error.message, 'error');
-                    });
-            }
-
-            // 3. Đổ thông tin đơn hàng + timeline
-            function populateOrderDetails(order) {
-                const timeline = document.getElementById('timeline');
-                timeline.innerHTML = '';
-                const currentIndex = statuses.indexOf(order.trangThai);
-
-                statuses.forEach(status => {
-                    let stepDiv = document.createElement('div');
-                    stepDiv.classList.add('step');
-                    const stepIndex = statuses.indexOf(status);
-                    if (stepIndex < currentIndex) {
-                        stepDiv.classList.add('completed');
-                    } else if (stepIndex === currentIndex) {
-                        stepDiv.classList.add('active');
-                    }
-
-                    let indicator = document.createElement('span');
-                    indicator.classList.add('step-indicator');
-                    let icon = document.createElement('i');
-                    icon.classList.add('fa-solid', statusIconMap[status] || 'fa-circle');
-                    indicator.appendChild(icon);
-
-                    let nameDiv = document.createElement('div');
-                    nameDiv.classList.add('step-name');
-                    nameDiv.textContent = statusDisplayMap[status] || status;
-
-                    stepDiv.appendChild(indicator);
-                    stepDiv.appendChild(nameDiv);
-                    timeline.appendChild(stepDiv);
-                });
-
-                const orderInfo = document.getElementById('orderInfo');
-                orderInfo.innerHTML = `
-                    <div class="col-md-4 mb-2">
-                        <label><strong>Mã đơn hàng:</strong></label>
-                        <div>#HD${order.id}</div>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <label><strong>Ngày nhận hàng:</strong></label>
-                        <div>${order.ngayNhanHang ? order.ngayNhanHang : 'Chưa có'}</div>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <label><strong>Tổng tiền:</strong></label>
-                        <div>${order.tongTien}</div>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <label><strong>Trạng thái:</strong></label>
-                        <div>${statusDisplayMap[order.trangThai] || order.trangThai}</div>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <label><strong>Loại hóa đơn:</strong></label>
-                        <div>${order.loaiHoaDon || ''}</div>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <label><strong>Phương thức thanh toán:</strong></label>
-                        <div>${order.phuongThucThanhToan || ''}</div>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <label><strong>Mã giảm giá:</strong></label>
-                        <div>${order.giamMaGiamGia || 0}</div>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <label><strong>Phí vận chuyển:</strong></label>
-                        <div>${order.phiVanChuyen || 0}</div>
-                    </div>
-                    <div class="col-md-12 mb-2">
-                        <label><strong>Ghi chú:</strong></label>
-                        <div>${order.ghiChu || ''}</div>
-                    </div>
-                `;
-
-                const customerInfo = document.getElementById('customerInfo');
-                customerInfo.innerHTML = `
-                    <div class="col-md-4 mb-2">
-                        <label><strong>Tên khách hàng:</strong></label>
-                        <div>${order.khachHang?.ten || 'Chưa cập nhật'}</div>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <label><strong>Số điện thoại:</strong></label>
-                        <div>${order.soDienThoai}</div>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <label><strong>Địa chỉ giao hàng:</strong></label>
-                        <div>${order.diaChi}</div>
-                    </div>
-                `;
-            }
-
-            // 4. Đổ danh sách sản phẩm vào bảng
-            function populateProductList(productList) {
-                const productListBody = document.getElementById('productListBody');
-                productListBody.innerHTML = '';
-                if (productList && productList.length > 0) {
-                    productList.forEach((detail, index) => {
-                        if(detail.isDeleted) return;
-                        let row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${index + 1}</td>
-                            <td>${detail.sanPhamChiTietId}</td>
-                            <td>${detail.tenSanPham || 'Tên sản phẩm'}</td>
-                            <td>${detail.giaGoc}</td>
-                            <td>${detail.giaKhuyenMai || 0}</td>
-                            <td>
-                                <input type="number" value="${detail.soLuong}" min="1" data-detail-id="${detail.id}" class="form-control form-control-sm updateQtyInput" style="width:80px;">
-                            </td>
-                            <td>${(detail.giaKhuyenMai || detail.giaGoc) * detail.soLuong}</td>
-                            <td>
-                                <button class="btn btn-sm btn-danger deleteDetailBtn" data-detail-id="${detail.id}">
-                                    <i class="fa-solid fa-trash"></i> Xóa
-                                </button>
-                            </td>
-                        `;
-                        productListBody.appendChild(row);
-                    });
-                } else {
-                    productListBody.innerHTML = `<tr><td colspan="8" class="text-center">Không có sản phẩm nào</td></tr>`;
-                }
-            }
-
-            // 5. Cập nhật trạng thái đơn hàng (xác nhận bằng SweetAlert2)
-            document.getElementById('updateStatusForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const newStatus = document.getElementById('trangThaiSelect').value;
-                const statusText = statusDisplayMap[newStatus] || newStatus;
-
-                Swal.fire({
-                    title: 'Xác nhận thay đổi trạng thái?',
-                    text: `Bạn có chắc muốn chuyển sang trạng thái: ${statusText}?`,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Đồng ý',
-                    cancelButtonText: 'Hủy'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        fetch('/api/orders/' + orderId + '/updateStatus', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                            body: 'trangThai=' + encodeURIComponent(newStatus)
-                        })
-                            .then(response => {
-                                if(!response.ok) throw new Error('Lỗi cập nhật trạng thái');
-                                return response.json();
-                            })
-                            .then(data => {
-                                Swal.fire('Thành công', 'Cập nhật trạng thái thành công!', 'success');
-                                fetchOrderDetails();
-                                fetchProductList();
-                            })
-                            .catch(error => {
-                                console.error(error);
-                                Swal.fire('Lỗi', error.message, 'error');
-                            });
-                    }
-                });
-            });
-
-            // 6. Cập nhật số lượng sản phẩm
-            document.getElementById('productListBody').addEventListener('change', function(e) {
-                if(e.target.classList.contains('updateQtyInput')) {
-                    const newQty = e.target.value;
-                    const detailId = e.target.getAttribute('data-detail-id');
-
-                    fetch('/api/orders/' + orderId + '/details/' + detailId + '/update', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: 'soLuong=' + encodeURIComponent(newQty)
-                    })
-                        .then(response => {
-                            if(!response.ok) throw new Error('Lỗi cập nhật số lượng');
-                            return response.json();
-                        })
-                        .then(data => {
-                            Swal.fire('Thành công', 'Cập nhật số lượng thành công!', 'success');
-                            fetchOrderDetails();
-                            fetchProductList();
-                        })
-                        .catch(error => {
-                            console.error(error);
-                            Swal.fire('Lỗi', error.message, 'error');
-                        });
-                }
-            });
-
-            // 7. Xóa sản phẩm (soft delete) -> hiển thị thông báo hoàn tác
-            document.getElementById('productListBody').addEventListener('click', function(e) {
-                if(e.target.closest('.deleteDetailBtn')) {
-                    const btn = e.target.closest('.deleteDetailBtn');
-                    const detailId = btn.getAttribute('data-detail-id');
-
-                    Swal.fire({
-                        title: 'Xóa sản phẩm?',
-                        text: 'Bạn có chắc muốn xóa sản phẩm này khỏi đơn hàng?',
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Đồng ý',
-                        cancelButtonText: 'Hủy'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            fetch('/api/orders/' + orderId + '/details/' + detailId + '/delete', {
-                                method: 'POST'
-                            })
-                                .then(response => {
-                                    if(!response.ok) throw new Error('Lỗi xóa sản phẩm');
-                                    return response.json();
-                                })
-                                .then(data => {
-                                    pendingDeletion = detailId;
-                                    showUndoNotification(); // Hiển thị thông báo hoàn tác
-                                })
-                                .catch(error => {
-                                    console.error(error);
-                                    Swal.fire('Lỗi', error.message, 'error');
-                                });
-                        }
-                    });
-                }
-            });
-
-            // 8. Hiển thị thông báo hoàn tác bằng cách xóa class .hidden
-            function showUndoNotification() {
-                const undoDiv = document.getElementById('undoNotification');
-                const timerSpan = document.getElementById('undoTimer');
-                let remaining = undoDuration;
-
-                // Loại bỏ class hidden để hiển thị
-                undoDiv.classList.remove('hidden');
-                timerSpan.textContent = `(${remaining} giây)`;
-
-                deletionTimer = setInterval(() => {
-                    remaining--;
-                    timerSpan.textContent = `(${remaining} giây)`;
-                    if (remaining <= 0) {
-                        clearInterval(deletionTimer);
-                        finalDeletePending();
-                        undoDiv.classList.add('hidden');
-                    }
-                }, 1000);
-            }
-
-            // 9. Hoàn tác xóa sản phẩm
-            document.getElementById('undoBtn').addEventListener('click', function() {
-                if(pendingDeletion) {
-                    clearInterval(deletionTimer);
-                    fetch('/api/orders/' + orderId + '/details/' + pendingDeletion + '/undo', {
-                        method: 'POST'
-                    })
-                        .then(response => {
-                            if(!response.ok) throw new Error('Lỗi hoàn tác xóa');
-                            return response.json();
-                        })
-                        .then(data => {
-                            Swal.fire('Thành công', 'Hoàn tác thành công!', 'success');
-                            pendingDeletion = null;
-                            document.getElementById('undoNotification').classList.add('hidden');
-                            fetchOrderDetails();
-                            fetchProductList();
-                        })
-                        .catch(error => {
-                            console.error(error);
-                            Swal.fire('Lỗi', error.message, 'error');
-                        });
-                }
-            });
-
-            // 10. Xóa hoàn toàn sau khi hết thời gian
-            function finalDeletePending() {
-                if(pendingDeletion) {
-                    fetch('/api/orders/' + orderId + '/details/' + pendingDeletion + '/finalDelete', {
-                        method: 'POST'
-                    })
-                        .then(response => {
-                            if(!response.ok) throw new Error('Lỗi xóa hoàn toàn sản phẩm');
-                            return response.json();
-                        })
-                        .then(data => {
-                            pendingDeletion = null;
-                            fetchOrderDetails();
-                            fetchProductList();
-                        })
-                        .catch(error => {
-                            console.error(error);
-                            Swal.fire('Lỗi', error.message, 'error');
-                        });
-                }
-            }
-
-            // 11. Khi mở modal cập nhật thông tin đơn hàng, điền sẵn dữ liệu hiện có
-            $('#updateOrderModal').on('show.bs.modal', function (event) {
-                if(currentOrder) {
-                    document.getElementById('ngayNhanHang').value = currentOrder.ngayNhanHang || '';
-                    document.getElementById('diaChi').value = currentOrder.diaChi || '';
-                    document.getElementById('soDienThoai').value = currentOrder.soDienThoai || '';
-                    document.getElementById('ghiChu').value = currentOrder.ghiChu || '';
-                }
-            });
-
-            // 12. Xử lý lưu thông tin đơn hàng từ modal
-            document.getElementById('updateOrderInfoForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const formData = new FormData(e.target);
-                const data = {
-                    ngayNhanHang: formData.get('ngayNhanHang'),
-                    diaChi: formData.get('diaChi'),
-                    soDienThoai: formData.get('soDienThoai'),
-                    ghiChu: formData.get('ghiChu')
-                };
-
-                fetch('/api/orders/' + orderId + '/updateInfo', {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                })
-                    .then(res => {
-                        if(!res.ok) throw new Error('Lỗi cập nhật thông tin đơn hàng');
-                        return res.json();
-                    })
-                    .then(result => {
-                        Swal.fire('Thành công', 'Cập nhật thông tin đơn hàng thành công!', 'success');
-                        $('#updateOrderModal').modal('hide');
-                        fetchOrderDetails();
-                        fetchProductList();
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        Swal.fire('Lỗi', err.message, 'error');
-                    });
-            });
-
-            // 13. Hàm hỗ trợ: Tạo các option trạng thái
-            function populateStatusOptions(selectedStatus) {
-                const select = document.getElementById('trangThaiSelect');
-                select.innerHTML = '';
-                statuses.forEach(status => {
-                    let option = document.createElement('option');
-                    option.value = status;
-                    option.textContent = statusDisplayMap[status] || status;
-                    if (selectedStatus === status) {
-                        option.selected = true;
-                    }
-                    select.appendChild(option);
-                });
-            }
-
-            // Khởi chạy
-            fetchOrderDetails();
-            fetchProductList();
-        });
-    </script>
 </th:block>
 </html>

@@ -1,18 +1,18 @@
 package com.poliqlo.controllers.admin.xu_ly_don_hang.model.request;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import lombok.*;
-import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 
-@Data
-@Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class DonHangAPIResponse implements Serializable {
+public class OrderUpdateInfoDTO {
+    private String tenNguoiNhan;
     private String diaChi;
     private String soDienThoai;
     private BigDecimal phiVanChuyen;

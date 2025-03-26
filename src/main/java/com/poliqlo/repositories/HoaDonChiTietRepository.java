@@ -25,12 +25,18 @@ public interface HoaDonChiTietRepository extends JpaRepository<HoaDonChiTiet, In
             "h.hoaDon.id, " +
             "h.sanPhamChiTiet.id, " +
             "h.sanPhamChiTiet.sanPham.ten, " +
+            "h.sanPhamChiTiet.mauSac.ten, " +
+            "h.sanPhamChiTiet.kichThuoc.ten, " +
             "h.giaGoc, " +
             "h.giaKhuyenMai, " +
             "h.soLuong) " +
             "FROM HoaDonChiTiet h " +
-            "WHERE h.hoaDon.id = :hoaDonId ")
+            "WHERE h.hoaDon.id = :hoaDonId " +
+            "  AND h.isDeleted = false")
     List<HoaDonChiTietDTO> findByHoaDonId(@Param("hoaDonId") Integer hoaDonId);
+
+
+
 
 //    @Query("SELECT hdct FROM HoaDonChiTiet hdct WHERE hdct.hoaDon.id = :hoaDonId AND hdct.isDeleted = false")
 //    List<HoaDonChiTiet> findAllByHoaDonId(@Param("hoaDonId") Integer hoaDonId);

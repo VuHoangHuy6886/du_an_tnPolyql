@@ -24,7 +24,7 @@ function isDiscountActive(variant) {
 const path = window.location.pathname;
 const productId = path.split('/').pop() || '1';
 
-fetch(`http://localhost:8080/api/san-pham?id=${productId}`)
+fetch(`/api/san-pham?id=${productId}`)
     .then(response => response.json())
     .then(data => {
         document.getElementById("loading").style.display = "none";
@@ -220,8 +220,14 @@ function renderProductDetail(prod) {
             return;
         }
         // Tính giá hiệu quả: nếu có giảm giá và đợt giảm giá đang hoạt động thì dùng giá giảm, ngược lại dùng giá gốc.
-        const effectivePrice = (variant.giaChietKhau && variant.giaChietKhau < variant.giaBan && isDiscountActive(variant))
-            ? variant.giaChietKhau : variant.giaBan;
+        let effectivePrice = variant.giaBan;
+        if (variant.isPromotionProduct) {
+            if (variant.dotGiamGia.loaiChietKhau === 'PHAN_TRAM') {
+                effectivePrice = variant.giaChietKhau;
+            } else {
+                effectivePrice = variant.giaBan - variant.dotGiamGia.giaTriGiam;
+            }
+        }
         const total = effectivePrice * quantity;
         if (total > 5000000) {
             Swal.fire({
@@ -232,7 +238,7 @@ function renderProductDetail(prod) {
             return;
         }
         console.log("Thêm vào giỏ hàng:", { variant, quantity });
-        fetch("http://localhost:8080/api/gio-hang", {
+        fetch("/api/gio-hang", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -240,7 +246,7 @@ function renderProductDetail(prod) {
             body: JSON.stringify({
                 idSanPhamChiTiet: parseInt(variant.id),
                 soLuong: parseInt(quantity),
-                idKhachHang:1
+                idKhachHang: 1
             }),
         })
             .then(response => {
@@ -249,7 +255,6 @@ function renderProductDetail(prod) {
             })
             .then(data => {
                 console.log("Phản hồi từ API:", data);
-
                 // Kiểm tra nếu API trả về một đối tượng có ID (hoặc dữ liệu hợp lệ khác)
                 if (data.id) {
                     Swal.fire({
@@ -276,7 +281,6 @@ function renderProductDetail(prod) {
                     text: "Vui lòng thử lại sau.",
                 });
             });
-
 
     });
     const buyBtn = document.createElement("button");
@@ -337,8 +341,8 @@ function renderProductDetail(prod) {
     });
     descriptionWrapper.appendChild(seeMoreBtn);
     setTimeout(() => {
-        if (descriptionContainer.scrollHeight > 200) {
-            descriptionContainer.style.maxHeight = "200px";
+        if (descriptionContainer.scrollHeight > 500) {
+            descriptionContainer.style.maxHeight = "500px";
             descriptionContainer.style.overflow = "hidden";
             seeMoreBtn.style.display = "block";
         }
@@ -408,19 +412,28 @@ function updateMainPrice() {
     const priceSection = document.getElementById("price-section");
     const variantInfoDiv = document.getElementById("variant-info");
 
+    // Khi chưa chọn biến thể, hiển thị khoảng giá dựa trên giá hiệu quả của từng sản phẩm chi tiết
     if (!selectedColor || !selectedSize) {
         let minPrice = Infinity;
         let maxPrice = 0;
         product.sanPhamChiTiets.forEach(v => {
-            const base = (v.giaChietKhau && v.giaChietKhau < v.giaBan) ? v.giaChietKhau : v.giaBan;
-            if (base < minPrice) minPrice = base;
-            if (base > maxPrice) maxPrice = base;
+            let effectivePrice = v.giaBan;
+            if (v.isPromotionProduct && v.dotGiamGia) {
+                if (v.dotGiamGia.loaiChietKhau === 'PHAN_TRAM') {
+                    effectivePrice = v.giaChietKhau;
+                } else {
+                    effectivePrice = v.giaBan - v.dotGiamGia.giaTriGiam;
+                }
+            }
+            if (effectivePrice < minPrice) minPrice = effectivePrice;
+            if (effectivePrice > maxPrice) maxPrice = effectivePrice;
         });
         priceSection.innerHTML = `Giá: ${formatCurrencyVND(minPrice)} - ${formatCurrencyVND(maxPrice)}`;
         variantInfoDiv.innerHTML = "";
         return;
     }
 
+    // Tìm biến thể dựa trên màu sắc và kích thước đã chọn
     const variant = product.sanPhamChiTiets.find(
         v => v.mauSac.ten === selectedColor && v.kichThuoc.ten === selectedSize
     );
@@ -431,14 +444,28 @@ function updateMainPrice() {
     }
 
     const basePrice = variant.giaBan;
-    const discountPrice = variant.giaChietKhau;
-    if (discountPrice && discountPrice < basePrice && isDiscountActive(variant)) {
-        const discountPercent = Math.round(((basePrice - discountPrice) / basePrice) * 100);
+    let effectivePrice = basePrice;
+    let discountPercent = 0;
+
+    // Nếu sản phẩm có khuyến mại và giảm giá, tính giá hiệu quả và phần trăm giảm
+    if (variant.isPromotionProduct && variant.dotGiamGia) {
+        if (variant.dotGiamGia.loaiChietKhau === 'PHAN_TRAM') {
+            effectivePrice = variant.giaChietKhau;
+            discountPercent = Math.round(((basePrice - effectivePrice) / basePrice) * 100);
+        } else {
+            effectivePrice = basePrice - variant.dotGiamGia.giaTriGiam;
+            discountPercent = Math.round((variant.dotGiamGia.giaTriGiam / basePrice) * 100);
+        }
+    }
+
+    // Nếu có giảm giá, hiển thị giá gốc, giá khuyến mại, phần trăm giảm và thông tin tiết kiệm
+    if (effectivePrice < basePrice) {
         priceSection.innerHTML = `
+          
+          <span class="main-price">Giá: ${formatCurrencyVND(effectivePrice)}</span>
           <span class="old-price">Giá cũ: ${formatCurrencyVND(basePrice)}</span>
-          <span class="main-price">Giá: ${formatCurrencyVND(discountPrice)}</span>
           <span class="discount-tag">- ${discountPercent}%</span>
-          <div class="discount-info">Tiết kiệm: ${formatCurrencyVND(basePrice - discountPrice)}</div>
+          <div class="discount-info">Tiết kiệm: ${formatCurrencyVND(basePrice - effectivePrice)}</div>
         `;
     } else {
         priceSection.innerHTML = `Giá: ${formatCurrencyVND(basePrice)}`;
@@ -449,6 +476,52 @@ function updateMainPrice() {
         </div>
       `;
 }
+
+// function updateMainPrice() {
+//     const priceSection = document.getElementById("price-section");
+//     const variantInfoDiv = document.getElementById("variant-info");
+//
+//     if (!selectedColor || !selectedSize) {
+//         let minPrice = Infinity;
+//         let maxPrice = 0;
+//         product.sanPhamChiTiets.forEach(v => {
+//             const base = (v.giaChietKhau && v.giaChietKhau < v.giaBan) ? v.giaChietKhau : v.giaBan;
+//             if (base < minPrice) minPrice = base;
+//             if (base > maxPrice) maxPrice = base;
+//         });
+//         priceSection.innerHTML = `Giá: ${formatCurrencyVND(minPrice)} - ${formatCurrencyVND(maxPrice)}`;
+//         variantInfoDiv.innerHTML = "";
+//         return;
+//     }
+//
+//     const variant = product.sanPhamChiTiets.find(
+//         v => v.mauSac.ten === selectedColor && v.kichThuoc.ten === selectedSize
+//     );
+//     if (!variant) {
+//         priceSection.innerHTML = `<p class="text-danger">Biến thể không tồn tại</p>`;
+//         variantInfoDiv.innerHTML = "";
+//         return;
+//     }
+//
+//     const basePrice = variant.giaBan;
+//     const discountPrice = variant.giaChietKhau;
+//     if (discountPrice && discountPrice < basePrice && isDiscountActive(variant)) {
+//         const discountPercent = Math.round(((basePrice - discountPrice) / basePrice) * 100);
+//         priceSection.innerHTML = `
+//           <span class="old-price">Giá cũ: ${formatCurrencyVND(basePrice)}</span>
+//           <span class="main-price">Giá: ${formatCurrencyVND(discountPrice)}</span>
+//           <span class="discount-tag">- ${discountPercent}%</span>
+//           <div class="discount-info">Tiết kiệm: ${formatCurrencyVND(basePrice - discountPrice)}</div>
+//         `;
+//     } else {
+//         priceSection.innerHTML = `Giá: ${formatCurrencyVND(basePrice)}`;
+//     }
+//     variantInfoDiv.innerHTML = `
+//         <div class="variant-info mt-2">
+//           <p><strong>Số lượng có sẵn:</strong> ${variant.soLuong.toLocaleString()}</p>
+//         </div>
+//       `;
+// }
 
 // Cập nhật các tùy chọn phụ thuộc giữa màu và kích thước
 function updateDependentOptions() {

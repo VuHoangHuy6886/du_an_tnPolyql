@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 public class LichSuHoaDon {
     @Id
     @Column(name = "ID", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @NotNull
