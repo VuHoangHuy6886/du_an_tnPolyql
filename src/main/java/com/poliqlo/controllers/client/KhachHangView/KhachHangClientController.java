@@ -2,6 +2,7 @@ package com.poliqlo.controllers.client.KhachHangView;
 
 import com.poliqlo.controllers.client.KhachHangView.dto.KhachHangResponseDTO;
 import com.poliqlo.controllers.client.KhachHangView.mapper.KhachHangMapper;
+import com.poliqlo.controllers.common.auth.service.AuthService;
 import com.poliqlo.models.KhachHang;
 import com.poliqlo.models.TaiKhoan;
 import com.poliqlo.repositories.KhachHangRepository;
@@ -16,9 +17,11 @@ import org.springframework.web.bind.annotation.*;
 public class KhachHangClientController {
     private final KhachHangRepository khachHangRepository;
     private final TaiKhoanRepository taiKhoanRepository;
+    private final AuthService authService;
+
     @GetMapping("/thong-tin-khach-hang")
     public String getThongTinTaiKhoan(Model model) {
-        KhachHang khachHang = khachHangRepository.findById(1).get();
+        KhachHang khachHang = khachHangRepository.findById(authService.getCurrentUserDetails().get().getKhachHang().getId()).get();
         KhachHangResponseDTO responseDTO = KhachHangMapper.KhachHangToResponse(khachHang);
         model.addAttribute("Response", responseDTO);
         return "/client/TaiKhoanKhachHang/index";

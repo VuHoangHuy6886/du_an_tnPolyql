@@ -133,7 +133,7 @@
                             <li>
                                 <a th:href="${@authService.isAuthenticated()?'/ho-so':'/sign-in'}" id="login"> <span th:attr="data-account-id=${@authService.getAccountId.orElse('')}" th:text="${@authService.getCurrentUsername().orElse('Đăng nhập')}"></span></a>
                                 <ul class="dropdown" th:class="${@authService.isAuthenticated()?'dropdown':'d-none'}">
-                                    <li><a href="/ho-so">Tài khoản</a></li>
+                                    <li><a th:href="@{'/thong-tin-khach-hang'}">Tài khoản</a></li>
                                     <li><a href="/don-mua">Đơn mua</a></li>
                                     <li><a href="/logout">Đăng xuất</a></li>
                                 </ul>
