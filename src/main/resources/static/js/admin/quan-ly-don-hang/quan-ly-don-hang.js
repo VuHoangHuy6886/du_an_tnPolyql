@@ -136,11 +136,12 @@ document.addEventListener("DOMContentLoaded", function() {
         const btnUpdate = document.getElementById('btn-info-khach-hang');
         if (btnUpdate) btnUpdate.disabled = status;
 
+        // hoặc chính <table> có id="myTable"
         // Vô hiệu hóa luôn các thành phần trong bảng #productListBody
         const productListBody = document.getElementById('productListBody');
         if (productListBody) {
-            productListBody.querySelectorAll('input, button, select, textarea')
-                .forEach(el => el.disabled = status);
+            if(status){productListBody.classList.add("disabled-table");}
+            else {productListBody.classList.remove("disabled-table");}
         }
     }
 
