@@ -118,18 +118,22 @@
                             <!-- Mã khách hàng -->
                             <div class="col-md-6 mb-3">
                                 <label for="maKhachHang" class="form-label required-field">Mã khách hàng</label>
-                                <input type="text" id="maKhachHang" name="maKhachHang" class="form-control" readonly required>
+                                <input type="text" id="maKhachHang" name="maKhachHang" class="form-control" readonly required placeholder="Mã khách hàng sẽ tự động tạo">
                             </div>
                             <!-- Tên khách hàng -->
                             <div class="col-md-6 mb-3">
                                 <label for="ten" class="form-label required-field">Tên khách hàng</label>
-                                <input type="text" id="ten" name="ten" class="form-control" pattern="^[A-Za-zÀ-Ỹà-ỹ\s]+$" required>
-                                <div class="invalid-feedback">Tên chỉ chứa chữ cái.</div>
+                                <input type="text" id="ten" name="ten" class="form-control" pattern="^[A-Za-zÀ-ỹ\s]+$" required>
+                                <div class="invalid-feedback">Vui lòng nhập tên khách hàng chỉ chứa chữ cái.</div>
                             </div>
                             <!-- Ngày sinh -->
                             <div class="col-md-6 mb-3">
                                 <label for="ngaySinh" class="form-label required-field">Ngày sinh</label>
                                 <input type="date" id="ngaySinh" name="ngaySinh" class="form-control" required>
+                                <div class="invalid-feedback">Vui lòng nhập ngày sinh</div>
+                                <div id="ngaySinhFeedback" class="validation-feedback">
+                                    <i class="fas fa-exclamation-circle"></i> Khách hàng cần ít nhất 6 tuổi để đăng ký.
+                                </div>
                             </div>
                             <!-- Giới tính -->
                             <div class="col-md-6 mb-3">
@@ -145,8 +149,8 @@
                             <!-- Email -->
                             <div class="col-md-6 mb-3">
                                 <label for="email" class="form-label required-field">Email</label>
-                                <input type="email" id="email" name="email" class="form-control" required>
-                                <div class="invalid-feedback">Vui lòng nhập email hợp lệ.</div>
+                                <input type="email" id="email" name="email" class="form-control"  pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" required>
+                                <div class="invalid-feedback">Vui lòng nhập email hợp lệ (VD: example@domain.com).</div>
                                 <div id="emailFeedback" class="validation-feedback">
                                     <i class="fas fa-exclamation-circle"></i> Email này đã được sử dụng, vui lòng chọn email khác.
                                 </div>
@@ -155,11 +159,13 @@
                             <!-- Số điện thoại -->
                             <div class="col-md-6 mb-3">
                                 <label for="soDienThoai" class="form-label required-field">Số điện thoại</label>
-                                <input type="text" id="soDienThoai" name="soDienThoai" class="form-control" pattern="^0\d{9}$" required>
-                                <div class="invalid-feedback">Nhập đúng 10 số.</div>
+                                <input type="text" id="soDienThoai" name="soDienThoai" class="form-control"
+                                       pattern="^(0|(\+?84))(3|5|7|8|9)\d{8}$" required>
+                                <div class="invalid-feedback">Số điện thoại không đúng định dạng Việt Nam (bắt đầu bằng 0 hoặc +84, theo sau là 9 chữ số).</div>
                                 <div id="phoneFeedback" class="validation-feedback">
                                     <i class="fas fa-exclamation-circle"></i> Số điện thoại này đã được sử dụng, vui lòng chọn số điện thoại khác.
                                 </div>
+                                <small class="form-text text-muted">Ví dụ: 0912345678, 84912345678 hoặc +84912345678</small>
                             </div>
                         </div>
                     </div>
@@ -167,7 +173,7 @@
 
                 <!-- Chú thích trường bắt buộc -->
                 <div class="mt-3 mb-2">
-                    <small class="text-muted"><span class="text-danger">*</span> Trường bắt buộc phải nhập</small>
+                    <small style="font-size: 15px" class="text-muted"><span class="text-danger">*</span> Trường bắt buộc phải nhập</small>
                 </div>
 
                 <!-- Nút hành động -->
@@ -211,31 +217,32 @@
             });
         })();
         document.getElementById("ngaySinh").addEventListener("change", function () {
-            const ngaySinhInput = this;
-            const ngaySinhValue = new Date(ngaySinhInput.value);
-            const today = new Date();
-            const minAge = 13;
+            // Kiểm tra form hợp lệ
+            let isValid = true;
 
-            // Đặt thời gian về 0h để so sánh chính xác
-            today.setHours(0, 0, 0, 0);
+            const ngaySinhInput = document.getElementById("ngaySinh");
+            if (ngaySinhInput && ngaySinhInput.value) {
+                const ngaySinh = new Date(ngaySinhInput.value);
+                const today = new Date();
+                const ageLimitDate = new Date();
+                ageLimitDate.setFullYear(today.getFullYear() - 6); // Ngày cách đây 6 năm
 
-            // Tính số tuổi
-            const age = today.getFullYear() - ngaySinhValue.getFullYear();
-            const monthDiff = today.getMonth() - ngaySinhValue.getMonth();
-            const dayDiff = today.getDate() - ngaySinhValue.getDate();
+                if (ngaySinh > today) {
+                    ngaySinhInput.setCustomValidity("Ngày sinh không thể vượt quá ngày hiện tại.");
+                    isValid = false;
+                } else if (ngaySinh > ageLimitDate) {
+                    ngaySinhInput.setCustomValidity("Khách hàng cần ít nhất 6 tuổi để đăng ký.");
+                    isValid = false;
+                } else {
+                    ngaySinhInput.setCustomValidity("");
+                }
 
-            // Kiểm tra điều kiện
-            if (!ngaySinhInput.value) {
-                ngaySinhInput.setCustomValidity("Vui lòng nhập ngày sinh.");
-            } else if (ngaySinhValue >= today) {
-                ngaySinhInput.setCustomValidity("Ngày sinh không được là hôm nay hoặc tương lai.");
-            } else if (age < minAge || (age === minAge && (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)))) {
-                ngaySinhInput.setCustomValidity("Khách hàng phải ít nhất 13 tuổi.");
-            } else {
-                ngaySinhInput.setCustomValidity("");
+                // Hiển thị thông báo lỗi tùy chỉnh
+                const feedbackElement = ngaySinhInput.nextElementSibling;
+                if (!isValid && feedbackElement && feedbackElement.classList.contains("invalid-feedback")) {
+                    feedbackElement.textContent = ngaySinhInput.validationMessage;
+                }
             }
-
-            ngaySinhInput.reportValidity();
         });
         document.addEventListener('DOMContentLoaded', function() {
             const emailInput = document.getElementById('email');

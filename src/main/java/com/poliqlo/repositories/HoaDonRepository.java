@@ -85,7 +85,7 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer>, JpaSpe
 
     // Tìm kiếm đơn hàng trong khoảng ngày
     @Query("SELECT hd FROM HoaDon hd WHERE hd.ngayNhanHang >= :fromDate AND hd.ngayNhanHang <= :toDate AND hd.isDeleted = false ORDER BY hd.id DESC")
-    Page<HoaDon> findByDateRangePaged(@Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate, Pageable pageable);
+    Page<HoaDon> findByDateRangePaged(@Param("fromDate") LocalDateTime fromDate, @Param("toDate") LocalDateTime toDate, Pageable pageable);
 
     // Tìm kiếm kết hợp: mã hóa đơn, khoảng tiền, khoảng thời gian, trạng thái
     @Query("SELECT hd FROM HoaDon hd WHERE " +
@@ -101,11 +101,11 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer>, JpaSpe
             @Param("trangThai") String trangThai,
             @Param("minAmount") BigDecimal minAmount,
             @Param("maxAmount") BigDecimal maxAmount,
-            @Param("fromDate") LocalDate fromDate,
-            @Param("toDate") LocalDate toDate,
+            @Param("fromDate") LocalDateTime fromDate,
+            @Param("toDate") LocalDateTime toDate,
             Pageable pageable);
 
     // Phương thức để lấy đơn hàng trong khoảng ngày gần đây
     @Query("SELECT hd FROM HoaDon hd WHERE hd.ngayNhanHang >= :fromDate AND hd.isDeleted = false ORDER BY hd.id DESC")
-    Page<HoaDon> findRecentOrdersPaged(@Param("fromDate") LocalDate fromDate, Pageable pageable);
+    Page<HoaDon> findRecentOrdersPaged(@Param("fromDate") LocalDateTime fromDate, Pageable pageable);
 }

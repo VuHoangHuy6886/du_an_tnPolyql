@@ -87,17 +87,17 @@
           <div class="col-md-4">
             <div class="form-group">
               <label>Mã nhân viên</label>
-              <input type="text" class="form-control" th:field="*{id}" readonly>
+              <input type="text" class="form-control" th:field="*{id}" readonly placeholder="Mã nhân viên sẽ tự động tạo">
             </div>
             <div class="form-group">
               <label>Tên nhân viên</label>
-              <input type="text" class="form-control" th:field="*{ten}" required>
-              <div class="invalid-feedback">Vui lòng nhập tên nhân viên.</div>
+              <input type="text" class="form-control" id="tenNhanVien" th:field="*{ten}" pattern="^[A-Za-zÀ-ỹ\s]+$" required>
+              <div class="invalid-feedback">Vui lòng nhập tên nhân viên chỉ chứa chữ cái.</div>
             </div>
             <div class="form-group">
               <label>Email</label>
-              <input type="email" class="form-control" th:field="*{taiKhoan.email}" id="email" required>
-              <div class="invalid-feedback">Vui lòng nhập email hợp lệ.</div>
+              <input type="email" class="form-control" th:field="*{taiKhoan.email}" pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" id="email" required>
+              <div class="invalid-feedback">Vui lòng nhập email hợp lệ (VD: example@domain.com).</div>
               <div id="emailFeedback" class="validation-feedback">Email này đã được sử dụng . Nhập email khác</div>
             </div>
             <div class="form-group">
@@ -108,9 +108,11 @@
           <div class="col-md-4">
             <div class="form-group">
               <label>Số điện thoại</label>
-              <input type="text" id="soDienThoai" class="form-control" th:field="*{taiKhoan.soDienThoai}" pattern="^[0-9]{10,11}$" inputmode="numeric" required>
-              <div class="invalid-feedback">Vui lòng nhập số điện thoại hợp lệ (10-11 chữ số).</div>
-              <div id="phoneFeedback" class="validation-feedback">Số điện thoại này đã được sử dụng . Nhập số điện thoại khác</div>
+              <input type="text" id="soDienThoai" class="form-control" th:field="*{taiKhoan.soDienThoai}"
+                     pattern="^(0|(\+?84))[2|3|5|7|8|9]\d{8}$" inputmode="numeric" required>
+              <div class="invalid-feedback">Số điện thoại không đúng định dạng Việt Nam (bắt đầu bằng 0 hoặc +84, theo sau là 9 chữ số).</div>
+              <div id="phoneFeedback" class="validation-feedback">Số điện thoại này đã được sử dụng. Nhập số điện thoại khác</div>
+              <small class="form-text text-muted">Ví dụ: 0912345678, 0235456789, 84912345678 hoặc +84912345678</small>
             </div>
             <div class="form-group">
               <label>Chức vụ</label>
@@ -176,6 +178,16 @@
       phoneInput.addEventListener("blur", function() {
         const phone = phoneInput.value;
         if (!phone) return;
+
+        // Kiểm tra định dạng số điện thoại Việt Nam
+        const phoneRegex = /^(0|(\+?84))[2|3|5|7|8|9]\d{8}$/;
+        if (!phoneRegex.test(phone)) {
+          phoneInput.setCustomValidity("Số điện thoại không đúng định dạng Việt Nam");
+          form.classList.add("was-validated");
+          return;
+        } else {
+          phoneInput.setCustomValidity("");
+        }
 
         fetch(`/admin/api/nhan-vien/check-phone?phone=${phone}&excludeId=${taiKhoanId}`)
                 .then(response => response.json())
