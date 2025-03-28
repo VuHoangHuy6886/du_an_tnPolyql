@@ -76,10 +76,10 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer>, JpaSpe
     @Query("SELECT hd FROM HoaDon hd WHERE hd.ngayNhanHang >= :fromDate AND hd.ngayNhanHang <= :toDate AND hd.isDeleted = false ORDER BY hd.id DESC")
     Page<HoaDon> findByDateRangePaged(@Param("fromDate") LocalDateTime fromDate, @Param("toDate") LocalDateTime toDate, Pageable pageable);
 
-    // Tìm kiếm kết hợp: mã hóa đơn, khoảng tiền, khoảng thời gian, trạng thái
     @Query("SELECT hd FROM HoaDon hd WHERE " +
             "(:id IS NULL OR hd.id = :id) AND " +
             "(:trangThai IS NULL OR hd.trangThai = :trangThai) AND " +
+            "(:loaiHoaDon IS NULL OR hd.loaiHoaDon = :loaiHoaDon) AND " +
             "(:minAmount IS NULL OR hd.tongTien >= :minAmount) AND " +
             "(:maxAmount IS NULL OR hd.tongTien <= :maxAmount) AND " +
             "(:fromDate IS NULL OR hd.ngayNhanHang >= :fromDate) AND " +
@@ -88,6 +88,7 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer>, JpaSpe
     Page<HoaDon> searchOrdersPaged(
             @Param("id") Integer id,
             @Param("trangThai") String trangThai,
+            @Param("loaiHoaDon") String loaiHoaDon,
             @Param("minAmount") BigDecimal minAmount,
             @Param("maxAmount") BigDecimal maxAmount,
             @Param("fromDate") LocalDateTime fromDate,
@@ -122,4 +123,13 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer>, JpaSpe
     @Query("select hdct.sanPhamChiTiet, hdct.soLuong, hdct.giaKhuyenMai  from HoaDonChiTiet hdct where hdct.hoaDon.ngayTao<=:toDate and hdct.hoaDon.ngayTao>=:fromDate AND (hdct.hoaDon.isDeleted = false or hdct.hoaDon.isDeleted=null) AND (hdct.hoaDon.trangThai != 'DA_HUY'  or hdct.hoaDon.trangThai != 'GIAO_HANG_THAT_BAI' or hdct.hoaDon.trangThai != 'CHO_CHUYEN_HOAN')")
     List<Object[]> getTop10SanPhamBanChayNhat(LocalDateTime fromDate, LocalDateTime toDate);
 
+
+    @Query("SELECT hd FROM HoaDon hd WHERE hd.loaiHoaDon = :loaiHoaDon AND hd.isDeleted = false ORDER BY hd.id DESC")
+    List<HoaDon> findAllByLoaiHoaDon(@Param("loaiHoaDon") String loaiHoaDon);
+
+    @Query("SELECT hd FROM HoaDon hd WHERE hd.loaiHoaDon = :loaiHoaDon AND hd.isDeleted = false ORDER BY hd.id DESC")
+    Page<HoaDon> findAllByLoaiHoaDonPaged(@Param("loaiHoaDon") String loaiHoaDon, Pageable pageable);
+    // Thêm phương thức mới để lấy đơn hàng theo nhiều trạng thái
+    @Query("SELECT hd FROM HoaDon hd WHERE hd.trangThai IN :statuses AND hd.isDeleted = false ORDER BY hd.id DESC")
+    Page<HoaDon> findAllByTrangThaiInPaged(@Param("statuses") List<String> statuses, Pageable pageable);
 }

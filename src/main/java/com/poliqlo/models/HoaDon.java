@@ -98,4 +98,12 @@ public class HoaDon {
     @Column(name = "NGAY_TAO")
     private LocalDateTime ngayTao;
 
+
+    public LocalDateTime getNgayDatFromLichSu() {
+        if (lichSuHoaDons != null && !lichSuHoaDons.isEmpty()) {
+            return lichSuHoaDons.get(0).getThoiGian();
+        }
+        return ngayTao;
+    }
+
 }

@@ -17,16 +17,13 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Controller
 @RequestMapping("/admin/hoa-don")
 public class HoaDonController {
     private final HoaDonService hoaDonService;
-    private static final int PAGE_SIZE = 5; // Số đơn hàng trên 1 trang
+    private static final int PAGE_SIZE = 6; // Số đơn hàng trên 1 trang
 
     @Autowired
     public HoaDonController(HoaDonService hoaDonService) {
@@ -42,11 +39,24 @@ public class HoaDonController {
             @RequestParam(value = "fromDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd[ HH:mm:ss]") LocalDateTime fromDate,
             @RequestParam(value = "toDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd[ HH:mm:ss]") LocalDateTime toDate,
             @RequestParam(value = "displayDays", required = false) Integer displayDays,
+            @RequestParam(value = "loaiHoaDon", required = false) String loaiHoaDon, // Thêm tham số loaiHoaDon
             Model model) {
 
-        Pageable pageable = PageRequest.of(page, PAGE_SIZE);
-        Page<HoaDon> hoaDonPage = hoaDonService.getAllActiveOrdersPaged(pageable);
+        if (loaiHoaDon == null) {
+            loaiHoaDon = "ONLINE";
+        }
 
+        Pageable pageable = PageRequest.of(page, PAGE_SIZE);
+        Page<HoaDon> hoaDonPage ;
+
+        // Nếu có displayDays, ưu tiên lọc theo ngày gần đây
+        if (displayDays != null && displayDays > 0) {
+            LocalDateTime fromDateFilter = LocalDate.now().minusDays(displayDays).atStartOfDay();
+            hoaDonPage = hoaDonService.searchOrders(null, null, loaiHoaDon, null, null, fromDateFilter, null, pageable);
+        } else {
+            // Sử dụng phương thức searchOrders để lọc theo loaiHoaDon mặc định
+            hoaDonPage = hoaDonService.searchOrders(orderId, null, loaiHoaDon, minAmount, maxAmount, fromDate, toDate, pageable);
+        }
         // Thêm tất cả tham số tìm kiếm vào model
         model.addAttribute("orderId", orderId);
         model.addAttribute("minAmount", minAmount);
@@ -54,8 +64,9 @@ public class HoaDonController {
         model.addAttribute("fromDate", fromDate);
         model.addAttribute("toDate", toDate);
         model.addAttribute("displayDays", displayDays);
-
+        model.addAttribute("loaiHoaDon", loaiHoaDon);
         addPaginationAttributes(model, hoaDonPage);
+
         return "/admin/hoa-don/index";
     }
     @GetMapping("/khachhang/{khachHangId}")
@@ -99,8 +110,14 @@ public class HoaDonController {
             Model model) {
 
         Pageable pageable = PageRequest.of(page, PAGE_SIZE);
-        Page<HoaDon> hoaDonPage = hoaDonService.getOrdersByStatusPaged(trangThai, pageable);
-
+        Page<HoaDon> hoaDonPage ;
+        // Kiểm tra nếu trangThai chứa nhiều trạng thái (phân tách bằng dấu phẩy)
+        if (trangThai.contains(",")) {
+            List<String> statuses = Arrays.asList(trangThai.split(","));
+            hoaDonPage = hoaDonService.getOrdersByMultipleStatusesPaged(statuses, pageable);
+        } else {
+            hoaDonPage = hoaDonService.getOrdersByStatusPaged(trangThai, pageable);
+        }
         // Thêm tất cả tham số tìm kiếm vào model
         model.addAttribute("trangThai", trangThai);
         model.addAttribute("orderId", orderId);
@@ -172,6 +189,7 @@ public class HoaDonController {
             @RequestParam(value = "fromDate", required = false)  @DateTimeFormat(pattern = "yyyy-MM-dd[ HH:mm:ss]") LocalDateTime fromDate,
             @RequestParam(value = "toDate", required = false)  @DateTimeFormat(pattern = "yyyy-MM-dd[ HH:mm:ss]") LocalDateTime toDate,
             @RequestParam(value = "displayDays", required = false) Integer displayDays,
+            @RequestParam(value = "loaiHoaDon", required = false) String loaiHoaDon,
             @RequestParam(value = "page", defaultValue = "0") int page,
             Model model) {
 
@@ -196,18 +214,33 @@ public class HoaDonController {
             if (minAmount == null) minAmount = BigDecimal.ZERO;
             if (maxAmount == null) maxAmount = new BigDecimal("999999999999");
 
-            hoaDonPage = hoaDonService.searchOrders(orderId, trangThai, minAmount, maxAmount, fromDate, toDate, pageable);
+            hoaDonPage = hoaDonService.searchOrders(orderId, trangThai, loaiHoaDon, minAmount, maxAmount, fromDate, toDate, pageable);
         }
 
         // Luôn thêm tất cả tham số tìm kiếm vào model để bảo toàn khi chuyển trang
         model.addAttribute("orderId", orderId);
         model.addAttribute("searchTrangThai", trangThai);
+        model.addAttribute("loaiHoaDon", loaiHoaDon);
         model.addAttribute("minAmount", minAmount);
         model.addAttribute("maxAmount", maxAmount);
         model.addAttribute("fromDate", fromDate);
         model.addAttribute("toDate", toDate);
         model.addAttribute("displayDays", displayDays);
 
+
+        addPaginationAttributes(model, hoaDonPage);
+        return "/admin/hoa-don/index";
+    }
+    @GetMapping("/loaihoadon/{loaiHoaDon}")
+    public String showOrderHistoryByLoaiHoaDon(
+            @PathVariable String loaiHoaDon,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            Model model) {
+
+        Pageable pageable = PageRequest.of(page, PAGE_SIZE);
+        Page<HoaDon> hoaDonPage = hoaDonService.getOrdersByLoaiHoaDonPaged(loaiHoaDon, pageable);
+
+        model.addAttribute("loaiHoaDon", loaiHoaDon);
         addPaginationAttributes(model, hoaDonPage);
         return "/admin/hoa-don/index";
     }

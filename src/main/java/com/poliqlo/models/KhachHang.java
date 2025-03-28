@@ -8,6 +8,8 @@ import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Builder
 @AllArgsConstructor
@@ -48,5 +50,8 @@ public class KhachHang {
     @ColumnDefault("b'0'")
     @Column(name = "IS_DELETED", nullable = false)
     private Boolean isDeleted = false;
+    @OneToMany(mappedBy = "khachHang", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DiaChi> danhSachDiaChi = new ArrayList<>();
+
 
 }

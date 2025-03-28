@@ -10,30 +10,71 @@
             /* Style cho bộ lọc */
             .filter-container {
                 display: flex;
-                flex-wrap: wrap;
-                gap: 10px;
+                flex-direction: column;
+                gap: 15px;
                 background-color: #f8f9fa;
                 border-radius: 8px;
-                padding: 15px;
+                padding: 20px;
                 margin-top: 10px;
-                margin-bottom: 15px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                align-items: center;
+                margin-bottom: 20px;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.1);
             }
-            .filter-group {
+
+            .filter-row {
                 display: flex;
                 flex-wrap: wrap;
-                gap: 10px;
-                flex: 1;
-                min-width: 300px;
+                gap: 15px;
                 align-items: center;
             }
+
+            .first-row {
+                display: flex;
+                justify-content: space-between;
+                gap: 20px;
+            }
+
+            .second-row {
+                display: flex;
+                justify-content: space-between;
+                gap: 20px;
+                align-items: center;
+            }
+
+            .filter-group {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                flex: 1;
+                min-width: 200px;
+            }
+
+            .search-group {
+                flex: 1;
+                min-width: 250px;
+            }
+
+            .price-group, .date-group {
+                flex: 1;
+                display: flex;
+                gap: 10px;
+                align-items: center;
+                min-width: 300px;
+            }
+
+            .button-group {
+                display: flex;
+                gap: 10px;
+                justify-content: flex-end;
+                min-width: 200px;
+            }
+
             .filter-buttons {
                 display: flex;
                 flex-wrap: wrap;
                 gap: 10px;
                 margin-bottom: 15px;
             }
+
             .filter-button {
                 background-color: white;
                 border: 1px solid #dee2e6;
@@ -42,51 +83,60 @@
                 cursor: pointer;
                 transition: all 0.2s;
             }
+
             .filter-button:hover {
                 border-color: #6c757d;
             }
+
             .filter-button.active {
                 background-color: #718096;
                 color: white;
                 border-color: #718096;
             }
+
             .filter-label {
                 font-weight: 500;
                 white-space: nowrap;
+                color: #4B5563;
             }
-            .filter-input {
+
+            .filter-input, .filter-select {
                 flex: 1;
-                min-width: 120px;
-                padding: 6px 10px;
+                min-width: 150px;
+                padding: 8px 12px;
                 border: 1px solid #ced4da;
                 border-radius: 5px;
+                font-size: 14px;
+                transition: border-color 0.2s;
             }
-            .search-button {
+
+            .filter-input:focus, .filter-select:focus {
+                border-color: #4B5563;
+                outline: none;
+            }
+
+            .search-button, .reset-button {
                 background-color: #4B5563;
                 color: white;
                 border: none;
                 border-radius: 5px;
-                padding: 6px 15px;
+                padding: 8px 20px;
                 cursor: pointer;
                 white-space: nowrap;
+                font-size: 14px;
+                transition: background-color 0.2s;
             }
-            .search-button:hover {
+
+            .search-button:hover, .reset-button:hover {
                 background-color: #374151;
             }
-            .search-group {
-                display: flex;
-                flex: 2;
-                min-width: 250px;
-                gap: 10px;
+
+            .reset-button {
+                background-color: #6c757d;
             }
-            .price-group, .date-group {
-                display: flex;
-                gap: 10px;
-                align-items: center;
-                flex-wrap: wrap;
-            }
-            .display-select {
-                width: 120px;
+
+            .display-select, .order-type-select {
+                width: 150px;
             }
 
             /* Style cho table */
@@ -94,21 +144,25 @@
                 margin-top: 15px;
                 overflow-x: auto;
             }
+
             .table {
                 width: 100%;
                 font-size: 15px;
                 border-collapse: collapse;
             }
+
             .table th {
                 background-color: #4B5563;
                 color: white;
                 padding: 12px 15px;
                 text-align: left;
             }
+
             .table td {
                 padding: 12px 15px;
                 border-bottom: 1px solid #e2e8f0;
             }
+
             .table tr:hover {
                 background-color: #f8f9fa;
             }
@@ -122,18 +176,23 @@
                 color: white;
                 display: inline-block;
             }
+
             .status-waiting {
                 background-color: #FFA500;
             }
+
             .status-confirmed {
                 background-color: #3498db;
             }
+
             .status-delivering {
                 background-color: #9B59B6;
             }
+
             .status-completed {
                 background-color: #2ECC71;
             }
+
             .status-cancelled {
                 background-color: #E74C3C;
             }
@@ -144,14 +203,17 @@
                 justify-content: center;
                 margin-top: 20px;
             }
+
             .pagination .page-item {
                 margin: 0 5px;
             }
+
             .pagination .page-link {
                 border-radius: 5px;
                 color: #4B5563;
                 padding: 8px 12px;
             }
+
             .pagination .page-item.active .page-link {
                 background-color: #4B5563;
                 border-color: #4B5563;
@@ -166,6 +228,7 @@
                 padding: 6px 12px;
                 cursor: pointer;
             }
+
             .btn-view-details:hover {
                 background-color: #374151;
             }
@@ -176,9 +239,34 @@
                 align-items: center;
                 margin-bottom: 15px;
             }
+
             .order-history-header h2 {
                 margin-bottom: 0;
                 margin-right: 20px;
+            }
+            .order-type-select {
+                width: 100px; /* Giảm chiều rộng của select */
+            }
+
+            .search-group .filter-input {
+                min-width: 180px; /* Điều chỉnh chiều rộng của input tìm kiếm */
+            }
+            .filter-group.search-group .filter-input {
+                min-width: 180px; /* Thu ngắn input tìm kiếm */
+                width: 180px;
+            }
+
+            .filter-group .filter-select.order-type-select {
+                width: 360px; /* Thu ngắn select Loại hóa đơn */
+                min-width: 360px;
+            }
+
+            .price-group .filter-input {
+                width: 120px; /* Điều chỉnh input khoảng giá */
+            }
+
+            .filter-row.second-row .filter-group {
+                flex: 0 0 auto; /* Ngăn không cho flex grow */
             }
         </style>
     </th:block>
@@ -196,45 +284,58 @@
         <!-- Bộ lọc trạng thái dạng button -->
         <div class="filter-buttons">
             <a href="/admin/hoa-don/index" class="filter-button">Tất cả</a>
-            <a href="/admin/hoa-don/trangthai/Chờ xác nhận" class="filter-button">Chờ xác nhận</a>
-            <a href="/admin/hoa-don/trangthai/Chờ đóng gói" class="filter-button">Chờ đóng gói</a>
-            <a href="/admin/hoa-don/trangthai/Chờ giao hàng" class="filter-button">Chờ giao hàng</a>
-            <a href="/admin/hoa-don/trangthai/Đang giao hàng" class="filter-button">Đang giao hàng</a>
-            <a href="/admin/hoa-don/trangthai/Đã nhận hàng" class="filter-button">Đã nhận hàng</a>
-            <a href="/admin/hoa-don/trangthai/Hoàn tất" class="filter-button">Hoàn tất</a>
-            <a href="/admin/hoa-don/trangthai/Đã hủy" class="filter-button">Đã hủy</a>
+            <a href="/admin/hoa-don/trangthai/CHO_XAC_NHAN" class="filter-button">Chờ xác nhận</a>
+            <a href="/admin/hoa-don/trangthai/XAC_NHAN,DANG_CHUAN_BI_HANG" class="filter-button">Đang chuẩn bị hàng</a>
+            <a href="/admin/hoa-don/trangthai/CHO_LAY_HANG" class="filter-button">Chờ giao hàng</a>
+            <a href="/admin/hoa-don/trangthai/LAY_HANG_THANH_CONG,DANG_VAN_CHUYEN,DANG_GIAO" class="filter-button">Đang giao hàng</a>
+            <a href="/admin/hoa-don/trangthai/GIAO_HANG_THANH_CONG,THANH_CONG" class="filter-button">Hoàn tất</a>
+            <a href="/admin/hoa-don/trangthai/DA_HUY" class="filter-button">Đã hủy</a>
         </div>
 
         <!-- Bộ lọc chi tiết -->
+        <!-- Bộ lọc chi tiết -->
         <form th:action="@{/admin/hoa-don/search}" method="get" class="filter-container">
-            <div class="filter-row">
-                <div class="filter-label">Tìm kiếm:</div>
-                <input type="text" class="filter-input" name="orderId" th:value="${orderId}" placeholder="Tìm kiếm mã đơn...">
+            <!-- Hàng 1: Tìm kiếm, Từ - Đến, Sau - Trước -->
+            <div class="filter-row first-row">
+                <div class="filter-group search-group">
+                    <div class="filter-label">Tìm kiếm:</div>
+                    <input type="text" class="filter-input" style="min-width: 220px" name="orderId" th:value="${orderId}" placeholder="Tìm kiếm mã đơn..." >
+                </div>
+                <div class="filter-group price-group">
+                    <div class="filter-label">Từ:</div>
+                    <input type="number" class="filter-input" name="minAmount" th:value="${minAmount}" placeholder="0">
+                    <div class="filter-label">Đến:</div>
+                    <input type="number" class="filter-input" name="maxAmount" th:value="${maxAmount}" placeholder="5000000000">
+                </div>
+                <div class="filter-group date-group">
+                    <div class="filter-label">Sau:</div>
+                    <input type="datetime-local" class="filter-input" name="fromDate" th:value="${fromDate}" placeholder="Từ ngày">
+                    <div class="filter-label">Trước:</div>
+                    <input type="datetime-local" class="filter-input" name="toDate" th:value="${toDate}" placeholder="Đến ngày">
+                </div>
             </div>
-            <div class="filter-row">
-                <div class="filter-label">Hiển thị:</div>
-                <select class="filter-input" name="displayDays" onchange="this.form.submit()">
-                    <option value="0" th:selected="${displayDays == null || displayDays == 0}">Tất cả</option>
-                    <option value="7" th:selected="${displayDays == 7}">7 ngày</option>
-                    <option value="30" th:selected="${displayDays == 30}">30 ngày</option>
-                    <option value="60" th:selected="${displayDays == 60}">60 ngày</option>
-                </select>
-            </div>
-            <div class="filter-row">
-                <div class="filter-label">Từ:</div>
-                <input type="number" class="filter-input" name="minAmount" th:value="${minAmount}" placeholder="0">
-                <div class="filter-label">Đến:</div>
-                <input type="number" class="filter-input" name="maxAmount" th:value="${maxAmount}" placeholder="5000000000">
-            </div>
-            <div class="filter-row">
-                <div class="filter-label">Sau:</div>
-                <input type="datetime-local" class="filter-input" name="fromDate" th:value="${fromDate}" placeholder="Từ ngày">
-                <div class="filter-label">Trước:</div>
-                <input type="datetime-local" class="filter-input" name="toDate" th:value="${toDate}" placeholder="Đến ngày">
-            </div>
-            <div class="filter-row">
-                <button type="submit" class="search-button">Tìm kiếm</button>
-                <a th:href="@{/admin/hoa-don/index}" class="search-button ml-2" style="text-decoration: none; text-align: center;">Reset</a>
+            <!-- Hàng 2: Loại hóa đơn, Hiển thị, và các nút -->
+            <div class="filter-row second-row">
+                <div class="filter-group">
+                    <div class="filter-label">Loại hóa đơn:</div>
+                    <select class="filter-select order-type-select" name="loaiHoaDon">
+                        <option value="ONLINE" th:selected="${loaiHoaDon == 'ONLINE'}">Online</option>
+                        <option value="TAI_QUAY" th:selected="${loaiHoaDon == 'TAI_QUAY'}">Tại quầy</option>
+                    </select>
+                </div>
+<!--                <div class="filter-group">-->
+<!--                    <div class="filter-label">Hiển thị:</div>-->
+<!--                    <select class="filter-input display-select" name="displayDays">-->
+<!--                        <option value="0" th:selected="${displayDays == null || displayDays == 0}">Tất cả</option>-->
+<!--                        <option value="7" th:selected="${displayDays == 7}">7 ngày</option>-->
+<!--                        <option value="30" th:selected="${displayDays == 30}">30 ngày</option>-->
+<!--                        <option value="60" th:selected="${displayDays == 60}">60 ngày</option>-->
+<!--                    </select>-->
+<!--                </div>-->
+                <div class="filter-group button-group">
+                    <button type="submit" class="search-button">Tìm kiếm</button>
+                    <a th:href="@{/admin/hoa-don/index}" class="reset-button" style="text-decoration: none;">Reset</a>
+                </div>
             </div>
         </form>
 
@@ -254,6 +355,7 @@
                     <th>Địa chỉ</th>
                     <th>Tổng tiền</th>
                     <th>Thanh toán</th>
+                    <th>Loại HD</th>
                     <th>Trạng thái</th>
                     <th>Thao tác</th>
                 </tr>
@@ -261,12 +363,13 @@
                 <tbody>
                 <tr th:each="hoaDon : ${hoaDons}">
                     <td>#<span th:text="${hoaDon.id}"></span></td>
-                    <td th:text="${#temporals.format(hoaDon.ngayNhanHang, 'dd/MM/yyyy')}"></td>
+                    <td th:text="${#temporals.format(hoaDon.getNgayDatFromLichSu(), 'dd/MM/yyyy')}"></td>
                     <td th:text="${hoaDon.tenNguoiNhan}"></td>
                     <td th:text="${hoaDon.soDienThoai}"></td>
-                    <td th:text="${hoaDon.diaChi}" class="text-truncate" style="max-width: 150px;"></td>
+                    <td th:text="${hoaDon.diaChi}"></td>
                     <td th:text="${#numbers.formatDecimal(hoaDon.tongTien, 0, 'COMMA', 0, 'POINT')} + ' VND'"></td>
                     <td th:text="${hoaDon.phuongThucThanhToan}"></td>
+                    <td th:text="${hoaDon.loaiHoaDon}"></td>
                     <td>
                         <span class="status-badge" th:classappend="${
                             hoaDon.trangThai == 'Chờ xác nhận' ? 'status-waiting' : (

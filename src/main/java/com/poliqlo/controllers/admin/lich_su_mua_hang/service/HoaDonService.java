@@ -100,12 +100,13 @@ public class HoaDonService {
     public Page<HoaDon> searchOrders(
             Integer id,
             String trangThai,
+            String loaiHoaDon,
             BigDecimal minAmount,
             BigDecimal maxAmount,
             LocalDateTime fromDate,
             LocalDateTime toDate,
             Pageable pageable) {
-        return hoaDonRepository.searchOrdersPaged(id, trangThai, minAmount, maxAmount, fromDate, toDate, pageable);
+        return hoaDonRepository.searchOrdersPaged(id, trangThai,loaiHoaDon, minAmount, maxAmount, fromDate, toDate, pageable);
     }
 
     public Page<HoaDon> getRecentOrders(int days, Pageable pageable) {
@@ -114,5 +115,16 @@ public class HoaDonService {
         return hoaDonRepository.findRecentOrdersPaged(fromDate, pageable);
     }
 
+    public List<HoaDon> getOrdersByLoaiHoaDon(String loaiHoaDon) {
+        return hoaDonRepository.findAllByLoaiHoaDon(loaiHoaDon);
+    }
 
+    public Page<HoaDon> getOrdersByLoaiHoaDonPaged(String loaiHoaDon, Pageable pageable) {
+        return hoaDonRepository.findAllByLoaiHoaDonPaged(loaiHoaDon, pageable);
+    }
+
+    // Thêm phương thức mới để lấy đơn hàng theo nhiều trạng thái
+    public Page<HoaDon> getOrdersByMultipleStatusesPaged(List<String> statuses, Pageable pageable) {
+        return hoaDonRepository.findAllByTrangThaiInPaged(statuses, pageable);
+    }
 }
