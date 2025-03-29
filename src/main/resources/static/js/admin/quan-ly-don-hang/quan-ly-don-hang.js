@@ -19,6 +19,7 @@ function convertToVietnamese(text) {
         "XUAT_KHO": "Xuất kho",
         "TAI_QUAY": "Tại quầy",
         "TIEN_MAT": "Tiền mặt",
+        "HOAN_HANG_THANH_CONG": "Hoàn hàng thành công",
     };
     return mapping[text] || text;
 }
@@ -32,8 +33,10 @@ const statuses = [
     "CHO_XAC_NHAN", "XAC_NHAN", "DANG_CHUAN_BI_HANG",
     "CHO_LAY_HANG", "LAY_HANG_THANH_CONG", "DANG_VAN_CHUYEN",
     "DANG_GIAO", "GIAO_HANG_THANH_CONG", "GIAO_HANG_THAT_BAI",
-    "CHO_CHUYEN_HOAN", "THANH_CONG", "DA_HUY", "THAT_LAC"
+    "CHO_CHUYEN_HOAN", "HOAN_HANG_THANH_CONG", "THANH_CONG",
+    "DA_HUY", "THAT_LAC"
 ];
+
 
 // Map icon cho trạng thái
 const statusIconMap = {
@@ -47,6 +50,7 @@ const statusIconMap = {
     "GIAO_HANG_THANH_CONG": "fa-check",
     "GIAO_HANG_THAT_BAI": "fa-times-circle",
     "CHO_CHUYEN_HOAN": "fa-rotate-left",
+    "HOAN_HANG_THANH_CONG": "fa-trophy",
     "THANH_CONG": "fa-trophy",
     "DA_HUY": "fa-ban",
     "THAT_LAC": "fa-exclamation-triangle"
@@ -60,42 +64,41 @@ document.addEventListener("DOMContentLoaded", function() {
         if (!timeline) return;
         timeline.innerHTML = '';
 
-        // Tùy theo trạng thái đơn hàng, xác định các bước hiển thị
         let timelineData = [];
         if (order.trangThai === "DA_HUY") {
-            // Đơn hàng hủy: hiển thị đến CHO_LAY_HANG, rồi DA_HUY
+            // Đơn hàng hủy: hiển thị đến CHO_LAY_HANG rồi DA_HUY
             let idx = statuses.indexOf("CHO_LAY_HANG");
             timelineData = statuses.slice(0, idx + 1);
             timelineData.push("DA_HUY");
-        } else if (
+        }
+        else if (
             order.trangThai === "GIAO_HANG_THAT_BAI" ||
             order.trangThai === "CHO_CHUYEN_HOAN" ||
+            order.trangThai === "HOAN_HANG_THANH_CONG" ||
             order.trangThai === "THAT_LAC"
         ) {
-            // Giao thất bại / Chờ hoàn / Thất lạc => hiển thị đến GIAO_HANG_THAT_BAI, rồi CHO_CHUYEN_HOAN
+            // Luồng hoàn trả: hiển thị đến DANG_GIAO, sau đó GIAO_HANG_THAT_BAI, CHO_CHUYEN_HOAN, HOAN_HANG_THANH_CONG
             let idx = statuses.indexOf("DANG_GIAO");
             timelineData = statuses.slice(0, idx + 1);
             timelineData.push("GIAO_HANG_THAT_BAI");
             timelineData.push("CHO_CHUYEN_HOAN");
-        } else {
-            // Đơn hàng bình thường => hiển thị đến GIAO_HANG_THANH_CONG
+            timelineData.push("HOAN_HANG_THANH_CONG");
+        }
+        else if (order.trangThai === "THANH_CONG") {
+            // Đơn hàng thành công: hiển thị đến GIAO_HANG_THANH_CONG, sau đó THANH_CONG
             let idx = statuses.indexOf("GIAO_HANG_THANH_CONG");
             timelineData = statuses.slice(0, idx + 1);
-
-            // Nếu đơn hàng thực tế đã sang GIAO_HANG_THAT_BAI hay THANH_CONG, thêm chúng
-            if (order.trangThai === "GIAO_HANG_THAT_BAI") {
-                timelineData.push("GIAO_HANG_THAT_BAI");
-            }
-            if (order.trangThai === "THANH_CONG") {
-                timelineData.push("THANH_CONG");
-            }
+            timelineData.push("THANH_CONG");
+        }
+        else {
+            // Đơn hàng bình thường: hiển thị đến GIAO_HANG_THANH_CONG
+            let idx = statuses.indexOf("GIAO_HANG_THANH_CONG");
+            timelineData = statuses.slice(0, idx + 1);
         }
 
-        // Xác định chỉ số hiện tại
         let currentTimelineIndex = timelineData.indexOf(order.trangThai);
         if (currentTimelineIndex === -1) currentTimelineIndex = 0;
 
-        // Vẽ
         timelineData.forEach((status, index) => {
             const stepDiv = document.createElement('div');
             stepDiv.classList.add('step');
@@ -117,6 +120,7 @@ document.addEventListener("DOMContentLoaded", function() {
             timeline.appendChild(stepDiv);
         });
     }
+
 
 // Vô hiệu hóa các thao tác chỉnh sửa
     function disableOrderActions(status) {
@@ -172,7 +176,6 @@ document.addEventListener("DOMContentLoaded", function() {
         renderTimeline(order);
         // Nút đặc biệt
         setupSpecialActions(order);
-
         // Từ "LAY_HANG_THANH_CONG" trở đi, hoặc DA_HUY, CHO_CHUYEN_HOAN, THANH_CONG, GIAO_HANG_THAT_BAI => disable
         // Từ "LAY_HANG_THANH_CONG" trở đi, hoặc DA_HUY, CHO_CHUYEN_HOAN, THANH_CONG, GIAO_HANG_THAT_BAI => disable
         const disableIndex = statuses.indexOf("LAY_HANG_THANH_CONG");
@@ -200,19 +203,22 @@ document.addEventListener("DOMContentLoaded", function() {
     function computeNextStatus(order) {
         const current = order.trangThai;
 
-        // Đơn hàng bị hủy => khôi phục => DANG_CHUAN_BI_HANG
+        // Nếu đơn hàng bị hủy => khôi phục => DANG_CHUAN_BI_HANG
         if (current === "DA_HUY") return "DANG_CHUAN_BI_HANG";
 
-        // Giao hàng thất bại => sang CHO_CHUYEN_HOAN
+        // Nếu đơn hàng giao thất bại => sang CHO_CHUYEN_HOAN
         if (current === "GIAO_HANG_THAT_BAI") return "CHO_CHUYEN_HOAN";
 
-        // CHO_CHUYEN_HOAN hoặc THANH_CONG => null
-        if (current === "CHO_CHUYEN_HOAN" || current === "THANH_CONG") return null;
+        // Nếu đang CHO_CHUYEN_HOAN => sang HOAN_HANG_THANH_CONG
+        if (current === "CHO_CHUYEN_HOAN") return "HOAN_HANG_THANH_CONG";
 
-        // Nếu đang DANG_GIAO => null => code chặn => hiển popup chọn
+        // Nếu đang HOAN_HANG_THANH_CONG hoặc THANH_CONG => không chuyển tiếp
+        if (current === "HOAN_HANG_THANH_CONG" || current === "THANH_CONG") return null;
+
+        // Nếu đang DANG_GIAO => sẽ xử lý popup chọn (trong setupUpdateStatusModal), nên return null
         if (current === "DANG_GIAO") return null;
 
-        // Bình thường => tìm trạng thái kế tiếp
+        // Đơn hàng bình thường: lấy trạng thái kế tiếp trong mảng
         let idx = statuses.indexOf(current);
         if (idx === -1) return null;
 
@@ -223,9 +229,10 @@ document.addEventListener("DOMContentLoaded", function() {
                 return null;
             }
         }
-        // Nếu đang GIAO_HANG_THANH_CONG => sang GIAO_HANG_THAT_BAI
+        // Nếu đang GIAO_HANG_THANH_CONG, bước tiếp theo là chuyển thành thất bại (hoặc bạn có thể chuyển trực tiếp thành thành công)
         return "GIAO_HANG_THAT_BAI";
     }
+
 
 // Mở modal cập nhật trạng thái
     function setupUpdateStatusModal() {
@@ -414,7 +421,7 @@ document.addEventListener("DOMContentLoaded", function() {
             </div>
             <div class="col-md-4 mb-2">
                 <label><strong>Phí giảm giá:</strong></label>
-                <div>${order.phiGiamGia || 0}</div>
+                <div>${order.giamMaGiamGia || 0}</div>
             </div>
             <div class="col-md-4 mb-2">
                 <label><strong>Phương thức thanh toán:</strong></label>
@@ -1031,6 +1038,8 @@ document.addEventListener("DOMContentLoaded", function() {
             })
             .then(data => {
                 Swal.fire('Thành công', 'Thêm sản phẩm thành công!', 'success');
+                $("#addCartModal").modal("hide");
+                $('#dataTable').DataTable().ajax.reload();
                 // Cập nhật lại thông tin đơn hàng (ví dụ: gọi hàm fetchOrderDetails)
                 fetchOrderDetails();
             })

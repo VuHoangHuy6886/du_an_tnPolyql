@@ -52,9 +52,7 @@ public class OrderService {
         if (taiKhoanId != null) {
             taiKhoan = taiKhoanRepository.findById(taiKhoanId).orElse(null);
         }
-        int maxId = lichSuHoaDonRepository.findMaxId();
         LichSuHoaDon lichSu = LichSuHoaDon.builder()
-                .id(maxId + 1)
                 .hoaDon(hoaDon)
                 .taiKhoan(taiKhoan)
                 .tieuDe(tieuDe)
@@ -93,7 +91,7 @@ public class OrderService {
                         sanPhamChiTietRepository.save(productDetail);
                     }
                     // Nếu chuyển sang CHO_CHUYEN_HOAN (trả hàng về kho): cộng số lượng về kho
-                    else if ("CHO_CHUYEN_HOAN".equals(newStatus)) {
+                    else if ("HOAN_HANG_THANH_CONG".equals(newStatus)) {
                         productDetail.setSoLuong(productDetail.getSoLuong() + detail.getSoLuong());
                         sanPhamChiTietRepository.save(productDetail);
                     }
@@ -201,9 +199,9 @@ public class OrderService {
         if (order.getGiamMaGiamGia()!= null) {
             sum = sum.subtract(order.getGiamMaGiamGia());
         }
-//        if (order.getPhiVanChuyen() != null) {
-//            sum = sum.add(order.getPhiVanChuyen());
-//        }
+        if (order.getPhiVanChuyen() != null) {
+            sum = sum.add(order.getPhiVanChuyen());
+        }
         order.setTongTien(sum);
 
     }

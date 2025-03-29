@@ -15,7 +15,9 @@ import java.util.Optional;
 public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, Integer>, JpaSpecificationExecutor<SanPhamChiTiet> {
   @Query("SELECT sp FROM SanPhamChiTiet sp WHERE sp.sanPham.id IN :ids")
   List<SanPhamChiTiet> findByListByIdProductsForDiscounts(@Param("ids") List<Integer> ids);
-    @Query(value = """
+  boolean existsBySanPhamIdAndKichThuocIdAndMauSacId(Integer sanPhamId, Integer kichThuocId, Integer mauSacId);
+
+  @Query(value = """
     SELECT 
         spct.ID AS id,
         sp.TEN AS tenSanPham,
