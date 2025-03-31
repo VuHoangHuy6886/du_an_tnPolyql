@@ -22,7 +22,6 @@ public class EditDotGiamGiaRequest {
     @NotBlank(message = "Tên không được để trống")
     private String ten;
 
-    @NotBlank(message = "Mô tả không được để trống")
     private String moTa;
 
     @NotNull(message = "Thời gian bắt đầu không được để trống")
