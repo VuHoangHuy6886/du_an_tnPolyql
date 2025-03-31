@@ -24,7 +24,9 @@
         align-items: center;
         gap: 10px;
     }
-
+/*#addProductDetailModal{*/
+/*    z-index: 1000;*/
+/*}*/
     .dataTables_processing::before {
         content: "";
         width: 24px;
@@ -243,27 +245,8 @@
                                 </th:block>
                             </select>
                         </div>
-<!--                        <div class="form-group col-md-3">-->
-<!--                            <label for="edit-danh-muc"><i class="fas fa-list"></i> Danh mục</label>-->
-<!--                            <select class="form-control" id="edit-danh-muc" required>-->
-<!--                                <option value="">Chọn danh mục</option>-->
-<!--                                <th:block th:each="danhMuc : ${listDanhMuc}">-->
-<!--                                    <option th:value="${danhMuc.id}" th:text="${danhMuc.ten}"></option>-->
-<!--                                </th:block>-->
-<!--                            </select>-->
-<!--                        </div>-->
                     </div>
-                    <!-- Hàng 3: Chọn ảnh với preview -->
-<!--                    <div class="form-row">-->
-<!--                        <div class="form-group col-md-6">-->
-<!--                            <label for="edit-anh-file"><i class="fas fa-image"></i> Chọn ảnh</label>-->
-<!--                            <input type="file" class="form-control-file" id="edit-anh-file" accept="image/*">-->
-<!--                            <div class="mt-2 text-center">-->
-<!--                                <img id="edit-anh-preview" src="" alt="Ảnh preview" class="img-fluid" style="max-height: 150px;">-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-                    <!-- Nút hành động -->
+
                     <div class="form-group d-flex justify-content-center">
                         <button type="button" class="btn btn-secondary mr-3" data-dismiss="modal">
                             <i class="fas fa-times"></i> Hủy
@@ -277,6 +260,9 @@
         </div>
     </div>
 </div>
+
+
+
 
 <!-- Modal Chi tiết sản phẩm -->
 <div class="modal fade" id="modal-product-detail" tabindex="-1" role="dialog" aria-labelledby="ProductDetailModalLabel" aria-hidden="true">
@@ -315,6 +301,9 @@
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">
                     <i class="fas fa-times"></i> Đóng
                 </button>
+                <button type="button" class="btn btn-success" id="btnOpenModalAddDetail" >
+                    <i class="fas fa-shopping-cart" ></i> Thêm sản phẩm chi tiết
+                </button>
             </div>
         </div>
     </div>
@@ -349,9 +338,7 @@
                         <input type="number" class="form-control" id="detail-so-luong" required>
                     </div>
                     <div class="form-group d-flex justify-content-end">
-                        <button type="button" class="btn btn-secondary mr-3" data-dismiss="modal">
-                            <i class="fas fa-times"></i> Hủy
-                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-save"></i> Lưu
                         </button>
@@ -362,7 +349,94 @@
     </div>
 </div>
 
-<!-- Modal Add -->
+<!-- Modal Thêm Sản Phẩm Chi Tiết -->
+<div class="modal fade" id="addProductDetailModal" tabindex="-1" aria-labelledby="addProductDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="addProductDetailModalLabel">
+                    <i class="fas fa-info-circle"></i> Thêm chi tiết sản phẩm
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Đóng">
+                    <span aria-hidden="true"><i class="fas fa-times"></i></span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Thêm class needs-validation và novalidate -->
+                <form id="addProductDetailForm" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="productName" class="form-label">Tên sản phẩm</label>
+                        <input type="text" id="productName" class="form-control" readonly>
+                        <!-- Trường readonly không bắt buộc validate, nên không cần invalid-feedback -->
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="edit-detail-kich-thuoc">
+                                <i class="fas fa-arrows-alt"></i> Kích thước
+                            </label>
+                            <select class="form-control" id="edit-detail-kich-thuoc" required>
+                                <option value="">Chọn kích thước</option>
+                                <th:block th:each="kichThuoc : ${listKichThuoc}">
+                                    <option th:value="${kichThuoc.id}" th:text="${kichThuoc.ten}"></option>
+                                </th:block>
+                            </select>
+                            <div class="invalid-feedback">
+                                Vui lòng chọn kích thước.
+                            </div>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="edit-detail-mau-sac">
+                                <i class="fas fa-palette"></i> Màu sắc
+                            </label>
+                            <select class="form-control" id="edit-detail-mau-sac" required>
+                                <option value="">Chọn màu sắc</option>
+                                <th:block th:each="mauSac : ${listMauSac}">
+                                    <option th:value="${mauSac.id}" th:text="${mauSac.ten}"></option>
+                                </th:block>
+                            </select>
+                            <div class="invalid-feedback">
+                                Vui lòng chọn màu sắc.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="add-detail-price" class="form-label">Giá bán</label>
+                        <input type="number" id="add-detail-price" class="form-control" required min="1000">
+                        <div class="invalid-feedback">
+                            Vui lòng nhập giá bán (lớn hơn 1000 ).
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="add-detail-quantity" class="form-label">Số lượng</label>
+                        <input type="number" id="add-detail-quantity" class="form-control" required min="1">
+                        <div class="invalid-feedback">
+                            Số lượng phải lớn hơn hoặc bằng 1.
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="barcode" class="form-label">Barcode</label>
+                        <input type="text" id="barcode" class="form-control" readonly>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <!-- data-dismiss="modal" để đóng modal với Bootstrap 4 -->
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <!-- Nút này không phải type="submit" mà là type="button", ta sẽ xử lý qua JS -->
+                <button type="button" class="btn btn-primary" id="btnAddProductDetail">
+                    Thêm sản phẩm chi tiết
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
 
 
 </body>

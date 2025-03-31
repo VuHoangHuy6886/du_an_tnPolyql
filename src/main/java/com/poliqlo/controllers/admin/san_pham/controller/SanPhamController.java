@@ -1,5 +1,6 @@
 package com.poliqlo.controllers.admin.san_pham.controller;
 
+import com.poliqlo.controllers.admin.san_pham.model.reponse.AddProductDetailRequest;
 import com.poliqlo.controllers.admin.san_pham.model.request.AddRequestNBC;
 import com.poliqlo.controllers.admin.san_pham.model.request.EditReq;
 import com.poliqlo.controllers.admin.san_pham.model.response.Response;
@@ -38,6 +39,9 @@ public class SanPhamController {
     private final ChatLieuRepository chatLieuRepository;
 
     private final KieuDangRepository kieuDangRepository;
+    private final KichThuocRepository kichThuocRepository;
+    private final MauSacRepository mauSacRepository;
+
     private final DanhMucRepository danhMucRepository;
     private final SanPhamChiTietRepository sanPhamChiTietRepository;
 
@@ -87,10 +91,14 @@ public class SanPhamController {
         List<ChatLieu> listChatLieu = chatLieuRepository.findAll();
         List<DanhMuc> listDanhMuc = danhMucRepository.findAll();
         List<KieuDang> listKieuDang = kieuDangRepository.findAll();
+        List<MauSac> listMauSac = mauSacRepository.findAll();
+        List<KichThuoc> listKichThuoc = kichThuocRepository.findAll();
         model.addAttribute("listThuongHieu", listThuongHieu);
         model.addAttribute("listChatLieu", listChatLieu);
         model.addAttribute("listDanhMuc", listDanhMuc);
         model.addAttribute("listKieuDang", listKieuDang);
+        model.addAttribute("listMauSac", listMauSac);
+        model.addAttribute("listKichThuoc", listKichThuoc);
         return "/admin/san-pham/san-pham";
     }
     // API trả về dữ liệu cho DataTables
@@ -125,14 +133,48 @@ public class SanPhamController {
         return modelMapper.map(sanPhamRepository.findAll(), new TypeToken<List<Response>>() {}.getType());
     }
 
-//    // Thêm mới sản phẩm (PUT)
-//    @ResponseBody
-//    @PutMapping("/api/v1/san-pham")
-//    public ResponseEntity<Response> add(@Valid @RequestBody AddRequest req) {
-//        return sanPhamService.save(req);
-//    }
+    @ResponseBody
+    @PostMapping("/api/v1/san-pham-detail")
+    public ResponseEntity<?> addProductDetail(@Valid @RequestBody AddProductDetailRequest request, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            String errorMessages = bindingResult.getAllErrors().stream()
+                    .map(err -> err.getDefaultMessage())
+                    .reduce("", (a, b) -> a + "\n" + b);
+            return ResponseEntity.badRequest().body(errorMessages);
+        }
 
-    // Cập nhật sản phẩm (POST)
+        SanPham sanPham = sanPhamRepository.findById(request.getSanPhamId())
+                .orElse(null);
+        if (sanPham == null) {
+            return ResponseEntity.badRequest().body("Sản phẩm không tồn tại");
+        }
+
+        boolean exists = sanPhamChiTietRepository.existsBySanPhamIdAndKichThuocIdAndMauSacId(
+                request.getSanPhamId(), request.getKichThuocId(), request.getMauSacId());
+        if (exists) {
+            return ResponseEntity.badRequest().body("Sản phẩm chi tiết đã tồn tại, vui lòng kiểm tra lại");
+        }
+
+        SanPhamChiTiet newDetail = new SanPhamChiTiet();
+        newDetail.setSanPham(sanPham);
+
+        KichThuoc kichThuoc = kichThuocRepository.findById(request.getKichThuocId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kích thước không hợp lệ"));
+        MauSac mauSac = mauSacRepository.findById(request.getMauSacId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Màu sắc không hợp lệ"));
+
+        newDetail.setKichThuoc(kichThuoc);
+        newDetail.setMauSac(mauSac);
+        newDetail.setSoLuong(request.getSoLuong());
+        newDetail.setGiaBan(request.getGiaBan()); // Gán giá bán từ payload
+
+        // Nếu có các thuộc tính khác như barcode, có thể thêm tương ứng
+
+        sanPhamChiTietRepository.save(newDetail);
+
+        return ResponseEntity.ok("Thêm sản phẩm chi tiết thành công!");
+    }
+
 
     @ResponseBody
     @PostMapping("/api/v1/san-pham/update")

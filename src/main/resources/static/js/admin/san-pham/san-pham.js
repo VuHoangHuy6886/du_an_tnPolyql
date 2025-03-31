@@ -121,13 +121,14 @@ const reloadDataTable = () => {
 // Model detail
 // Biến toàn cục lưu ID sản phẩm hiện tại (để reload bảng chi tiết)
 let currentProductId = null;
-
+let currentProductName = '';
 function loadProductDetails(productId) {
     currentProductId = productId;
     $.ajax({
         url: `${apiURL}/${productId}`,
         type: 'GET',
         success: function (data) {
+            currentProductName = data.ten || '';
             // Nếu bảng đã được khởi tạo với DataTable, hủy bỏ trước khi cập nhật dữ liệu mới
             if ($.fn.DataTable.isDataTable('#detailTable')) {
                 $('#detailTable').DataTable().clear().destroy();
@@ -148,7 +149,10 @@ function loadProductDetails(productId) {
                     if (data.anhs && data.anhs.length > 0 && detail.mauSac && detail.mauSac.id) {
                         const imagesOfColor = data.anhs.filter(img => img.mauSacId === detail.mauSac.id && !img.isDeleted);
                         if (imagesOfColor.length > 0) {
-                            imageUrl = imagesOfColor[0].url;
+                            // Tìm ảnh có isDefault === true
+                            const defaultImage = imagesOfColor.find(img => img.isDefault);
+                            // Nếu tìm thấy thì gán url của ảnh đó, nếu không thì lấy ảnh đầu tiên
+                            imageUrl = defaultImage ? defaultImage.url : imagesOfColor[0].url;
                         }
                     }
 
@@ -188,8 +192,80 @@ function loadProductDetails(productId) {
         }
     });
 }
+$(document).on("click", "#btnOpenModalAddDetail", function(e) {
+    // Đảm bảo rằng currentProductName và currentProductId đã có giá trị từ loadProductDetails
+    if (!currentProductName || !currentProductId) {
+        Swal.fire("Lỗi", "Chưa có thông tin sản phẩm, vui lòng thử lại sau", "error");
+        return;
+    }
+    // Điền tên sản phẩm (readonly)
+    $("#productName").val(currentProductName);
+    // Reset các trường khác trong modal
+    $("#edit-detail-kich-thuoc").val('');
+    $("#edit-detail-mau-sac").val('');
+    $("#add-detail-quantity").val('');
+    // Nếu có trường giá hoặc barcode, có thể reset hoặc điền mặc định
+    $("#add-detail-price").val('');
+    $("#barcode").val('');
+    $("#addProductDetailModal").modal("show");
+});
 
+// Xử lý sự kiện thêm sản phẩm chi tiết
+$("#btnAddProductDetail").on("click", function(e) {
+    let form = document.getElementById("addProductDetailForm");
 
+    // Kiểm tra tính hợp lệ của form
+    if (!form.checkValidity()) {
+        // Ngăn submit và dừng sự kiện
+        e.preventDefault();
+        e.stopPropagation();
+        // Thêm lớp .was-validated để Bootstrap hiển thị lỗi
+        form.classList.add("was-validated");
+    } else {
+        // Form hợp lệ => xử lý tiếp (gửi AJAX)
+        // Lấy dữ liệu
+        let kichThuocId = $("#edit-detail-kich-thuoc").val();
+        let mauSacId = $("#edit-detail-mau-sac").val();
+        let giaBan = parseFloat($("#add-detail-price").val());
+        let soLuong = parseInt($("#add-detail-quantity").val());
+
+        // Tạo payload
+        let payload = {
+            sanPhamId: currentProductId, // ID sản phẩm, giả sử đã lưu ở ngoài
+            kichThuocId: parseInt(kichThuocId),
+            mauSacId: parseInt(mauSacId),
+            giaBan: giaBan,
+            soLuong: soLuong
+        };
+
+        // Gửi AJAX
+        $.ajax({
+            url: "/api/v1/san-pham-detail",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(payload),
+            success: function(response) {
+                Swal.fire("Thành công", "Thêm sản phẩm chi tiết thành công", "success");
+                $("#addProductDetailModal").modal("hide");
+                // Reload chi tiết và bảng sản phẩm
+                if (currentProductId) {
+                    loadProductDetails(currentProductId);
+                    reloadDataTable();
+                }
+            },
+            error: function(xhr, status, error) {
+                Swal.fire("Lỗi", xhr.responseText || "Thêm sản phẩm chi tiết thất bại", "error");
+            }
+        });
+    }
+});
+$('#addProductDetailModal').on('hidden.bs.modal', function () {
+    // Xóa trạng thái validation, nhưng không reset dữ liệu nhập
+    $('#addProductDetailForm').removeClass('was-validated');
+
+    // Loại bỏ hiển thị lỗi của Bootstrap (nếu có)
+    $('#addProductDetailForm .form-control').removeClass('is-invalid is-valid');
+});
 // Xử lý khi nhấn nút "Chi tiết" trên DataTable (chứa ID sản phẩm)
 $(document).ready(() => {
     $('#dataTable tbody').on('click', '.btn-detail', function () {
