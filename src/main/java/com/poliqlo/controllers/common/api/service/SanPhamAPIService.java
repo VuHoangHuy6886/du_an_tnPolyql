@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -152,6 +153,10 @@ public class SanPhamAPIService {
                 spct.setIsPromotionProduct(dgg.isPresent());
 
             });
+            sanPhamAPIResponse.setSanPhamChiTiets(
+                    sanPhamAPIResponse.getSanPhamChiTiets().stream().filter(
+            spct->!(spct.getIsDeleted()||spct.getSoLuong()<1))
+                            .collect(Collectors.toSet()));
 
             sanPhamAPIResponse.setSoLuong(sp.getSanPhamChiTiets().stream().mapToInt(SanPhamChiTiet::getSoLuong).sum());
             return sanPhamAPIResponse;

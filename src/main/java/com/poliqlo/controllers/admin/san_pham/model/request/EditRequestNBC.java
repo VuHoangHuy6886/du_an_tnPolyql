@@ -1,6 +1,5 @@
 package com.poliqlo.controllers.admin.san_pham.model.request;
 
-import com.poliqlo.validation.Unique;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -21,7 +20,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @Builder
-public class AddRequestNBC implements Serializable {
+public class EditRequestNBC implements Serializable {
     Integer id;
     @PositiveOrZero
     Integer thuongHieuId;
@@ -31,7 +30,6 @@ public class AddRequestNBC implements Serializable {
     Integer kieuDangId;
     @NotNull
     @Size(max = 50)
-    @Unique(entityClass = com.poliqlo.models.SanPham.class, fieldName = "maSanPham")
     String maSanPham;
     @NotNull
     @Size(max = 255)

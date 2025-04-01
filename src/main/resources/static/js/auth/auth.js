@@ -36,20 +36,20 @@ $(document).ready(function () {
         });
 
         if (isValid) {
-            var username = $('#email').val();
-            var password = $('#password').val();
 
+            let formData=new FormData;
+            formData.append("username",$('#email').val())
+            formData.append("password", $('#password').val())
             $.ajax({
                 type: 'POST',
-                url: '/sign-in',
-                data: JSON.stringify( {
-                    email: username,
-                    password: password
-                }),
-                contentType: 'application/json',
+                url: '/login',
+                data:formData,
+                processData: false,
+                contentType: false,
 
                 success: function (response) {
                     // Lưu token vào localStorage nếu cần
+                    debugger
                     if (response.token) {
                         localStorage.setItem('Authorization',"Bearer "+ response.token);
                         Toast.fire({

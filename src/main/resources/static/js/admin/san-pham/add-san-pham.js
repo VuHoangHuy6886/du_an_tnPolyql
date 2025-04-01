@@ -197,7 +197,6 @@ $(document).ready(function () {
     });
 
     allNextBtn.click(function () {
-        alert('ok')
         var curStep = $(this).closest(".setup-content"),
             curStepBtn = curStep.attr("id"),
             nextStepWizard = $('div.setup-panel div a[href="#' + curStepBtn + '"]').parent().next().children("a"),
@@ -712,7 +711,7 @@ $(document).ready(() => {
             `
 
 
-            fieldsetContainer = `<div id="danhSachSanPhamChiTiet">${fieldsetContainer}</div>>`
+            fieldsetContainer = `<div id="danhSachSanPhamChiTiet">${fieldsetContainer}</div>`
 
             let imageContainer = `
             <div class="card shadow m-2 w-100 ">
@@ -939,10 +938,10 @@ $(document).ready(() => {
 
 
                     tableApDung.find("thead tr").append(`
-                <th class="text-center" km-id="${km.id}">KM${ma}</th>>
+                <th class="text-center" km-id="${km.id}">KM${ma}</th>
             `)
                     tableApDung.find("tbody tr").append(`
-                <td class="text-center"><input type="checkbox" checked km-id="${km.id}" data-toggle="tooltip" data-placement="right" title="${km.text}"></td>>
+                <td class="text-center"><input type="checkbox" checked km-id="${km.id}" data-toggle="tooltip" data-placement="right" title="${km.text}"></td>
             `)
                 })
                 tableDanhSach.find("tbody").html(dataLstKm)
@@ -977,10 +976,10 @@ $(document).ready(() => {
 
 
             tableApDung.find("thead tr").append(`
-                <th class="text-center" km-id="${km.id}">KM${ma}</th>>
+                <th class="text-center" km-id="${km.id}">KM${ma}</th>
             `)
             tableApDung.find("tbody tr").append(`
-                <td class="text-center"><input type="checkbox" checked km-id="${km.id}" data-toggle="tooltip" data-placement="right" title="${km.text}"></td>>
+                <td class="text-center"><input type="checkbox" checked km-id="${km.id}" data-toggle="tooltip" data-placement="right" title="${km.text}"></td>
             `)
         })
         tableDanhSach.find("tbody").html(dataLstKm)

@@ -74,7 +74,11 @@ public class AuthenticationController {
     public String home() {
 
         try {
-
+            String successUrl = (String) httpSession.getAttribute("successUrl");
+            httpSession.removeAttribute("successUrl");
+            if (successUrl!=null&&!successUrl.isEmpty()){
+                return "redirect:"+successUrl;
+            }
             TaiKhoan taiKhoan = (TaiKhoan) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
             return switch (taiKhoan.getRole()) {

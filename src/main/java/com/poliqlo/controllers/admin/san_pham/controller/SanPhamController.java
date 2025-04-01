@@ -3,6 +3,7 @@ package com.poliqlo.controllers.admin.san_pham.controller;
 import com.poliqlo.controllers.admin.san_pham.model.reponse.AddProductDetailRequest;
 import com.poliqlo.controllers.admin.san_pham.model.request.AddRequestNBC;
 import com.poliqlo.controllers.admin.san_pham.model.request.EditReq;
+import com.poliqlo.controllers.admin.san_pham.model.request.EditRequestNBC;
 import com.poliqlo.controllers.admin.san_pham.model.response.Response;
 import com.poliqlo.controllers.admin.san_pham.service.SanPhamService;
 import com.poliqlo.controllers.admin.san_pham_chi_tiet.chat_lieu.model.response.ProductDetailDTO;
@@ -76,6 +77,18 @@ public class SanPhamController {
 
         }
         return sanPhamService.persist(addRequestNBC);
+    }
+    @ResponseBody
+    @PostMapping("/api/v1/san-pham/{id}")
+    public ResponseEntity<?> update(@Validated @RequestBody EditRequestNBC editReq, @PathVariable(name = "id") Integer  id, BindingResult bindResult) {
+        if(bindResult.hasErrors()){
+            String errorMessages = bindResult.getAllErrors().stream()
+                    .map(er-> ((DefaultMessageSourceResolvable) er.getArguments()[0]).getDefaultMessage()+ " " +er.getDefaultMessage())
+                    .reduce("", (e1, e2) -> e1 + "\n" + e2);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errorMessages);
+
+        }
+        return sanPhamService.update(editReq,id);
     }
     // Các phương thức khác...
     // API trả về danh sách sản phẩm chi tiết cho 1 sản phẩm
