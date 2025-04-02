@@ -177,7 +177,7 @@ public class SanPhamController {
 
 
     @ResponseBody
-    @PostMapping("/api/v1/san-pham/update")
+    @PutMapping("/api/san-pham/update")
     public ResponseEntity<?> updateSanPham(@Valid @RequestBody EditReq request) {
         try {
             boolean isUpdated = sanPhamService.updateSanPham(request);
@@ -213,5 +213,25 @@ public class SanPhamController {
     public ResponseEntity<byte[]> exportToExcel() throws IOException {
         return sanPhamService.exportToExcel();
     }
+    @ResponseBody
+    @DeleteMapping("/api/san-pham/delete")
+    public ResponseEntity<String> stopSelling(@RequestParam Integer id) {
+        boolean updated = sanPhamService.updateIsDelete(id, true);
+        if (updated) {
+            return ResponseEntity.ok("Sản phẩm đã ngừng bán");
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy sản phẩm");
+    }
+
+    // Bán lại sản phẩm (Cập nhật isDelete = false)
+    @PostMapping("/api/san-pham/revert")
+    public ResponseEntity<String> resumeSelling(@RequestParam Integer id) {
+        boolean updated = sanPhamService.updateIsDelete(id, false);
+        if (updated) {
+            return ResponseEntity.ok("Sản phẩm đã được bán lại");
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy sản phẩm");
+    }
+
 
 }

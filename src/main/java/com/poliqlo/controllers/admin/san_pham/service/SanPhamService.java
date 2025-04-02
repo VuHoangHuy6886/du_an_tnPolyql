@@ -21,6 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -124,7 +125,16 @@ public class SanPhamService {
         return ResponseEntity.accepted().body(chatLieu);
     }
 
-
+    public boolean updateIsDelete(Integer id, boolean isDelete) {
+        Optional<SanPham> optionalSanPham = sanPhamRepository.findById(id);
+        if (optionalSanPham.isPresent()) {
+            SanPham sanPham = optionalSanPham.get();
+            sanPham.setIsDeleted(isDelete);
+            sanPhamRepository.save(sanPham);
+            return true;
+        }
+        return false;
+    }
 
     public ResponseEntity<byte[]> exportToExcel() throws IOException {
         List<SanPham> mauSacList = sanPhamRepository.findAll();

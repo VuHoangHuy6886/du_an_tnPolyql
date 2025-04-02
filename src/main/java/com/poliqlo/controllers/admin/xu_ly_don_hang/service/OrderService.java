@@ -5,6 +5,8 @@ import com.poliqlo.controllers.admin.xu_ly_don_hang.model.request.*;
 import com.poliqlo.controllers.common.auth.service.AuthService;
 import com.poliqlo.models.*;
 import com.poliqlo.repositories.*;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,7 +38,8 @@ public class OrderService {
     @Autowired
     private AuthService authService;
 
-
+    @PersistenceContext
+    private EntityManager entityManager;
     public Optional<HoaDon> getOrderById(Integer id) {
         return hoaDonRepository.findById(id);
     }
@@ -113,28 +116,6 @@ public class OrderService {
         return updated;
     }
 
-//    public HoaDon updateOrderStatus(Integer hoaDonId, HoaDonStatusUpdateDTO dto, Integer taiKhoanId) {
-//        HoaDon hoaDon = hoaDonRepository.findById(hoaDonId)
-//                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với id " + hoaDonId));
-//        String oldStatus = hoaDon.getTrangThai();
-//        hoaDon.setTrangThai(dto.getTrangThai());
-//        hoaDon.setGhiChu(dto.getGhiChu());
-//        HoaDon updated = hoaDonRepository.save(hoaDon);
-//
-//        // Ghi log lịch sử (giả sử hàm này ghi vào bảng lịch sử hóa đơn)
-//        String oldStatusVi = TrangThaiUtils.convertTrangThai(oldStatus);
-//        String newStatusVi = TrangThaiUtils.convertTrangThai(dto.getTrangThai());
-//
-//        String logMsg = "Chuyển trạng thái từ " + oldStatusVi + " -> " + newStatusVi;
-//        if (dto.getGhiChu() != null && !dto.getGhiChu().isEmpty()) {
-//            logMsg += ". Ghi chú: " + dto.getGhiChu();
-//        }
-//
-//
-//        addHistoryLog(hoaDonId, "Cập nhật trạng thái", logMsg, taiKhoanId);
-//        return updated;
-//    }
-
     public HoaDonChiTiet updateOrderDetailQuantity(Integer orderId, Integer detailId, Integer newQty) {
         HoaDonChiTiet detail = hoaDonChiTietRepository.findById(detailId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy chi tiết đơn hàng với id " + detailId));
@@ -185,6 +166,7 @@ public class OrderService {
     // Hàm tính lại tổng tiền của đơn hàng dựa trên chi tiết sản phẩm
     private void recalcHoaDonTotal(HoaDon order) {
         BigDecimal sum = BigDecimal.ZERO;
+        // Tính tổng tiền từ các chi tiết đơn hàng (chỉ tính các chi tiết chưa bị xóa)
         if (order.getHoaDonChiTiets() != null) {
             for (HoaDonChiTiet detail : order.getHoaDonChiTiets()) {
                 if (!detail.getIsDeleted()) {
@@ -195,16 +177,78 @@ public class OrderService {
                 }
             }
         }
-        // Giả sử: tổng tiền = tổng chi tiết - phí giảm giá + phí vận chuyển
-        if (order.getGiamMaGiamGia()!= null) {
-            sum = sum.subtract(order.getGiamMaGiamGia());
+
+        // Lưu tổng tiền trước khi áp dụng phiếu giảm giá
+        BigDecimal preDiscountTotal = sum;
+
+        // Áp dụng phiếu giảm giá nếu có và hợp lệ
+        PhieuGiamGia voucher = order.getPhieuGiamGia();
+        BigDecimal discount = BigDecimal.ZERO;
+        if (voucher != null) {
+            // Kiểm tra thời gian áp dụng phiếu giảm giá
+            LocalDateTime now = LocalDateTime.now();
+            if (voucher.getNgayBatDau() != null && voucher.getNgayKetThuc() != null) {
+                if (now.isBefore(voucher.getNgayBatDau()) || now.isAfter(voucher.getNgayKetThuc())) {
+                    // Phiếu giảm giá hết hạn hoặc chưa bắt đầu
+                    voucher = null;
+                }
+            } else {
+                // Nếu thời gian không được thiết lập đầy đủ, coi như voucher không hợp lệ
+                voucher = null;
+            }
+
+            // Kiểm tra điều kiện hóa đơn tối thiểu
+            if (voucher != null && voucher.getHoaDonToiThieu() != null) {
+                if (preDiscountTotal.compareTo(voucher.getHoaDonToiThieu()) < 0) {
+                    // Tổng tiền đơn hàng không đủ điều kiện sử dụng voucher
+                    voucher = null;
+                }
+            }
         }
+
+        if (voucher != null) {
+            discount = computeVoucherDiscount(voucher, preDiscountTotal);
+            order.setGiamMaGiamGia(discount);
+        } else {
+            order.setGiamMaGiamGia(BigDecimal.ZERO);
+        }
+
+        // Cộng phí vận chuyển nếu có
         if (order.getPhiVanChuyen() != null) {
-            sum = sum.add(order.getPhiVanChuyen());
+            sum = sum.subtract(discount).add(order.getPhiVanChuyen());
+        } else {
+            sum = sum.subtract(discount);
         }
         order.setTongTien(sum);
-
     }
+
+    /**
+     * Tính số tiền giảm dựa trên phiếu giảm giá và tổng tiền hóa đơn (preDiscountTotal).
+     * Nếu loại chiết khấu là "PHAN_TRAM", discount = preDiscountTotal * (giaTriGiam / 100),
+     * không vượt quá giamToiDa.
+     * Nếu loại chiết khấu là giảm theo tiền, discount = giaTriGiam, không vượt quá giamToiDa.
+     */
+    private BigDecimal computeVoucherDiscount(PhieuGiamGia voucher, BigDecimal preDiscountTotal) {
+        BigDecimal discount = BigDecimal.ZERO;
+        if ("PHAN_TRAM".equalsIgnoreCase(voucher.getLoaiHinhGiam())) {
+            discount = preDiscountTotal.multiply(voucher.getGiaTriGiam())
+                    .divide(BigDecimal.valueOf(100));
+            if (discount.compareTo(voucher.getGiamToiDa()) > 0) {
+                discount = voucher.getGiamToiDa();
+            }
+        } else { // Giảm theo số tiền
+            discount = voucher.getGiaTriGiam();
+            if (discount.compareTo(voucher.getGiamToiDa()) > 0) {
+                discount = voucher.getGiamToiDa();
+            }
+        }
+        // Không được giảm quá tổng tiền
+        if (discount.compareTo(preDiscountTotal) > 0) {
+            discount = preDiscountTotal;
+        }
+        return discount;
+    }
+
 
     // Hàm ghi log lịch sử đơn hàng
     private void addHistory(Integer orderId, Integer taiKhoanId, String tieuDe, String moTa) {
@@ -264,7 +308,7 @@ public class OrderService {
 
         // Tính lại tổng tiền (nếu cần tính toán dựa trên phí vận chuyển, giảm giá, ...)
         ;
-
+recalcHoaDonTotal(order);
         HoaDon updatedOrder = hoaDonRepository.save(order);
 
         // Ghi log lịch sử cập nhật
@@ -352,6 +396,7 @@ public class OrderService {
         addHistoryLog(orderId, "Xóa sản phẩm", logMsg,  authService.getCurrentUserDetails().get().getKhachHang().getTaiKhoan().getId());
         return detail;
     }
+    @Transactional
     public HoaDonChiTiet undoDeleteOrderDetail(Integer orderId, Integer detailId) {
         // Lấy đơn hàng
         HoaDon order = hoaDonRepository.findById(orderId)
@@ -361,36 +406,49 @@ public class OrderService {
         HoaDonChiTiet detail = hoaDonChiTietRepository.findById(detailId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy chi tiết đơn hàng với id " + detailId));
 
-        // Lấy sản phẩm chi tiết
+        // Kiểm tra chi tiết đơn hàng có đang ở trạng thái xóa không
+        if (!detail.getIsDeleted()) {
+            throw new RuntimeException("Chi tiết đơn hàng không ở trạng thái bị xóa, không cần hoàn tác.");
+        }
+
+        // Lấy sản phẩm chi tiết liên quan
         SanPhamChiTiet sanPhamChiTiet = detail.getSanPhamChiTiet();
         if (sanPhamChiTiet == null) {
             throw new RuntimeException("Không tìm thấy sản phẩm chi tiết tương ứng với đơn hàng");
         }
 
-        // Cộng lại số lượng sản phẩm về kho
-        int updatedStock = sanPhamChiTiet.getSoLuong() - detail.getSoLuong();
-        sanPhamChiTiet.setSoLuong(updatedStock);
-        sanPhamChiTietRepository.save(sanPhamChiTiet); // Cập nhật kho
+        // Kiểm tra tồn kho trước khi hoàn tác:
+        // Khi xóa, số lượng chi tiết đã được cộng vào tồn kho.
+        // Hoàn tác sẽ cần trừ số lượng đó khỏi tồn kho, vì sản phẩm sẽ được phục hồi vào đơn hàng.
+        // Do đó, nếu tồn kho hiện tại (số lượng còn) < số lượng cần trừ, không đủ để hoàn tác.
+        if (sanPhamChiTiet.getSoLuong() < detail.getSoLuong()) {
+            throw new RuntimeException("Không đủ tồn kho để hoàn tác. Tồn kho hiện tại: " + sanPhamChiTiet.getSoLuong());
+        }
 
-        // Đánh dấu chi tiết đơn hàng là đã xóa (soft delete)
+        // Trừ số lượng từ tồn kho (vì hoàn tác sẽ đưa sản phẩm trở lại đơn hàng)
+        sanPhamChiTiet.setSoLuong(sanPhamChiTiet.getSoLuong() - detail.getSoLuong());
+        sanPhamChiTietRepository.save(sanPhamChiTiet);
+
+        // Đánh dấu chi tiết đơn hàng là chưa bị xóa
         detail.setIsDeleted(false);
         hoaDonChiTietRepository.save(detail);
-
-        // Cập nhật lại tổng tiền của đơn hàng
+        // Tính lại tổng tiền của đơn hàng
         recalcHoaDonTotal(order);
         hoaDonRepository.save(order);
 
         // Xây dựng log message
-        String productName = (detail.getSanPhamChiTiet().getSanPham().getTen() != null) ? detail.getSanPhamChiTiet().getSanPham().getTen() : "";
-        String color = (detail.getSanPhamChiTiet().getMauSac().getTen() != null) ? detail.getSanPhamChiTiet().getMauSac().getTen() : "";
-        String size = (detail.getSanPhamChiTiet().getKichThuoc().getTen() != null) ? detail.getSanPhamChiTiet().getKichThuoc().getTen() : "";
-        String logMsg = "Hoàn tác sản phẩm\"" + productName + " - " + color + " - " + size + "\"";
+        String productName = (sanPhamChiTiet.getSanPham().getTen() != null) ? sanPhamChiTiet.getSanPham().getTen() : "";
+        String color = (sanPhamChiTiet.getMauSac() != null && sanPhamChiTiet.getMauSac().getTen() != null) ? sanPhamChiTiet.getMauSac().getTen() : "";
+        String size = (sanPhamChiTiet.getKichThuoc() != null && sanPhamChiTiet.getKichThuoc().getTen() != null) ? sanPhamChiTiet.getKichThuoc().getTen() : "";
+        String logMsg = "Hoàn tác sản phẩm \"" + productName + " - " + color + " - " + size + "\"";
 
-        // Ghi log lịch sử
-        addHistoryLog(orderId, "Hoàn tác sản phẩm", logMsg,  authService.getCurrentUserDetails().get().getKhachHang().getTaiKhoan().getId());
+        // Ghi log lịch sử (sử dụng ID tài khoản từ authService)
+        Integer userId = authService.getCurrentUserDetails().get().getKhachHang().getTaiKhoan().getId();
+        addHistoryLog(orderId, "Hoàn tác sản phẩm", logMsg, userId);
 
         return detail;
     }
+
     public List<LichSuHoaDonDTO> getLichSuHoaDon(Integer hoaDonId) {
         // Lấy danh sách LichSuHoaDon từ DB
         List<LichSuHoaDon> list = lichSuHoaDonRepository
@@ -503,18 +561,10 @@ public class OrderService {
             // Ghi log lịch sử
             String logMsg = "Thêm mới sản phẩm \"" + productDetail.getSanPham().getTen() + "\" với số lượng " + dto.getSoLuong();
             addHistoryLog(orderId, "Thêm sản phẩm", logMsg,  authService.getCurrentUserDetails().get().getKhachHang().getTaiKhoan().getId());
-            List<HoaDonChiTiet> details = hoaDonChiTietRepository.findByHoaDonIdAndIsDeletedFalse(order.getId());
-            BigDecimal sum = BigDecimal.ZERO;
-            for (HoaDonChiTiet detail : details) {
-                BigDecimal unitPrice = detail.getGiaKhuyenMai() != null ? detail.getGiaKhuyenMai() : detail.getGiaGoc();
-                sum = sum.add(unitPrice.multiply(BigDecimal.valueOf(detail.getSoLuong())));
-            }
-            if (order.getGiamMaGiamGia() != null) {
-                sum = sum.subtract(order.getGiamMaGiamGia());
-            }
 
-            order.setTongTien(sum);
-
+            entityManager.refresh(order);
+            // Tính lại tổng tiền, bao gồm cả phí giảm giá và phí vận chuyển
+            recalcHoaDonTotal(order);
             hoaDonRepository.save(order);
             // Cập nhật tổng tiền đơn hàng
             // recalcOrderTotal(order); -> nếu có logic tính lại tổng tiền
@@ -579,6 +629,10 @@ public class OrderService {
         }
         String logMsg = "Khôi phục đơn hàng có id: "+order.getId();
         addHistoryLog(orderId, "Khôi phục đơn hàng", logMsg,  authService.getCurrentUserDetails().get().getKhachHang().getTaiKhoan().getId());
+        hoaDonRepository.save(order);
+        entityManager.refresh(order);
+        // Tính lại tổng tiền, bao gồm cả phí giảm giá và phí vận chuyển
+        recalcHoaDonTotal(order);
         hoaDonRepository.save(order);
         return order;
     }

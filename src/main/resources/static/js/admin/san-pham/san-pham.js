@@ -41,8 +41,8 @@ function loadData() {
             }
         },
         columns: [
-            { data: "id", name: "id" },
-            { data: "maSanPham", name: "maSanPham" },
+            {data: "id", name: "id"},
+            {data: "maSanPham", name: "maSanPham"},
             {
                 data: "ten",
                 name: "ten",
@@ -76,19 +76,31 @@ function loadData() {
             {
                 data: "trangThai",
                 name: "trangThai",
+                visible: false,
+                searchable: true,
                 render: data => {
-
                     let text = data && data.trim() !== "" ? data : "Không có dữ liệu";
-                    let ht="";
+                    let ht = "";
                     let bgColor = "";
                     if (text === "CON_HANG") {
-                        ht="Còn hàng"
+                        ht = "Còn hàng"
                         bgColor = "green";
                     } else if (text === "HET_HANG") {
-                        ht="Hết hàng"
+                        ht = "Hết hàng"
                         bgColor = "red";
                     }
                     return `<span style="background-color:${bgColor}; color:white; padding:3px 6px; border-radius:4px; font-size: 13px;">${ht}</span>`;
+                }
+            },
+            {
+                data: "isDeleted",
+                name: "tinhTrang",
+                render: data => {
+                    if (data === true) {
+                        return `<span style="background-color:red; color:white; padding:2px 4px; border-radius:4px; font-size: 10px;">Ngưng bán</span>`;
+                    } else {
+                        return `<span style="background-color:green; color:white; padding:2px 4px; border-radius:4px; font-size: 10px;">Đang bán</span>`;
+                    }
                 }
             },
             {
@@ -99,16 +111,58 @@ function loadData() {
             {
                 data: "id",
                 render: function (data, type, row) {
-                    return `<div class="d-flex justify-content-end">
-                        <button type="button" class="btn btn-sm btn-primary mr-3 btn-edit" data-id="${data}">
-                            <i class="fa-solid fa-pen-to-square" style="color: #ffffff;"></i>
-                        </button>
-                        <button type="button" class="btn btn-sm btn-info btn-detail" data-id="${data}">
-                            <i class="fa-solid fa-eye" style="color: #ffffff;"></i>
-                        </button>
-                    </div>`;
+                    // Giả sử bạn đã có biến toggleBtn để hiển thị nút "Ngừng bán/Bán lại" như sau:
+                    let toggleBtn = "";
+                    if (row.isDeleted === false) {
+                        // Sản phẩm đang bán
+                        toggleBtn = `
+              <button type="button" class="btn btn-sm btn-danger mr-2 btn-toggle-sell"
+                      data-id="${data}" data-action="stop" title="Ngừng bán">
+                  <i class="fa-solid fa-ban"></i>
+              </button>
+          `;
+                    } else {
+                        // Sản phẩm đã ngưng bán
+                        toggleBtn = `
+              <button type="button" class="btn btn-sm btn-success mr-2 btn-toggle-sell"
+                      data-id="${data}" data-action="resume" title="Bán lại">
+                  <i class="fa-solid fa-play"></i>
+              </button>
+          `;
+                    }
+
+                    // Tạo hàng chứa ba nút (chỉnh sửa, xem chi tiết, ngừng/bán lại)
+                    // Và bên dưới là nút "Chỉnh sửa chi tiết" dẫn tới /admin/san-pham/<id>
+                    return `
+      <div class="d-flex flex-column align-items-end">
+          <!-- Hàng 1: 3 nút icon -->
+          <div class="d-flex justify-content-end align-items-center mb-2">
+              <!-- Nút Chỉnh sửa -->
+              <button type="button" class="btn btn-sm btn-primary mr-2 btn-edit" 
+                      data-id="${data}" title="Chỉnh sửa nhanh">
+                  <i class="fa-solid fa-pen-to-square" style="color: #ffffff;"></i>
+              </button>
+              <!-- Nút Xem chi tiết -->
+              <button type="button" class="btn btn-sm btn-info mr-2 btn-detail"
+                      data-id="${data}" title="Xem chi tiết">
+                  <i class="fa-solid fa-eye" style="color: #ffffff;"></i>
+              </button>
+              <!-- Nút Ngừng bán/Bán lại -->
+              ${toggleBtn}
+          </div>
+
+          <!-- Hàng 2: Nút dẫn tới /admin/san-pham/<id> -->
+          <!-- Bạn có thể điều chỉnh style="width:..." để căn chiều rộng theo ý muốn -->
+          <div style="width: 100%;">
+              <a href="/admin/san-pham/${data}" class="btn btn-secondary w-100" title="Chỉnh sửa chi tiết đầy đủ">
+                  <i class="fa-solid fa-pen-to-square"></i> Chỉnh sửa
+              </a>
+          </div>
+      </div>
+      `;
                 }
             }
+
         ],
         order: [[0, 'desc']]
     });
@@ -122,6 +176,7 @@ const reloadDataTable = () => {
 // Biến toàn cục lưu ID sản phẩm hiện tại (để reload bảng chi tiết)
 let currentProductId = null;
 let currentProductName = '';
+
 function loadProductDetails(productId) {
     currentProductId = productId;
     $.ajax({
@@ -139,9 +194,9 @@ function loadProductDetails(productId) {
             // Lấy danh sách chi tiết từ thuộc tính sanPhamChiTiets của sản phẩm
             let details = data.sanPhamChiTiets || [];
             if (details.length > 0) {
-                details.forEach(function(detail) {
+                details.forEach(function (detail) {
                     let formattedPrice = detail.giaBan
-                        ? new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(detail.giaBan)
+                        ? new Intl.NumberFormat('vi-VN', {style: 'currency', currency: 'VND'}).format(detail.giaBan)
                         : '';
 
                     // Lấy hình ảnh đầu tiên của màu tương ứng
@@ -192,7 +247,61 @@ function loadProductDetails(productId) {
         }
     });
 }
-$(document).on("click", "#btnOpenModalAddDetail", function(e) {
+$(document).on("click", ".btn-toggle-sell", function (e) {
+    e.preventDefault();
+    let id = $(this).data("id");
+    let action = $(this).data("action");
+
+    if (action === "stop") {
+        // Xác nhận ngừng bán sản phẩm
+        Swal.fire({
+            title: 'Bạn có chắc muốn ngừng bán sản phẩm này?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ngừng bán',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "/api/san-pham/delete?id=" + id,
+                    type: "DELETE",
+                    success: function (response) {
+                        Swal.fire("Thành công", "Sản phẩm đã ngừng bán", "success");
+                        reloadDataTable();
+                    },
+                    error: function (xhr, status, error) {
+                        Swal.fire("Lỗi", "Không thể ngừng bán sản phẩm", "error");
+                    }
+                });
+            }
+        });
+    } else if (action === "resume") {
+        // Xác nhận bán lại sản phẩm
+        Swal.fire({
+            title: 'Bạn có chắc muốn bán lại sản phẩm này?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Bán lại',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "/api/san-pham/revert?id=" + id,
+                    type: "POST",
+                    success: function (response) {
+                        Swal.fire("Thành công", "Sản phẩm đã được bán lại", "success");
+                        reloadDataTable();
+                    },
+                    error: function (xhr, status, error) {
+                        Swal.fire("Lỗi", "Không thể bán lại sản phẩm", "error");
+                    }
+                });
+            }
+        });
+    }
+});
+
+$(document).on("click", "#btnOpenModalAddDetail", function (e) {
     // Đảm bảo rằng currentProductName và currentProductId đã có giá trị từ loadProductDetails
     if (!currentProductName || !currentProductId) {
         Swal.fire("Lỗi", "Chưa có thông tin sản phẩm, vui lòng thử lại sau", "error");
@@ -211,7 +320,7 @@ $(document).on("click", "#btnOpenModalAddDetail", function(e) {
 });
 
 // Xử lý sự kiện thêm sản phẩm chi tiết
-$("#btnAddProductDetail").on("click", function(e) {
+$("#btnAddProductDetail").on("click", function (e) {
     let form = document.getElementById("addProductDetailForm");
 
     // Kiểm tra tính hợp lệ của form
@@ -244,7 +353,7 @@ $("#btnAddProductDetail").on("click", function(e) {
             method: "POST",
             contentType: "application/json",
             data: JSON.stringify(payload),
-            success: function(response) {
+            success: function (response) {
                 Swal.fire("Thành công", "Thêm sản phẩm chi tiết thành công", "success");
                 $("#addProductDetailModal").modal("hide");
                 // Reload chi tiết và bảng sản phẩm
@@ -253,7 +362,7 @@ $("#btnAddProductDetail").on("click", function(e) {
                     reloadDataTable();
                 }
             },
-            error: function(xhr, status, error) {
+            error: function (xhr, status, error) {
                 Swal.fire("Lỗi", xhr.responseText || "Thêm sản phẩm chi tiết thất bại", "error");
             }
         });
@@ -367,6 +476,7 @@ $(document).ready(function () {
         });
         table.draw();
     }
+
     $('.filter-input').on('change keyup', applyFilters);
 
     // Reset các bộ lọc
@@ -483,7 +593,7 @@ $(document).ready(function () {
         });
     });
 
-    $(document).on("click", ".btn-delete", function(e) {
+    $(document).on("click", ".btn-delete", function (e) {
         e.preventDefault();
         let id = $(this).data("id");
         Swal.fire({
@@ -497,11 +607,11 @@ $(document).ready(function () {
                 $.ajax({
                     url: apiURL + "?id=" + id,
                     type: "DELETE",
-                    success: function(response) {
+                    success: function (response) {
                         Swal.fire("Thành công", "Đã xóa sản phẩm", "success");
                         reloadDataTable();
                     },
-                    error: function(xhr, status, error) {
+                    error: function (xhr, status, error) {
                         Swal.fire("Lỗi", "Không thể xóa sản phẩm", "error");
                     }
                 });
@@ -509,7 +619,7 @@ $(document).ready(function () {
         });
     });
 
-    $(document).on("click", ".btn-revert", function(e) {
+    $(document).on("click", ".btn-revert", function (e) {
         e.preventDefault();
         let id = $(this).data("id");
         Swal.fire({
@@ -523,18 +633,17 @@ $(document).ready(function () {
                 $.ajax({
                     url: apiURL + "/revert?id=" + id,
                     type: "POST",
-                    success: function(response) {
+                    success: function (response) {
                         Swal.fire("Thành công", "Đã khôi phục sản phẩm", "success");
                         reloadDataTable();
                     },
-                    error: function(xhr, status, error) {
+                    error: function (xhr, status, error) {
                         Swal.fire("Lỗi", "Không thể khôi phục sản phẩm", "error");
                     }
                 });
             }
         });
     });
-
 
 
 });
