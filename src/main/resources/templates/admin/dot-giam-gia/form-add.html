@@ -123,7 +123,7 @@
                             <td th:text="${i.index + 1}"></td>
                             <td th:text="${product.maSanPham}"></td>
                             <td th:text="${product.ten}"></td>
-                            <td th:text="${product.trangThai == 'CON_HANG' ? 'Còn hàng':'Hết hàng'}"></td>
+                            <td th:text="${product.trangThai == 'IN_STOCK' ? 'Còn hàng':'Hết hàng'}"></td>
                             <td>
                                 <input type="checkbox" name="selectedProducts" th:value="${product.id}"
                                        th:id="${product.id}" onclick="handlerClick(this)">
@@ -170,7 +170,10 @@
             <h5 class="d-flex justify-content-start">Danh sách biến thể sản phẩm</h5>
             <table class="w-100 table table-bordered" id="tableProductDetail">
                 <thead>
-                <th>Chọn</th>
+                <th>
+                    <input id="checkedAllProductDetail" type="checkbox">
+                    all
+                </th>
                 <th>Kích Thước</th>
                 <th>Màu Sắc</th>
                 <th>Giá Bán</th>

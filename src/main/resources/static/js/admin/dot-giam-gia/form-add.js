@@ -1,6 +1,8 @@
 let listIdProducts = [];
 let listProductDetail = [];
 let inputListIds = document.getElementById("productDetailIds");
+
+// Sự kiện chọn tất cả sản phẩm chính
 document.getElementById("checkAll").addEventListener("click", function () {
     let checkboxes = document.querySelectorAll("input[name='selectedProducts']");
     checkboxes.forEach((checkbox) => {
@@ -9,56 +11,72 @@ document.getElementById("checkAll").addEventListener("click", function () {
     });
 });
 
+// Hàm xử lý click từng sản phẩm chính
 function handlerClick(checkbox) {
     if (checkbox.checked) {
-        console.log("Checked:", checkbox.value);
-        listIdProducts.push(checkbox.value);
+        if (!listIdProducts.includes(checkbox.value)) {
+            listIdProducts.push(checkbox.value);
+        }
     } else {
-        console.log("Unchecked:", checkbox.value);
         listIdProducts = listIdProducts.filter((item) => item !== checkbox.value);
     }
-    console.log("list id products:", listIdProducts);
+    console.log("Danh sách sản phẩm:", listIdProducts);
     sendListIdProducts(listIdProducts);
 }
 
+// Hàm gửi danh sách sản phẩm đã chọn
 function sendListIdProducts(listIdProducts) {
     let tablebodys = document.getElementById("tableBody");
+
     fetch("/admin/dot-giam-gia/listIdProducts", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(listIdProducts),
     })
         .then(response => {
-            if (!response.ok) {
-                throw new Error(`Lỗi: ${response.status} - ${response.statusText}`);
-            }
+            if (!response.ok) throw new Error(`Lỗi: ${response.status} - ${response.statusText}`);
             return response.json();
         })
         .then(data => {
             tablebodys.innerHTML = '';
-            //
-            if (data.length >= 1) {
-                console.log(data)
-                data.map(item => {
+
+            if (data.length > 0) {
+                console.log("Dữ liệu trả về:", data);
+
+                // Render bảng danh sách sản phẩm chi tiết
+                data.forEach(item => {
                     let row = `<tr scope="row">
-                            <td><input type="checkbox" value="${item.id}" onclick="handlerGetIdProductDetail(this)"></td>
-                            <td>${item.kichThuoc.ten}</td>
-                            <td>${item.mauSac.ten}</td>
-                            <td>${item.giaBan}</td></tr>`;
+                    <td><input type="checkbox" class="productDetailCheck" value="${item.id}" onclick="handlerGetIdProductDetail(this)"></td>
+                    <td>${item.kichThuoc.ten}</td>
+                    <td>${item.mauSac.ten}</td>
+                    <td>${item.giaBan}</td></tr>`;
                     tablebodys.innerHTML += row;
-                })
+                });
+
+                // Xử lý sự kiện chọn tất cả sản phẩm chi tiết
+                let checkedAllDetail = document.getElementById("checkedAllProductDetail");
+                checkedAllDetail.addEventListener("change", function () {
+                    let productDetailCheckboxes = document.querySelectorAll(".productDetailCheck");
+                    listProductDetail = [];
+
+                    productDetailCheckboxes.forEach(checkbox => {
+                        checkbox.checked = checkedAllDetail.checked;
+                        if (checkedAllDetail.checked) {
+                            listProductDetail.push(checkbox.value);
+                        }
+                    });
+
+                    updateProductDetailInput();
+                    console.log("Danh sách chi tiết sản phẩm:", listProductDetail);
+                });
             } else {
-                tablebodys.innerHTML = '<h5 class="m-auto font-weight-bold text-danger">Sản phẩm không có biến thể nào</h5>'
+                tablebodys.innerHTML = '<h5 class="m-auto font-weight-bold text-danger">Sản phẩm không có biến thể nào</h5>';
             }
         })
-        .catch(error => {
-            console.error("Lỗi:", error);
-        });
+        .catch(error => console.error("Lỗi:", error));
 }
 
-// function get id product detail
+// Hàm xử lý khi chọn từng sản phẩm chi tiết
 function handlerGetIdProductDetail(checkbox) {
     if (checkbox.checked) {
         if (!listProductDetail.includes(checkbox.value)) {
@@ -67,10 +85,16 @@ function handlerGetIdProductDetail(checkbox) {
     } else {
         listProductDetail = listProductDetail.filter(item => item !== checkbox.value);
     }
-    console.log("product detail: ", listProductDetail);
-    let productDetailIds = listProductDetail.join(",");
-    inputListIds.value = productDetailIds;
+    updateProductDetailInput();
 }
+
+// Cập nhật giá trị input ẩn chứa danh sách sản phẩm chi tiết
+function updateProductDetailInput() {
+    inputListIds.value = listProductDetail.join(",");
+    console.log("Danh sách sản phẩm chi tiết cập nhật:", inputListIds.value);
+}
+
+
 // handler gia tri giam and giam toi da
 document.addEventListener("DOMContentLoaded", function () {
     const radioButtons = document.querySelectorAll('input[name="loaiChietKhau"]');

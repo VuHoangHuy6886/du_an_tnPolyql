@@ -34,6 +34,10 @@ public class AuthenticationController {
                     model.addAttribute("message", "Tài khoản chưa tồn tại bạn cần đăng ký");
                     break;
                 }
+                case "423":{
+                    model.addAttribute("message", "Tài khoản của bạn đã bị khóa");
+                    break;
+                }
             }
         }
         return "authentication/authentication";
@@ -74,7 +78,11 @@ public class AuthenticationController {
     public String home() {
 
         try {
-
+            String successUrl = (String) httpSession.getAttribute("successUrl");
+            httpSession.removeAttribute("successUrl");
+            if (successUrl!=null&&!successUrl.isEmpty()){
+                return "redirect:"+successUrl;
+            }
             TaiKhoan taiKhoan = (TaiKhoan) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
             return switch (taiKhoan.getRole()) {

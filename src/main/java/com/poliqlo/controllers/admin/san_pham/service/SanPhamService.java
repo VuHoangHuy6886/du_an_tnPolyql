@@ -3,6 +3,7 @@ package com.poliqlo.controllers.admin.san_pham.service;
 import com.poliqlo.controllers.admin.san_pham.model.request.AddRequest;
 import com.poliqlo.controllers.admin.san_pham.model.request.AddRequestNBC;
 import com.poliqlo.controllers.admin.san_pham.model.request.EditReq;
+import com.poliqlo.controllers.admin.san_pham.model.request.EditRequestNBC;
 import com.poliqlo.controllers.admin.san_pham.model.response.Response;
 import com.poliqlo.models.*;
 import com.poliqlo.repositories.*;
@@ -20,6 +21,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -35,6 +38,8 @@ public class SanPhamService {
     private final DanhMucRepository DanhMucRepository;
 
     private final KieuDangRepository kieuDangRepository;
+    private final SanPhamChiTietRepository sanPhamChiTietRepository;
+
     @Transactional
     public ResponseEntity<?> persist(AddRequestNBC addRequestNBC){
         var sp = SanPham.builder()
@@ -46,7 +51,6 @@ public class SanPhamService {
                 .danhMucs(addRequestNBC.getDanhMucIds().stream().map(id -> DanhMuc.builder().id(id).build()).collect(Collectors.toSet()))
                 .kieuDang(KieuDang.builder().id(addRequestNBC.getKieuDangId()).build())
                 .chatLieu(ChatLieu.builder().id(addRequestNBC.getChatLieuId()).build())
-                .trangThai(addRequestNBC.getTrangThai())
                 .anhUrl(addRequestNBC.getAnhUrl())
                 .isDeleted(false)
                 .build();
@@ -150,4 +154,62 @@ public class SanPhamService {
                 .body(in.readAllBytes());
     }
 
+    @Transactional
+    public ResponseEntity<?> update(EditRequestNBC editReq, Integer idSP){
+        var oldSP=sanPhamRepository.findById(idSP).get();
+        var sp = SanPham.builder()
+                .ten(editReq.getTen())
+                .maSanPham(editReq.getMaSanPham())
+                .moTa(editReq.getMoTa())
+                .trangThai(editReq.getTrangThai())
+                .thuongHieu(ThuongHieu.builder().id(editReq.getThuongHieuId()).build())
+                .danhMucs(editReq.getDanhMucIds().stream().map(id -> DanhMuc.builder().id(id).build()).collect(Collectors.toSet()))
+                .kieuDang(KieuDang.builder().id(editReq.getKieuDangId()).build())
+                .chatLieu(ChatLieu.builder().id(editReq.getChatLieuId()).build())
+                .anhUrl(editReq.getAnhUrl())
+                .isDeleted(false)
+                .build();
+        sp.setId(idSP);
+        sp.setAnhs(editReq.getAnhs().stream()
+                .map(obj -> {
+                    var anh = Anh.builder()
+                            .sanPham(sp)
+                            .url(obj.getUrl())
+                            .mauSac(MauSac.builder().id(obj.getMauSacId()).build())
+                            .isDefault(obj.getIsDefault())
+                            .isDeleted(false)
+                            .build();
+                    return anh;
+                })
+                .toList()
+        );
+        sanPhamChiTietRepository.beforeUpdateSPCT(idSP);
+        var mapSPCT=new HashMap<String,SanPhamChiTiet>();
+        sanPhamChiTietRepository.findAllBySanPham_Id(idSP).forEach(spct->{
+            mapSPCT.put(spct.getMauSac().getId()+":"+spct.getKichThuoc().getId(),spct);
+        });
+        editReq.getSanPhamChiTiets()
+                .forEach(spct->{
+
+                    var spctNew=sanPhamChiTietRepository.findByMauSac_IdAndKichThuoc_IdAndSanPham_Id(spct.getMauSacId(),spct.getKichThuocId(),idSP)
+                            .orElse(SanPhamChiTiet.builder()
+                                    .sanPham(sp)
+                                    .barcode(spct.getBarcode())
+                                    .giaBan(spct.getGiaBan())
+                                    .kichThuoc(KichThuoc.builder().id(spct.getKichThuocId()).build())
+                                    .mauSac(MauSac.builder().id(spct.getMauSacId()).build())
+                                    .isDeleted(false)
+                                    .soLuong(spct.getSoLuong())
+                                    .build());
+                    spctNew.setBarcode(spct.getBarcode());
+                    spctNew.setGiaBan(spct.getGiaBan());
+                    spctNew.setSoLuong(spct.getSoLuong());
+                    spctNew.setIsDeleted(false);
+                    mapSPCT.put(spct.getMauSacId()+":"+spct.getKichThuocId(),spctNew);
+                });
+        var newSPCT=new HashSet<>(mapSPCT.values());
+        sp.setSanPhamChiTiets(newSPCT);
+        var resp=sanPhamRepository.save(sp);
+        return ResponseEntity.ok(sp);
+    }
 }

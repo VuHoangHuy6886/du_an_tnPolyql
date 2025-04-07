@@ -1,5 +1,6 @@
 package com.poliqlo.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -22,6 +23,7 @@ public class DiaChi {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "KHACH_HANG_ID", nullable = false)
+    @JsonIgnore
     private KhachHang khachHang;
 
     @Size(max = 255)

@@ -46,7 +46,7 @@ public class PhieuGiamGiaController {
                           Model model
     ) {
         Integer page, size;
-
+        thongBao = "";
         try {
             page = Integer.parseInt(pageStr);
             size = Integer.parseInt(sizeStr);
@@ -128,7 +128,7 @@ public class PhieuGiamGiaController {
         } else {
             khachHangPage = service.getAllCustomers(pageable);
         }
-        thongBao = "";
+
         model.addAttribute("thongBao",thongBao);
         model.addAttribute("listKH", khachHangPage.getContent());
         model.addAttribute("currentPage", page);
@@ -156,16 +156,16 @@ public class PhieuGiamGiaController {
         } else {
             listCustomer = null;
         }
-
+        // CHECK TRUNG
         if (repository.existsByTen(request.getTen())) {
-            thongBao= "ten da ton tai";
+            thongBao= "Ten da ton tai";
             return "redirect:/admin/phieu-giam-gia/form-add";
         }
-
-        if (repository.existsByGiaTriGiam(BigDecimal.valueOf(Double.parseDouble(request.getGiaTriGiam())))) {
-            thongBao= "gia tri giam da ton tai";
-            return "redirect:/admin/phieu-giam-gia/form-add";
-        }
+//        Check trung Gia Tri Giam
+//        if (repository.existsByGiaTriGiam(BigDecimal.valueOf(Double.parseDouble(request.getGiaTriGiam())))) {
+//            thongBao= "Gia tri giam da ton tai";
+//            return "redirect:/admin/phieu-giam-gia/form-add";
+//        }
 
 
         service.save(request, listCustomer);

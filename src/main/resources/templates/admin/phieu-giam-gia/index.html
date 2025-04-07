@@ -7,7 +7,23 @@
 <head>
     <!--    Custom link-->
     <th:block layout:fragment="head_link">
+        <style>
+            .text-red {
+                color: red;
+                font-weight: bold;
+            }
 
+            .text-black {
+                color: black;
+                font-weight: bold;
+            }
+
+            .text-yellow {
+                color: yellow;
+                font-weight: bold;
+            }
+
+        </style>
     </th:block>
 
 </head>
@@ -35,60 +51,61 @@
 
 
                 <!--form filter-->
-                    <div class="container-fluid w-100 mt-4">
-                        <div class="container-fluid card p-4 w-100">
-                            <form class="container-fluid row g-3 align-items-center w-100">
-                                <div class="col-md-4">
-                                    <span for="name">Tìm kiếm theo Mã & Tên</span>
-                                    <input
-                                            id="name"
-                                            type="text"
-                                            name="name"
-                                            class="form-control"
-                                            th:value="${name}"
-                                            placeholder="Nhập Mã & Tên ">
-                                </div>
-                                <div class="col-md-4">
-                                    <span for="startTime">Ngày bắt đầu</span>
-                                    <input type="date" class="form-control" id="startTime" name="startTime"
-                                           th:value="${#temporals.format(startTime, 'yyyy-MM-dd')}"/>
-                                </div>
+                <div class="container-fluid w-100 mt-4">
+                    <div class="container-fluid card p-4 w-100">
+                        <form class="container-fluid row g-3 align-items-center w-100">
+                            <div class="col-md-4">
+                                <span for="name">Tìm kiếm theo Mã & Tên</span>
+                                <input
+                                        id="name"
+                                        type="text"
+                                        name="name"
+                                        class="form-control"
+                                        th:value="${name}"
+                                        placeholder="Nhập Mã & Tên ">
+                            </div>
+                            <div class="col-md-4">
+                                <span for="startTime">Ngày bắt đầu</span>
+                                <input type="date" class="form-control" id="startTime" name="startTime"
+                                       th:value="${#temporals.format(startTime, 'yyyy-MM-dd')}"/>
+                            </div>
 
-                                <div class="col-md-4">
-                                    <span for="endTime">Ngày kết thúc</span>
-                                    <input type="date" class="form-control" id="endTime" name="endTime"
-                                           th:value="${#temporals.format(endTime, 'yyyy-MM-dd')}"/>
-                                </div>
-                                    <div class="col-md-4 form-group d-flex flex-column justify-content-start align-items-start">
-                                        <label for="status" class="form-label font-weight-bold">Trạng Thái</label>
-                                        <select id="status" class="form-control" name="status">
-                                            <option value="">Select</option>
-                                            <option value="SAP_DIEN_RA" th:selected="${status == 'SAP_DIEN_RA'}">Sắp
-                                                diễn
-                                                ra
-                                            </option>
-                                            <option value="DANG_DIEN_RA" th:selected="${status == 'DANG_DIEN_RA'}">Đang
-                                                diễn
-                                                ra
-                                            </option>
-                                            <option value="DA_KET_THUC" th:selected="${status == 'DA_KET_THUC'}">Đã kết
-                                                thúc
-                                            </option>
-                                        </select>
-                                    </div>
+                            <div class="col-md-4">
+                                <span for="endTime">Ngày kết thúc</span>
+                                <input type="date" class="form-control" id="endTime" name="endTime"
+                                       th:value="${#temporals.format(endTime, 'yyyy-MM-dd')}"/>
+                            </div>
+                            <div class="col-md-4 form-group d-flex flex-column justify-content-start align-items-start">
+                                <label for="status" class="form-label font-weight-bold">Trạng Thái</label>
+                                <select id="status" class="form-control" name="status">
+                                    <option value="">Select</option>
+                                    <option value="SAP_DIEN_RA" th:selected="${status == 'SAP_DIEN_RA'}">Sắp
+                                        diễn
+                                        ra
+                                    </option>
+                                    <option value="DANG_DIEN_RA" th:selected="${status == 'DANG_DIEN_RA'}">Đang
+                                        diễn
+                                        ra
+                                    </option>
+                                    <option value="DA_KET_THUC" th:selected="${status == 'DA_KET_THUC'}">Đã kết
+                                        thúc
+                                    </option>
+                                </select>
+                            </div>
 
-                                    <button class="btn btn-secondary col-md-2" id="ClearForm" style="margin-left:  15px ; margin-top: 15px" >
-                                        <i class="fas fa-rotate-right"></i>
-                                        Clear
-                                    </button>
-                                <button class="form-control btn-secondary">
-                                    Tìm Kiếm
-                                </button>
-                            </form>
-                        </div>
+                            <button class="btn btn-secondary col-md-2" id="ClearForm"
+                                    style="margin-left:  15px ; margin-top: 15px">
+                                <i class="fas fa-rotate-right"></i>
+                                Clear
+                            </button>
+                            <button class="form-control btn-secondary">
+                                Tìm Kiếm
+                            </button>
+                        </form>
                     </div>
+                </div>
 
-<!--                ssasa-->
+                <!--                ssasa-->
                 <div class="card-body">
                     <div>
                         <table class="table table-bordered" id="dataTable">
@@ -110,7 +127,14 @@
                                 <td th:text="${phieuGiamGia.ten}"></td>
                                 <td th:text="${#temporals.format(phieuGiamGia.ngayBatDau, 'dd/MM/yyyy')}"></td>
                                 <td th:text="${#temporals.format(phieuGiamGia.ngayKetThuc, 'dd/MM/yyyy')}"></td>
-                                <td th:text="${phieuGiamGia.trangThai}"></td>
+                                <td th:text="${phieuGiamGia.trangThai == 'DANG_DIEN_RA' ? 'Đang diễn ra'
+        : (phieuGiamGia.trangThai == 'DA_KET_THUC' ? 'Đã kết thúc'
+        : (phieuGiamGia.trangThai == 'SAP_DIEN_RA' ? 'Sắp diễn ra' : ''))}"
+                                    th:class="${phieuGiamGia.trangThai == 'DANG_DIEN_RA' ? 'text-red'
+        : (phieuGiamGia.trangThai == 'DA_KET_THUC' ? 'text-black'
+        : (phieuGiamGia.trangThai == 'SAP_DIEN_RA' ? 'text-yellow' : ''))}">
+                                </td>
+
                                 </td>
 
                                 <td class="d-flex ">
@@ -138,7 +162,8 @@
                         </table>
 
                         <!-- Phân Trang -->
-                        <nav class="d-flex justify-content-center mt-3" aria-label="Page navigation" th:if="${totalPages > 1}">
+                        <nav class="d-flex justify-content-center mt-3" aria-label="Page navigation"
+                             th:if="${totalPages > 1}">
                             <ul class="pagination">
                                 <!-- Nút Previous -->
                                 <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">

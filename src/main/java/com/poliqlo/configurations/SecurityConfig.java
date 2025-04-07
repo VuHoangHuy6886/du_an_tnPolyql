@@ -22,6 +22,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -41,7 +42,7 @@ public class SecurityConfig {
     private final PasswordEncoder passwordEncoder;
     private final UserDetailsService userDetailsService;
 
-    private static final String[] unAuthURL = { "/sign-in/**", "/sign-in", "/sign-up", "/error", "/logout", "/vendor/**", "/js/**", "/css/**", "/fonts/**", "/iphone/**", "/img/**", "/api/v1/admin/data-list-add-san-pham/**", "/api/v2/san-pham/**", "/api/v2/**", "/iphone/**", "/client/**", "/img/**", "/api/v2/san-pham/**", "/unauth-home", "/verify-account", "/reset-otp"
+    private static final String[] unAuthURL = { "/sign-in/**", "/sign-in", "/sign-up", "/error", "/logout", "/vendor/**","/...", "/js/**", "/css/**", "/fonts/**", "/iphone/**", "/img/**", "/api/v1/admin/data-list-add-san-pham/**", "/api/v2/san-pham/**", "/api/v2/**", "/iphone/**", "/client/**", "/img/**", "/api/v2/san-pham/**", "/unauth-home", "/verify-account", "/reset-otp"
     };
     private static final String[] customerURLs = {
             "/cart/**"
@@ -77,8 +78,9 @@ public class SecurityConfig {
             if (request.getRequestURI().contains("api")) {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             } else {
+                request.getSession().setAttribute("successUrl", request.getRequestURI());
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                response.sendRedirect("/sign-in?error=401&successUrl=" + request.getRequestURL().toString());
+                response.sendRedirect("/sign-in?error=401");
             }
         };
     }
@@ -96,7 +98,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(unAuthURL).permitAll()
                         .requestMatchers(customerURLs).hasRole("USER")
-                        .requestMatchers(employeeURLs).hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(employeeURLs).hasAnyRole("STAFF", "ADMIN")
                         .requestMatchers(adminOnlyUrls).hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
@@ -123,12 +125,14 @@ public class SecurityConfig {
                                             return taiKhoanRepository.save(newTaiKhoan);
                                         });
 
-                                if (taiKhoan != null) {
+                                if (taiKhoan.isEnabled()) {
                                     var authorities = Collections.singletonList(new SimpleGrantedAuthority(taiKhoan.getRole()));
                                     Authentication auth = new UsernamePasswordAuthenticationToken(taiKhoan, null, authorities);
                                     SecurityContextHolder.getContext().setAuthentication(auth);
+                                    response.sendRedirect("/home");
+
                                 } else {
-                                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                                    response.sendRedirect("/sign-in?error=423");
                                 }
                             }
                             if (request.getRequestURI().contains("facebook")) {
@@ -153,29 +157,32 @@ public class SecurityConfig {
                                                 })
 
                                         );
-                                if (taiKhoan != null) {
+                                if (taiKhoan.isEnabled()) {
                                     var authorities = Collections.singletonList(new SimpleGrantedAuthority(taiKhoan.getRole()));
                                     Authentication auth = new UsernamePasswordAuthenticationToken(taiKhoan, null, authorities);
                                     SecurityContextHolder.getContext().setAuthentication(auth);
+                                    response.sendRedirect("/home");
+
                                 } else {
-                                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                                    response.sendRedirect("/sign-in?error=423");
                                 }
                             }
-                            response.sendRedirect("/home");
+
                         })
 
                 )
-
-                .formLogin(form -> form
-                        .loginPage("/login")   // Trang đăng nhập tùy chỉnh
-                        .loginProcessingUrl("/do-login") // URL xử lý đăng nhập
-                        .usernameParameter("email") // Thay đổi nếu cần
-                        .passwordParameter("password") // Thay đổi nếu cần
-                        .defaultSuccessUrl("/home", true) // URL sau khi đăng nhập thành công
-                        .failureUrl("/login?error=true") // URL khi đăng nhập thất bại
-                        .permitAll()
+                .formLogin(formlg->formlg
+                        .successHandler((request, response, authentication) ->
+                                response.setStatus(200)
+                        )
+                        .failureHandler((request, response, exception) ->
+                                response.setStatus(401)
+                        )
+                        .failureUrl("/sign-in")
 
                 )
+
+
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/sign-in")
@@ -185,6 +192,10 @@ public class SecurityConfig {
 //                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // JWT vẫn hoạt động song song
 
         return http.build();
+    }
+    @Bean
+    PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
     }
 
 
@@ -198,7 +209,7 @@ public class SecurityConfig {
                                 "http://127.0.0.1:5500")// Thay bằng nguồn gốc của bạn
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                         .allowedHeaders("*") // Cho phép tất cả các header
-                        .allowCredentials(true); // Cho phép gửi cookie
+                        .allowCredentials(true);
             }
         };
     }

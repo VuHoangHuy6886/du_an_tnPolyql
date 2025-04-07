@@ -72,6 +72,9 @@ public class TaiKhoan implements UserDetails, OAuth2User {
     @OneToOne(mappedBy = "taiKhoan", cascade = CascadeType.ALL)
     private KhachHang khachHang;
 
+    @OneToOne(mappedBy = "taiKhoan")
+    private NhanVien nhanVien;
+
     @Override
     public Map<String, Object> getAttributes() {
         return Map.of();
@@ -81,6 +84,13 @@ public class TaiKhoan implements UserDetails, OAuth2User {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"));
     }
+
+    @Override
+    public boolean isEnabled() {
+        return
+                this.isEnable&&!this.isDeleted;
+    }
+
 
     @Override
     public String getUsername() {

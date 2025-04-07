@@ -49,7 +49,6 @@ public class DotGiamGiaService {
 
     public String add(AddDotGiamGiaRequest request, List<Integer> ids) {
         DotGiamGia dotGiamGia = mapper.toDotGiamGia(request, genMa());
-        String ma = genMa();
         DotGiamGia result = dotGiamGiaRepository.save(dotGiamGia);
         // apply to product detail
         for (int i = 0; i < ids.toArray().length; i++) {

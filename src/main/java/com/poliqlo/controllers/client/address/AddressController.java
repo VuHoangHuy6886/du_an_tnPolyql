@@ -5,6 +5,7 @@ import com.poliqlo.controllers.client.address.dto.AddressResponseDTO;
 import com.poliqlo.controllers.client.address.dto.UpdateAddressRequestDTO;
 import com.poliqlo.controllers.client.address.mapper.AddressMapper;
 import com.poliqlo.controllers.client.address.service.AddressService;
+import com.poliqlo.controllers.common.auth.service.AuthService;
 import com.poliqlo.models.DiaChi;
 import com.poliqlo.models.KhachHang;
 import com.poliqlo.repositories.DiaChiRepository;
@@ -25,6 +26,7 @@ public class AddressController {
     private final AddressService addressService;
     private final KhachHangRepository khachHangRepository;
     private final DiaChiRepository diaChiRepository;
+    private final AuthService authService;
 
     @PostMapping("/api/find-address-by-id-customer")
     public ResponseEntity<?> getDiaChiById(@RequestBody Integer id) {
@@ -58,7 +60,7 @@ public class AddressController {
 
     @GetMapping("/address")
     public String showAddress(Model model) {
-        model.addAttribute("customerId", 1);
+        model.addAttribute("customerId", authService.getCurrentUserDetails().get().getKhachHang().getId());
         return "client/address";
     }
 

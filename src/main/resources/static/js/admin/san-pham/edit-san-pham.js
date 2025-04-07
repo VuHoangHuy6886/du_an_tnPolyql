@@ -4,6 +4,7 @@ var urlAPI = "/api/v1/admin/data-list-add-san-pham";
 var dataList = {}
 var variantChangeFlagForStep2 = true;
 var variantChangeFlagForStep3 = true;
+var _id;
 //Init component
 $(document).ready(() => {
     //Image product upload
@@ -141,10 +142,7 @@ $(document).ready(function () {
         $("#overlay").hide();
 
 
-        $('#sp-kichThuoc,#sp-mau-sac,#sp-ten').on('change', function () {
-            variantChangeFlagForStep2 = true;
-            variantChangeFlagForStep3 = true;
-        })
+
 
         $("#overlay").show();
 
@@ -175,7 +173,11 @@ $(document).ready(function () {
 
 //Template data
 $(document).ready(() => {
-
+    $('#sp-kichThuoc,#sp-mauSac,#sp-ten').on('change', function () {
+        debugger
+        variantChangeFlagForStep2 = true;
+        variantChangeFlagForStep3 = true;
+    })
 })
 
 //optimize select
@@ -216,7 +218,6 @@ $(document).ready(function () {
     });
 
     allNextBtn.click(function () {
-        alert('ok')
         var curStep = $(this).closest(".setup-content"),
             curStepBtn = curStep.attr("id"),
             nextStepWizard = $('div.setup-panel div a[href="#' + curStepBtn + '"]').parent().next().children("a"),
@@ -563,6 +564,8 @@ const fillData = (spTemp) => {
     $('#sp-kichThuoc').val(ktIds).trigger('change');
     $('#sp-ma').val(dataTemp.maSanPham)
     $('#imagePreview').css('background-image', `url(${dataTemp.anhUrl})`);
+    debugger
+    $('#sp-trangThai').val(dataTemp.trangThai).trigger('change');
     fillDataStep2()
     variantChangeFlagForStep2 = false;
     fillValueStep2()
@@ -601,16 +604,31 @@ function fillValueStep2() {
         $row.find('input[type="text"]').val(spct.giaBan).trigger('change')
         $row.find('input[type="number"]').eq(0).val(spct.soLuong).trigger('change')
         $row.find('input[type="number"]').eq(1).val(spct.barcode).trigger('change')
+        $row.find('td').eq(1).attr("spct-id",spct.id)
         if (spct.isDeleted){
-            $row.find('input,button').prop("disabled", true);
+            $row.find('input').prop("disabled", true);
+            $row.addClass('disabled')
+            $row.find('button').off()
+            $row.find('button').text("Khôi phục");
+            $row.find('button').on('click',()=>{
+                $row.find('button').text("Xóa");
+                $row.find('input').prop("disabled", false);
+                $row.removeClass('disabled');
+                $row.find('button').on('click',()=>{
+                    $row.remove()
+                })
+            })
+
         }
     })
 }
 
 $(document).ready(() => {
     $("a[href='#step-2']").on("click", function () {
+        debugger
         if (variantChangeFlagForStep2)
-            fillDataStep2();
+        fillDataStep2();
+        fillValueStep2();
         variantChangeFlagForStep2 = false;
     })
 })
@@ -623,6 +641,7 @@ let fillDataStep2=function () {
 
     //Tạo dòng  giá nhập giá bán input cho từng màu sắc và hình ảnh của chúng
     $('#sp-mauSac').select2('data').forEach(function (mauSac) {
+        debugger
         imageRow += `
                   <tr>
                         <td style="text-align: center;vertical-align: middle">${mauSac.text}<span class="d-none">${mauSac.id}</span></td>
@@ -746,7 +765,7 @@ let fillDataStep2=function () {
             `
 
 
-    fieldsetContainer = `<div id="danhSachSanPhamChiTiet">${fieldsetContainer}</div>>`
+    fieldsetContainer = `<div id="danhSachSanPhamChiTiet">${fieldsetContainer}</div>`
 
     let imageContainer = `
             <div class="card shadow m-2 w-100 ">
@@ -969,10 +988,10 @@ $(document).ready(() => {
 
 
                     tableApDung.find("thead tr").append(`
-                <th class="text-center" km-id="${km.id}">KM${ma}</th>>
+                <th class="text-center" km-id="${km.id}">KM${ma}</th>
             `)
                     tableApDung.find("tbody tr").append(`
-                <td class="text-center"><input type="checkbox" checked km-id="${km.id}" data-toggle="tooltip" data-placement="right" title="${km.text}"></td>>
+                <td class="text-center"><input type="checkbox" checked km-id="${km.id}" data-toggle="tooltip" data-placement="right" title="${km.text}"></td>
             `)
                 })
                 tableDanhSach.find("tbody").html(dataLstKm)
@@ -1007,10 +1026,10 @@ $(document).ready(() => {
 
 
             tableApDung.find("thead tr").append(`
-                <th class="text-center" km-id="${km.id}">KM${ma}</th>>
+                <th class="text-center" km-id="${km.id}">KM${ma}</th>
             `)
             tableApDung.find("tbody tr").append(`
-                <td class="text-center"><input type="checkbox" checked km-id="${km.id}" data-toggle="tooltip" data-placement="right" title="${km.text}"></td>>
+                <td class="text-center"><input type="checkbox" checked km-id="${km.id}" data-toggle="tooltip" data-placement="right" title="${km.text}"></td>
             `)
         })
         tableDanhSach.find("tbody").html(dataLstKm)
@@ -1103,7 +1122,7 @@ $(document).ready(function () {
             sp.kieuDangId = $('#sp-kieuDang').val();
             sp.maSanPham = $('#sp-ma').val();
             sp.anhUrl = $('#sp-img').val();
-            sp.sanPhamChiTiets = $('#danhSachSanPhamChiTiet').find('tbody tr').map((i, e) => {
+            sp.sanPhamChiTiets = $('#danhSachSanPhamChiTiet').find('tbody tr:not(.disabled)').map((i, e) => {
                 let obj = {
 
                     kichThuocId: $(e).closest('table').eq(0).attr('kt-id'),
@@ -1149,21 +1168,22 @@ $(document).ready(function () {
 
             // Nếu form hợp lệ, gửi dữ liệu form lên server
             $.ajax({
-                url: "/api/v1/san-pham",
-                method: 'PUT', // Phương thức HTTP
+                url: "/api/v1/san-pham/"+dataTemp.id,
+                method: 'POST', // Phương thức HTTP
                 data: JSON.stringify(sp),
                 contentType: 'application/json',
                 success: function (response) {
                     Toast.fire({
                         icon: "success",
-                        title: "Thêm mới thành công"
+                        title: "Cập nhật thành công"
                     })
+                    setTimeout(()=>{window.location.replace('/admin/san-pham')},500);
                     console.log(response);
                 },
                 error: function (xhr, status, error) {
                     Toast.fire({
                         icon: "error",
-                        title: "Thêm mới thất bại"
+                        title: "Cập nhật thất bại"
                     });
                     console.log(response);
                     console.error(xhr.responseText);

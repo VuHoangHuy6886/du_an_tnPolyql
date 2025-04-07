@@ -23,35 +23,38 @@ $(document).ready(function() {
     $('#mauSacSelect').select2({
         placeholder: "Chọn màu sắc",
         allowClear: true
+    }); $('#kichThuocSelect').select2({
+        placeholder: "Chọn kích thước",
+        allowClear: true
     });
     $('#sortSelect').select2({
         placeholder: "Chọn sắp xếp",
         allowClear: true
     });
-    var initialParams = getFilterParams();
-    fetchProducts(initialParams);
-
-    $("#filter-form").on("submit", function(e) {
-        e.preventDefault();
-        var queryParams = getFilterParams();
-        queryParams.page = 0;
-        fetchProducts(queryParams);
-    });
-
-    $("#filter-form").on("reset", function() {
-        setTimeout(function() {
-            $("#thuongHieuSelect, #chatLieuSelect, #kieuDangSelect, #mauSacSelect").val("");
-            $("#danhMucSelect").val("");
-            $("#sortSelect").val("");
-            $("[id^='price-']").prop("checked", false);
-            fetchProducts(getFilterParams());
-        }, 100);
-    });
-
-    $(document).on("click", ".add-to-cart-btn", function() {
-        var productData = $(this).data("product");
-        openAddToCartModal(productData);
-    });
+    // var initialParams = getFilterParams();
+    // fetchProducts(initialParams);
+    //
+    // $("#filter-form").on("submit", function(e) {
+    //     e.preventDefault();
+    //     var queryParams = getFilterParams();
+    //     queryParams.page = 0;
+    //     fetchProducts(queryParams);
+    // });
+    //
+    // $("#filter-form").on("reset", function() {
+    //     setTimeout(function() {
+    //         $("#thuongHieuSelect, #chatLieuSelect, #kieuDangSelect, #JSelect").val("");
+    //         $("#danhMucSelect").val("");
+    //         $("#sortSelect").val("");
+    //         $("[id^='price-']").prop("checked", false);
+    //         fetchProducts(getFilterParams());
+    //     }, 100);
+    // });
+    //
+    // $(document).on("click", ".add-to-cart-btn", function() {
+    //     var productData = $(this).data("product");
+    //     openAddToCartModal(productData);
+    // });
 });
 /***************** Get Filter Parameters *****************/
 function getFilterParams() {
@@ -81,6 +84,14 @@ function getFilterParams() {
     var mauSac = $("#mauSacSelect").val();
     if (mauSac && mauSac.length > 0 && mauSac[0] !== "") {
         params.mauSacId = mauSac;
+    }
+    var kichThuoc = $("#kichThuocSelect").val();
+    if (kichThuoc && kichThuoc.length > 0 && kichThuoc[0] !== "") {
+        params.kichThuocId = kichThuoc;
+    }
+    var searchBox = $("#searchBox").val();
+    if (searchBox && searchBox.length > 0) {
+        params.ten = searchBox;
     }
     // Lọc giá
     var selectedPriceRange = $("input[name='priceRange']:checked").val();
@@ -117,13 +128,7 @@ function getFilterParams() {
         }
     }
     // Nếu URL có parameter "ten"
-    var urlParams = new URLSearchParams(window.location.search);
-    if(urlParams.has('ten')) {
-        params.ten = urlParams.get('ten');
-        $("#product-title").text("Sản phẩm có tên: " + params.ten);
-    } else {
-        $("#product-title").text("Tất cả sản phẩm");
-    }
+
 
     return params;
 }
@@ -136,7 +141,7 @@ function renderProducts(data) {
         return;
     }
     products.forEach(function(product) {
-        var prices = product.sanPhamChiTiets.map(detail => detail.giaBan);
+        var prices = product.sanPhamChiTiets.map(detail => detail.giaChietKhau);
         var minPrice = Math.min.apply(null, prices);
         var maxPrice = Math.max.apply(null, prices);
         var defaultImage = product.anhUrl;
@@ -178,7 +183,7 @@ function renderProducts(data) {
 
 function fetchProducts(queryParams) {
     queryParams.page = (typeof queryParams.page !== "undefined") ? queryParams.page : 0;
-    queryParams.pageSize = 10;
+    queryParams.pageSize = 12;
     lastQuery = queryParams;
 
     $("#product-container").html('<div class="text-center my-3"><i class="fas fa-spinner fa-spin fa-2x"></i> Đang tải sản phẩm...</div>');
@@ -632,10 +637,11 @@ $(document).ready(function() {
     // Reset form filter và gọi lại API với các tham số rỗng (hoặc theo URL nếu có)
     $("#filter-form").on("reset", function() {
         setTimeout(function() {
-            $("#thuongHieuSelect, #chatLieuSelect, #kieuDangSelect, #mauSacSelect").val("");
-            $("#danhMucSelect").val("");
-            $("#minPrice, #maxPrice, #sortSelect").val("");
-            $("input[name='priceRange']").prop("checked", false);
+            $("#thuongHieuSelect, #chatLieuSelect, #kieuDangSelect, #mauSacSelect, #kichThuocSelect").val("").trigger("change");
+            $("#danhMucSelect").val("").trigger("change");
+            $("#minPrice, #maxPrice, #sortSelect").val("").trigger("change");
+            $("input[name='priceRange']").prop("checked", false).trigger("change");
+            $('#searchBox').val('').trigger('input');
             fetchProducts(getFilterParams());
         }, 100);
     });

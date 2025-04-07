@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import net.minidev.json.annotate.JsonIgnore;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
@@ -94,8 +93,20 @@ public class HoaDon {
     @Column(name = "TRANG_THAI_THANH_TOAN", length = 20)
     private String trangThaiThanhToan;
 
-    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "NGAY_TAO")
     private LocalDateTime ngayTao;
 
+
+    public LocalDateTime getNgayDatFromLichSu() {
+        if (lichSuHoaDons != null && !lichSuHoaDons.isEmpty()) {
+            return lichSuHoaDons.get(0).getThoiGian();
+        }
+        return ngayTao;
+    }
+
+    @PrePersist
+    public void prePersist() {
+        ngayTao=LocalDateTime.now();
+        isDeleted = false;
+    }
 }

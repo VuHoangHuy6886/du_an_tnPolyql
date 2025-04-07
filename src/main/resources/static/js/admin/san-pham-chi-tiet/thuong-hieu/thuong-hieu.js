@@ -242,7 +242,6 @@ $(document).ready(() => {
             form.addClass('was-validated');
         } else {
             let formData=new FormData(form[0])
-            // Nếu form hợp lệ, gửi dữ liệu form lên server
             $.ajax({
                 url: apiURL, // Thay 'URL_API' bằng đường dẫn của API của bạn
                 method: 'POST', // Phương thức HTTP

@@ -13,10 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Controller
 @RequestMapping("/lichsumuahang")
@@ -63,7 +60,14 @@ public class LichSuMuaHangController {
             Model model) {
 
         Pageable pageable = PageRequest.of(page, PAGE_SIZE);
-        Page<HoaDon> hoaDonPage = hoaDonService.getOrdersByStatusPaged(trangThai, pageable);
+        Page<HoaDon> hoaDonPage ;
+        // Kiểm tra nếu trangThai chứa nhiều trạng thái (phân tách bằng dấu phẩy)
+        if (trangThai.contains(",")) {
+            List<String> statuses = Arrays.asList(trangThai.split(","));
+            hoaDonPage = hoaDonService.getOrdersByMultipleStatusesPaged(statuses, pageable);
+        } else {
+            hoaDonPage = hoaDonService.getOrdersByStatusPaged(trangThai, pageable);
+        }
 
         addPaginationAttributes(model, hoaDonPage);
         model.addAttribute("trangThai", trangThai);

@@ -2,10 +2,12 @@ package com.poliqlo.repositories;
 
 import com.poliqlo.controllers.admin.san_pham_chi_tiet.chat_lieu.model.response.ProductDetailDTO;
 import com.poliqlo.models.SanPhamChiTiet;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -40,4 +42,11 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
 
     @Query("SELECT spct.id FROM SanPhamChiTiet spct WHERE spct.barcode = :barcode")
     Optional<Integer> findFirstByBarcode(@Size(max = 100) String barcode, Limit limit);
+
+    Optional<SanPhamChiTiet> findByMauSac_IdAndKichThuoc_IdAndSanPham_Id(@PositiveOrZero Integer mauSacId, @PositiveOrZero Integer kichThuocId, Integer idSP);
+  @Modifying
+  @Query("UPDATE SanPhamChiTiet spct SET spct.isDeleted = true WHERE spct.sanPham.id = :idSP")
+  void beforeUpdateSPCT(@Param("idSP") Integer idSP);
+
+  List<SanPhamChiTiet> findAllBySanPham_Id(Integer idSP);
 }

@@ -7,10 +7,7 @@ import com.poliqlo.models.SanPham;
 import com.poliqlo.models.SanPhamChiTiet;
 import com.poliqlo.repositories.SanPhamChiTietRepository;
 import com.poliqlo.repositories.SanPhamRepository;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.*;
@@ -24,6 +21,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -90,7 +88,16 @@ public class SanPhamAPIService {
 
                 // Tìm theo kích thước
                 if (request.getKichThuocId() != null && !request.getKichThuocId().isEmpty()) {
-                    predicate = cb.and(predicate, root.join("sanPhamChiTiets").get("kichThuoc").get("id").in(request.getKichThuocId()));
+                    Subquery<Integer> subquery = query.subquery(Integer.class);
+                    Root<SanPhamChiTiet> subRoot = subquery.from(SanPhamChiTiet.class);
+
+                    subquery.select(cb.literal(1))
+                            .where(
+                                    cb.equal(subRoot.get("sanPham"), root),
+                                    subRoot.get("kichThuoc").get("id").in(request.getKichThuocId())
+                            );
+
+                    predicate = cb.and(predicate, cb.exists(subquery));
                 }
 
 
@@ -101,15 +108,33 @@ public class SanPhamAPIService {
 
                 // Tìm theo màu sắc
                 if (request.getMauSacId() != null && !request.getMauSacId().isEmpty()) {
-                    predicate = cb.and(predicate, root.join("sanPhamChiTiets").get("mauSac").get("id").in(request.getMauSacId()));
+                    // Tạo subquery để tìm màu sắc của SanPham hiện tại
+                    Subquery<Integer> subquery = query.subquery(Integer.class);
+                    Root<SanPhamChiTiet> subRoot = subquery.from(SanPhamChiTiet.class);
+
+                    subquery.select(cb.literal(1))
+                            .where(
+                                    cb.equal(subRoot.get("sanPham"), root),
+                                    subRoot.get("mauSac").get("id").in(request.getMauSacId())
+                            );
+
+                    predicate = cb.and(predicate, cb.exists(subquery));
                 }
 
                 // Lọc theo giá bán
                 if (request.getMinPrice() != null) {
-                    predicate = cb.and(predicate, cb.greaterThanOrEqualTo(root.join("sanPhamChiTiets").get("giaBan"), request.getMinPrice()));
+                    Subquery<BigDecimal> subquery = query.subquery(BigDecimal.class);
+                    Root<SanPhamChiTiet> subRoot = subquery.from(SanPhamChiTiet.class);
+                    subquery.select(cb.min(subRoot.get("giaBan")))
+                            .where(cb.equal(subRoot.get("sanPham"), root));
+                    predicate = cb.and(predicate, cb.greaterThanOrEqualTo(subquery, request.getMinPrice()));
                 }
                 if (request.getMaxPrice() != null) {
-                    predicate = cb.and(predicate, cb.lessThanOrEqualTo(root.join("sanPhamChiTiets").get("giaBan"), request.getMaxPrice()));
+                    Subquery<BigDecimal> subquery = query.subquery(BigDecimal.class);
+                    Root<SanPhamChiTiet> subRoot = subquery.from(SanPhamChiTiet.class);
+                    subquery.select(cb.min(subRoot.get("giaBan")))
+                            .where(cb.equal(subRoot.get("sanPham"), root));
+                    predicate = cb.and(predicate, cb.lessThanOrEqualTo(subquery, request.getMaxPrice()));
                 }
 
                 return predicate;
@@ -152,8 +177,19 @@ public class SanPhamAPIService {
                 spct.setIsPromotionProduct(dgg.isPresent());
 
             });
+            sanPhamAPIResponse.setSanPhamChiTiets(
+                    sanPhamAPIResponse.getSanPhamChiTiets().stream()
+                            .filter(
+                    spct->
+                                    !(spct.getIsDeleted()||spct.getSoLuong()<1)&&
+                                    (request.getMinPrice()==null||spct.getGiaChietKhau().compareTo(request.getMinPrice())>=0)&&
+                                    (request.getMaxPrice()==null||spct.getGiaChietKhau().compareTo(request.getMaxPrice())<=0)&&
+                                    (request.getKichThuocId()==null|| !request.getKichThuocId().isEmpty() &&request.getKichThuocId().contains(spct.getKichThuoc().getId()))&&
+                                    (request.getMauSacId()==null|| !request.getMauSacId().isEmpty() &&request.getMauSacId().contains(spct.getMauSac().getId()))
+                            )
+                            .collect(Collectors.toSet()));
 
-            sanPhamAPIResponse.setSoLuong(sp.getSanPhamChiTiets().stream().mapToInt(SanPhamChiTiet::getSoLuong).sum());
+            sanPhamAPIResponse.setSoLuong(sanPhamAPIResponse.getSanPhamChiTiets().stream().mapToInt(SanPhamAPIResponse.SanPhamChiTiet::getSoLuong).sum());
             return sanPhamAPIResponse;
         });
 
