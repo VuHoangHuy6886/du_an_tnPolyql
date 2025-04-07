@@ -398,55 +398,74 @@ recalcHoaDonTotal(order);
     }
     @Transactional
     public HoaDonChiTiet undoDeleteOrderDetail(Integer orderId, Integer detailId) {
-        // Lấy đơn hàng
+        // 1. Lấy đơn hàng
         HoaDon order = hoaDonRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với id " + orderId));
 
-        // Lấy chi tiết đơn hàng
+        // 2. Lấy chi tiết đơn hàng đang bị xóa
         HoaDonChiTiet detail = hoaDonChiTietRepository.findById(detailId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy chi tiết đơn hàng với id " + detailId));
 
-        // Kiểm tra chi tiết đơn hàng có đang ở trạng thái xóa không
+        // 3. Kiểm tra chi tiết đơn hàng có đang ở trạng thái bị xóa không
         if (!detail.getIsDeleted()) {
             throw new RuntimeException("Chi tiết đơn hàng không ở trạng thái bị xóa, không cần hoàn tác.");
         }
 
-        // Lấy sản phẩm chi tiết liên quan
-        SanPhamChiTiet sanPhamChiTiet = detail.getSanPhamChiTiet();
-        if (sanPhamChiTiet == null) {
+        // 4. Lấy sản phẩm chi tiết liên quan
+        SanPhamChiTiet productDetail = detail.getSanPhamChiTiet();
+        if (productDetail == null) {
             throw new RuntimeException("Không tìm thấy sản phẩm chi tiết tương ứng với đơn hàng");
         }
 
-        // Kiểm tra tồn kho trước khi hoàn tác:
-        // Khi xóa, số lượng chi tiết đã được cộng vào tồn kho.
-        // Hoàn tác sẽ cần trừ số lượng đó khỏi tồn kho, vì sản phẩm sẽ được phục hồi vào đơn hàng.
-        // Do đó, nếu tồn kho hiện tại (số lượng còn) < số lượng cần trừ, không đủ để hoàn tác.
-        if (sanPhamChiTiet.getSoLuong() < detail.getSoLuong()) {
-            throw new RuntimeException("Không đủ tồn kho để hoàn tác. Tồn kho hiện tại: " + sanPhamChiTiet.getSoLuong());
+        // 5. Kiểm tra tồn kho trước khi hoàn tác:
+        // Vì hoàn tác sẽ trừ số lượng từ tồn kho, nếu tồn kho hiện tại < số lượng chi tiết cần phục hồi thì không đủ.
+        if (productDetail.getSoLuong() < detail.getSoLuong()) {
+            throw new RuntimeException("Không đủ tồn kho để hoàn tác. Tồn kho hiện tại: " + productDetail.getSoLuong());
         }
 
-        // Trừ số lượng từ tồn kho (vì hoàn tác sẽ đưa sản phẩm trở lại đơn hàng)
-        sanPhamChiTiet.setSoLuong(sanPhamChiTiet.getSoLuong() - detail.getSoLuong());
-        sanPhamChiTietRepository.save(sanPhamChiTiet);
+        // 6. Kiểm tra xem trong đơn hàng đã có chi tiết nào (active) của sản phẩm đó chưa (khác với chi tiết đang hoàn tác)
+        Optional<HoaDonChiTiet> activeDetailOpt = order.getHoaDonChiTiets().stream()
+                .filter(od -> od.getSanPhamChiTiet().getId().equals(productDetail.getId())
+                        && !od.getIsDeleted()
+                        && !od.getId().equals(detail.getId()))
+                .findFirst();
 
-        // Đánh dấu chi tiết đơn hàng là chưa bị xóa
-        detail.setIsDeleted(false);
-        hoaDonChiTietRepository.save(detail);
-        // Tính lại tổng tiền của đơn hàng
+        HoaDonChiTiet resultDetail;
+
+        if (activeDetailOpt.isPresent()) {
+            // Nếu có chi tiết active, cộng dồn số lượng từ chi tiết đang hoàn tác vào đó
+            HoaDonChiTiet activeDetail = activeDetailOpt.get();
+            int newQuantity = activeDetail.getSoLuong() + detail.getSoLuong();
+            activeDetail.setSoLuong(newQuantity);
+            hoaDonChiTietRepository.save(activeDetail);
+
+            // Xóa bỏ (hoặc đánh dấu đã hợp nhất) chi tiết đang hoàn tác
+//            hoaDonChiTietRepository.delete(detail);
+            resultDetail = activeDetail;
+        } else {
+            // Nếu chưa có, đánh dấu chi tiết đang bị xóa là không bị xóa nữa (hoàn tác)
+            detail.setIsDeleted(false);
+            hoaDonChiTietRepository.save(detail);
+            resultDetail = detail;
+        }
+
+        // 7. Trừ số lượng từ tồn kho (hoàn tác sẽ lấy số lượng của chi tiết đang hoàn tác)
+        productDetail.setSoLuong(productDetail.getSoLuong() - detail.getSoLuong());
+        sanPhamChiTietRepository.save(productDetail);
+
+        // 8. Tính lại tổng tiền của đơn hàng
         recalcHoaDonTotal(order);
         hoaDonRepository.save(order);
 
-        // Xây dựng log message
-        String productName = (sanPhamChiTiet.getSanPham().getTen() != null) ? sanPhamChiTiet.getSanPham().getTen() : "";
-        String color = (sanPhamChiTiet.getMauSac() != null && sanPhamChiTiet.getMauSac().getTen() != null) ? sanPhamChiTiet.getMauSac().getTen() : "";
-        String size = (sanPhamChiTiet.getKichThuoc() != null && sanPhamChiTiet.getKichThuoc().getTen() != null) ? sanPhamChiTiet.getKichThuoc().getTen() : "";
+        // 9. Ghi log lịch sử hoàn tác
+        String productName = (productDetail.getSanPham().getTen() != null) ? productDetail.getSanPham().getTen() : "";
+        String color = (productDetail.getMauSac() != null && productDetail.getMauSac().getTen() != null) ? productDetail.getMauSac().getTen() : "";
+        String size = (productDetail.getKichThuoc() != null && productDetail.getKichThuoc().getTen() != null) ? productDetail.getKichThuoc().getTen() : "";
         String logMsg = "Hoàn tác sản phẩm \"" + productName + " - " + color + " - " + size + "\"";
-
-        // Ghi log lịch sử (sử dụng ID tài khoản từ authService)
         Integer userId = authService.getCurrentUserDetails().get().getKhachHang().getTaiKhoan().getId();
         addHistoryLog(orderId, "Hoàn tác sản phẩm", logMsg, userId);
 
-        return detail;
+        return resultDetail;
     }
 
     public List<LichSuHoaDonDTO> getLichSuHoaDon(Integer hoaDonId) {

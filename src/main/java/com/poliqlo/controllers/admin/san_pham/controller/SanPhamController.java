@@ -1,12 +1,14 @@
 package com.poliqlo.controllers.admin.san_pham.controller;
 
 import com.poliqlo.controllers.admin.san_pham.model.reponse.AddProductDetailRequest;
+import com.poliqlo.controllers.admin.san_pham.model.reponse.UpdateProductDetailDTO;
 import com.poliqlo.controllers.admin.san_pham.model.request.AddRequestNBC;
 import com.poliqlo.controllers.admin.san_pham.model.request.EditReq;
 import com.poliqlo.controllers.admin.san_pham.model.request.EditRequestNBC;
 import com.poliqlo.controllers.admin.san_pham.model.response.Response;
 import com.poliqlo.controllers.admin.san_pham.service.SanPhamService;
 import com.poliqlo.controllers.admin.san_pham_chi_tiet.chat_lieu.model.response.ProductDetailDTO;
+
 import com.poliqlo.models.*;
 import com.poliqlo.repositories.*;
 import jakarta.persistence.EntityManager;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -202,6 +205,30 @@ public class SanPhamController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Có lỗi xảy ra khi cập nhật sản phẩm!");
         }
+    }
+    @ResponseBody
+    @PostMapping("/api/san-pham-detail/update")
+    public ResponseEntity<?> updateProductDetail(@RequestBody UpdateProductDetailDTO dto) {
+        // Validate các trường
+        if (dto.getGiaBan() == null || dto.getGiaBan().compareTo(BigDecimal.valueOf(1000)) <= 0) {
+            return ResponseEntity.badRequest().body("Giá bán phải lớn hơn 1000");
+        }
+        if (dto.getSoLuong() == null || dto.getSoLuong() < 0) {
+            return ResponseEntity.badRequest().body("Số lượng phải lớn hơn hoặc bằng 0");
+        }
+
+        // Tìm sản phẩm chi tiết theo id
+        SanPhamChiTiet spct = sanPhamChiTietRepository.findById(dto.getId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm chi tiết với id: " + dto.getId()));
+
+        // Cập nhật các trường
+        spct.setGiaBan(dto.getGiaBan());
+        spct.setSoLuong(dto.getSoLuong());
+
+        // Lưu entity
+        sanPhamChiTietRepository.save(spct);
+
+        return ResponseEntity.ok(spct);
     }
 
 
