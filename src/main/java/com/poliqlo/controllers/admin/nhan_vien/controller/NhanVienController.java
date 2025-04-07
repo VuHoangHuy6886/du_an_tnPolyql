@@ -8,6 +8,7 @@ import com.poliqlo.controllers.admin.nhan_vien.service.TaiKhoanService;
 import com.poliqlo.controllers.common.file.service.BlobStoreService;
 import com.poliqlo.models.NhanVien;
 import com.poliqlo.models.TaiKhoan;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +26,7 @@ import java.io.IOException;
 
 @Controller
 @RequestMapping("admin/nhan-vien")
+@RequiredArgsConstructor
 public class NhanVienController {
     @Autowired
     private NhanVienService nhanVienService;
@@ -33,7 +35,7 @@ public class NhanVienController {
 
     @Autowired
     private BlobStoreService blobStoreService;
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     // Hiển thị danh sách nhân viên
     @GetMapping("/list")
@@ -85,6 +87,7 @@ public class NhanVienController {
         taiKhoan.setSoDienThoai(soDienThoai);
         taiKhoan.setRole(role);
         taiKhoan.setPassword(passwordEncoder.encode(password));
+        taiKhoan.setIsEnable(false);
 
         if (!file.isEmpty()) {
             try {

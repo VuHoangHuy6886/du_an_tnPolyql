@@ -564,6 +564,8 @@ const fillData = (spTemp) => {
     $('#sp-kichThuoc').val(ktIds).trigger('change');
     $('#sp-ma').val(dataTemp.maSanPham)
     $('#imagePreview').css('background-image', `url(${dataTemp.anhUrl})`);
+    debugger
+    $('#sp-trangThai').val(dataTemp.trangThai).trigger('change');
     fillDataStep2()
     variantChangeFlagForStep2 = false;
     fillValueStep2()
@@ -605,11 +607,13 @@ function fillValueStep2() {
         $row.find('td').eq(1).attr("spct-id",spct.id)
         if (spct.isDeleted){
             $row.find('input').prop("disabled", true);
+            $row.addClass('disabled')
             $row.find('button').off()
             $row.find('button').text("Khôi phục");
             $row.find('button').on('click',()=>{
                 $row.find('button').text("Xóa");
                 $row.find('input').prop("disabled", false);
+                $row.removeClass('disabled');
                 $row.find('button').on('click',()=>{
                     $row.remove()
                 })
@@ -1118,7 +1122,7 @@ $(document).ready(function () {
             sp.kieuDangId = $('#sp-kieuDang').val();
             sp.maSanPham = $('#sp-ma').val();
             sp.anhUrl = $('#sp-img').val();
-            sp.sanPhamChiTiets = $('#danhSachSanPhamChiTiet').find('tbody tr').map((i, e) => {
+            sp.sanPhamChiTiets = $('#danhSachSanPhamChiTiet').find('tbody tr:not(.disabled)').map((i, e) => {
                 let obj = {
 
                     kichThuocId: $(e).closest('table').eq(0).attr('kt-id'),
@@ -1173,6 +1177,7 @@ $(document).ready(function () {
                         icon: "success",
                         title: "Cập nhật thành công"
                     })
+                    setTimeout(()=>{window.location.replace('/admin/san-pham')},500);
                     console.log(response);
                 },
                 error: function (xhr, status, error) {

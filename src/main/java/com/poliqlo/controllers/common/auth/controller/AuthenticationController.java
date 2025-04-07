@@ -34,6 +34,10 @@ public class AuthenticationController {
                     model.addAttribute("message", "Tài khoản chưa tồn tại bạn cần đăng ký");
                     break;
                 }
+                case "423":{
+                    model.addAttribute("message", "Tài khoản của bạn đã bị khóa");
+                    break;
+                }
             }
         }
         return "authentication/authentication";

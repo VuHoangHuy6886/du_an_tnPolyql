@@ -2,7 +2,7 @@ const apiURL = "/api/san-pham";
 
 const TrangThai = new Map([
     ['IN_STOCK', "Còn hàng"],
-    ['OUT_OF_STOCK', "Hết hàng"],
+    ['OUT_OF_STOCK', "Ngừng kinh doanh"],
     ['TEMPORARILY_OUT_OF_STOCK', "Hết hàng tạm thời"],
     ['COMING_SOON', "Sắp ra mắt"],
     ['DISCONTINUED', "Không kinh doanh"]
@@ -81,14 +81,14 @@ function loadData() {
                     let text = data && data.trim() !== "" ? data : "Không có dữ liệu";
                     let ht="";
                     let bgColor = "";
-                    if (text === "CON_HANG") {
-                        ht="Còn hàng"
+                    if (text === "IN_STOCK") {
+                        ht="Đang kinh doanh"
                         bgColor = "green";
-                    } else if (text === "HET_HANG") {
-                        ht="Hết hàng"
+                    } else if (text === "OUT_OF_STOCK") {
+                        ht="Ngừng kinh doanh"
                         bgColor = "red";
                     }
-                    return `<span style="background-color:${bgColor}; color:white; padding:3px 6px; border-radius:4px; font-size: 13px;">${ht}</span>`;
+                    return `<span style="background-color:${bgColor}; color:white; padding:3px 6px; border-radius:4px; display: inline-block;width: max-content;font-size: 10px;">${ht}</span>`;
                 }
             },
             {
@@ -415,7 +415,7 @@ $(document).ready(function () {
                 setSelectValue("#edit-thuong-hieu", rowData.thuongHieu && rowData.thuongHieu.ten ? rowData.thuongHieu.ten : "");
                 setSelectValue("#edit-chat-lieu", rowData.chatLieu && rowData.chatLieu.ten ? rowData.chatLieu.ten : "");
                 setSelectValue("#edit-kieu-dang", rowData.kieuDang && rowData.kieuDang.ten ? rowData.kieuDang.ten : "");
-
+                $('#btn-edit').attr('href',"/admin/san-pham/"+rowData.id)
                 $('#modal-edit').modal('show');
 
                 // Lấy danh sách tên sản phẩm (ngoại trừ tên hiện tại) để validate

@@ -48,4 +48,5 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
   @Query("UPDATE SanPhamChiTiet spct SET spct.isDeleted = true WHERE spct.sanPham.id = :idSP")
   void beforeUpdateSPCT(@Param("idSP") Integer idSP);
 
+  List<SanPhamChiTiet> findAllBySanPham_Id(Integer idSP);
 }

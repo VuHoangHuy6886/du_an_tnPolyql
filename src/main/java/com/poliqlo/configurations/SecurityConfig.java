@@ -125,12 +125,14 @@ public class SecurityConfig {
                                             return taiKhoanRepository.save(newTaiKhoan);
                                         });
 
-                                if (taiKhoan != null) {
+                                if (taiKhoan.isEnabled()) {
                                     var authorities = Collections.singletonList(new SimpleGrantedAuthority(taiKhoan.getRole()));
                                     Authentication auth = new UsernamePasswordAuthenticationToken(taiKhoan, null, authorities);
                                     SecurityContextHolder.getContext().setAuthentication(auth);
+                                    response.sendRedirect("/home");
+
                                 } else {
-                                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                                    response.sendRedirect("/sign-in?error=423");
                                 }
                             }
                             if (request.getRequestURI().contains("facebook")) {
@@ -155,16 +157,17 @@ public class SecurityConfig {
                                                 })
 
                                         );
-                                if (taiKhoan != null) {
+                                if (taiKhoan.isEnabled()) {
                                     var authorities = Collections.singletonList(new SimpleGrantedAuthority(taiKhoan.getRole()));
                                     Authentication auth = new UsernamePasswordAuthenticationToken(taiKhoan, null, authorities);
                                     SecurityContextHolder.getContext().setAuthentication(auth);
+                                    response.sendRedirect("/home");
+
                                 } else {
-                                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                                    response.sendRedirect("/sign-in?error=423");
                                 }
                             }
 
-                            response.sendRedirect("/home");
                         })
 
                 )

@@ -660,7 +660,7 @@ function fillDataToTableSanPham(data) {
                 "ten": "Áo thun nam",
                 "soLuong": 4,
                 "isPromotionProduct": false,
-                "trangThai": "CON_HANG",
+                "trangThai": "IN_STOCK",
                 "moTa": "<p><img style=\"display: block; margin-left: auto; margin-right: auto;\" src=\"https://mcdn.coolmate.me/image/December2024/AKWBNTASLAN_93.jpg\" width=\"1004\" height=\"2067\"></p>",
                 "isDeleted": false,
                 "sanPhamChiTiets": [
@@ -838,7 +838,7 @@ function fillDataToTableSanPham(data) {
                 "ten": "Áo thun nam",
                 "soLuong": 4,
                 "isPromotionProduct": false,
-                "trangThai": "CON_HANG",
+                "trangThai": "IN_STOCK",
                 "moTa": "<p><img style=\"display: block; margin-left: auto; margin-right: auto;\" src=\"https://mcdn.coolmate.me/image/December2024/AKWBNTASLAN_93.jpg\" width=\"1004\" height=\"2067\"></p>",
                 "isDeleted": false,
                 "sanPhamChiTiets": [
@@ -1016,7 +1016,7 @@ function fillDataToTableSanPham(data) {
                 "ten": "Áo thun nam",
                 "soLuong": 4,
                 "isPromotionProduct": false,
-                "trangThai": "CON_HANG",
+                "trangThai": "IN_STOCK",
                 "moTa": "<p><img style=\"display: block; margin-left: auto; margin-right: auto;\" src=\"https://mcdn.coolmate.me/image/December2024/AKWBNTASLAN_93.jpg\" width=\"1004\" height=\"2067\"></p>",
                 "isDeleted": false,
                 "sanPhamChiTiets": [
@@ -1194,7 +1194,7 @@ function fillDataToTableSanPham(data) {
                 "ten": "Áo thun nam",
                 "soLuong": 4,
                 "isPromotionProduct": false,
-                "trangThai": "CON_HANG",
+                "trangThai": "IN_STOCK",
                 "moTa": "<p><img style=\"display: block; margin-left: auto; margin-right: auto;\" src=\"https://mcdn.coolmate.me/image/December2024/AKWBNTASLAN_93.jpg\" width=\"1004\" height=\"2067\"></p>",
                 "isDeleted": false,
                 "sanPhamChiTiets": [
@@ -1372,7 +1372,7 @@ function fillDataToTableSanPham(data) {
                 "ten": "Áo thun nam",
                 "soLuong": 4,
                 "isPromotionProduct": false,
-                "trangThai": "CON_HANG",
+                "trangThai": "IN_STOCK",
                 "moTa": "<p><img style=\"display: block; margin-left: auto; margin-right: auto;\" src=\"https://mcdn.coolmate.me/image/December2024/AKWBNTASLAN_93.jpg\" width=\"1004\" height=\"2067\"></p>",
                 "isDeleted": false,
                 "sanPhamChiTiets": [
@@ -1587,7 +1587,7 @@ function fillDataToTableSanPham(data) {
 
     let dataSP = '';
     _mapProduct.forEach((sp, id) => {
-        let disable = (sp.trangThai != 'CON_HANG') ? "disable" : "";
+        let disable = (sp.trangThai != 'IN_STOCK') ? "disable" : "";
         let outOfStock = (sp.soLuong < 1) ? "out-of-stock" : "";
         dataSP += `
                 <div sp-id="${sp.id}" class="col-4 d-flex justify-content-between product ${outOfStock} ${disable}">

@@ -5,6 +5,7 @@
       layout:decorate="/client/layout/layout-client.html"
 >
 <head>
+    <th:block layout:fragment="head_link">
     <meta charset="UTF-8">
     <title>Sản Phẩm</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -14,8 +15,39 @@
 
     <link href="/vendor/select2/select2.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/client/trang-san-pham.css">
+        <style>
+            .sidebar {
+            }
+            .sidebar-box {
+                font-size: 15px;
+                width: 100%;
+                float: left;
+                background: #fff;
+            }
+
+
+
+            .search-form {
+                .form-group {
+                    position: relative;
+                    #s {
+                        padding-right: 50px;
+                        background: lighten(black, 97%);
+                        border: none;
+                    }
+                }
+                .icon {
+                    position: absolute;
+                    top: 50%;
+                    right: 20px;
+                    transform: translateY(-50%);
+                }
+            }
+
+        </style>
+    </th:block>
 </head>
-<body layout:fragment="content">
+<div layout:fragment="content">
 <div class="container-fluid mt-4">
     <div class="row">
         <!-- Sidebar Filter -->
@@ -73,6 +105,16 @@
                             </th:block>
                         </select>
                     </div>
+                    <!-- Màu sắc -->
+                    <div class="form-group mb-3">
+                        <label for="kichThuocSelect"><i class="fas fa-ruler-vertical"></i> Kích thước</label>
+                        <select multiple="multiple" class="form-control" id="kichThuocSelect">
+                            <option value="">Tất cả</option>
+                            <th:block th:each="kichThuoc : ${listKichThuoc}">
+                                <option th:value="${kichThuoc.id}" th:text="${kichThuoc.ten}"></option>
+                            </th:block>
+                        </select>
+                    </div>
                     <!-- Lọc giá -->
                     <div class="form-group mb-3">
                         <label><i class="fas fa-money-bill-wave"></i> Lọc theo giá</label>
@@ -111,7 +153,19 @@
         </div>
         <!-- Main Product Grid -->
         <div class="col-md-9">
-            <h2 class="mb-3" id="product-title">Tất cả sản phẩm</h2>
+            <div class="d-flex" style="flex-direction: column">
+                <div class="col-md-12 col-lg-6 sidebar pl-0">
+                    <div class="sidebar-box search-form-wrap">
+                        <form action="#" class="search-form">
+                            <div class="form-group">
+                                <span class="icon fa fa-search" onclick="fetchProducts(getFilterParams())"></span>
+                                <input type="text" class="form-control pl-0" id="searchBox" placeholder="Tìm kiếm sản phẩm">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
             <div class="row product-grid" id="product-container">
                 <!-- Các card sản phẩm được render tại đây (4 sản phẩm/hàng) -->
             </div>
@@ -180,18 +234,21 @@
     </div>
 </div>
 
-<!-- Scripts -->
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</div>
 
-<script src="/vendor/datatables/jquery.dataTables.min.js"></script>
-<script src="/vendor/select2/select2.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-<script src="/js/client/iphone.js"></script>
-<script src="/js/client/san-pham-client.js"></script>
-</body>
+<th:block layout:fragment="bottom_link">
 
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <script src="/vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="/vendor/select2/select2.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="/js/client/iphone.js"></script>
+    <script src="/js/client/san-pham-client.js"></script>
+</th:block>
 
 </html>
+
