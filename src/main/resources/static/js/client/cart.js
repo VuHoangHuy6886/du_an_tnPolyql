@@ -50,6 +50,7 @@ document.addEventListener("DOMContentLoaded", function () {
         safeSetText("showVoucher", "Vui Lòng Chọn Sản phẩm");
         safeSetDisplay("btnThanToan", "none");
         document.getElementById("voucherId").value = 0
+        document.getElementById("showTongTien").innerText = 0;
 
         console.log("vào hàm update price ()*********")
         tongTien = 0;
