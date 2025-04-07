@@ -91,6 +91,7 @@
                             <form id="formUpdateQuantity">
                                 <input type="hidden" id="idCart" name="idCart" th:value="${cart.id}">
                                 <input id="inputQuantity"  type="text" th:value="${cart.quantity}"
+                                       data-th-id="${cart.id}"
                                        class="form-control h-100 inputSoLuong"
                                        style="width: 50px;">
                             </form>
@@ -158,9 +159,9 @@
                 <!--Modal-->
                 <hr>
                 <form method="post" th:action="@{/cart/trang-thanh-toan}">
-                    <input type="hidden" id="idKhachHang" name="idKH" th:value="${idCustomer}">
-                    <input type="hidden" id="cartIds" name="cartIds" value="">
-                    <input type="hidden" id="voucherId" name="voucherId" value="">
+                    <input type="text" id="idKhachHang" name="idKH" th:value="${idCustomer}">
+                    <input type="text" id="cartIds" name="cartIds" value="">
+                    <input type="text" id="voucherId" name="voucherId" value="">
                     <h5>Tổng Tiền trước khi giảm giá : <span id="totalPriceAfterDiscounts" class="text-danger"></span></h5>
                     <h5>Giá Trị Giảm của voucher : <span id="soTienGiam" class="text-danger"></span></h5>
                     <h4 class="fw-bold text-dark">Tổng Tiền: <span id="showTongTien"

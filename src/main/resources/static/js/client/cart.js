@@ -1,187 +1,202 @@
-let quantity = document.getElementById("inputQuantity");
-let cartId = document.getElementById("idCart");
-let tongTien = 0;
-let totalPriceAfterDiscount = 0;
-quantity.addEventListener("input", function () {
-    this.value = this.value.replace(/[^0-9]/g, '');
-});
-
-function sendServer(data) {
-    fetch("/api/cart/update-quantity", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-    })
-    setTimeout(() => {
-        location.reload(true)
-    }, 500)
-}
-
 document.addEventListener("DOMContentLoaded", function () {
-    // Lấy giá trị customerId từ input hidden
-    var customerId = document.getElementById("customerid").value;
-    var removeAllLink = document.getElementById("removeAllLink");
-    removeAllLink.href = "/cart/remove-all/" + customerId;
-
-    // Handler checkbox
+    const quantity = document.getElementById("inputQuantity");
+    const cartId = document.getElementById("idCart");
+    const customerId = document.getElementById("customerid")?.value;
+    const removeAllLink = document.getElementById("removeAllLink");
     const chonAll = document.getElementById("chonall");
     const chon = document.querySelectorAll(".chon");
     const totalPrices = document.getElementById("showTongTien");
+    const showVoucher = document.getElementById("showDanhSachVouCher");
+    const confirmVoucherBtn = document.getElementById("confirmVoucher");
 
-    // Reset form khi tải trang
-    chon.forEach(item => item.checked = false);
+    let tongTien = 0;
+    let totalPriceAfterDiscount = 0;
+    let selectedVoucherId = null;
+    let selectedDiscountValue = null;
+
+    if (removeAllLink && customerId) {
+        removeAllLink.href = "/cart/remove-all/" + customerId;
+    }
+
+    if (quantity) {
+        quantity.addEventListener("input", function () {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+    }
+
+    function sendServer(data) {
+        fetch("/api/cart/update-quantity", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(data)
+        });
+        setTimeout(() => location.reload(true), 500);
+    }
+
+    function safeSetText(id, text) {
+        const el = document.getElementById(id);
+        if (el) el.innerText = text;
+    }
+
+    function safeSetDisplay(id, value) {
+        const el = document.getElementById(id);
+        if (el) el.style.display = value;
+    }
 
     function updateTotalPrice() {
-        let totalPrice = 0;
-        let listCartId = [];
 
-        chon.forEach((item, index) => {
-            if (item.checked) {
-                const priceString = document.querySelectorAll(".tongtien")[index].textContent;
-                const priceFloat = Number(priceString.replace(/,/g, '').replace(/[^\d.]/g, ''));
-                totalPriceAfterDiscount += priceFloat
-                totalPrice += priceFloat;
-                let cartId = document.querySelectorAll(".idGioHang")[index].value;
-                listCartId.push(cartId);
+        safeSetText("soTienGiam", convertToVND(0));
+        safeSetText("totalPriceAfterDiscounts", convertToVND(0));
+        safeSetText("showVoucher", "Vui Lòng Chọn Sản phẩm");
+        safeSetDisplay("btnThanToan", "none");
+        document.getElementById("voucherId").value = 0
+
+        console.log("vào hàm update price ()*********")
+        tongTien = 0;
+        totalPriceAfterDiscount = 0;
+        selectedVoucherId = null;
+        selectedDiscountValue = null;
+
+        let selectedCartIds = [];
+
+        chon.forEach((checkbox, index) => {
+            if (checkbox.checked) {
+                const priceString = document.querySelectorAll(".tongtien")[index]?.textContent || "0";
+                console.log("tong tien cua san pham : ", priceString)
+                document.getElementById("showTongTien").innerText = priceString
+                const priceFloat = parseFloat(priceString.replace(/,/g, '').replace(/[^\d.]/g, '')) || 0;
+                tongTien += priceFloat;
+                totalPriceAfterDiscount += priceFloat;
+
+                const currentCartId = document.querySelectorAll(".idGioHang")[index]?.value;
+                if (currentCartId) selectedCartIds.push(currentCartId);
             }
         });
 
-        document.getElementById("cartIds").value = listCartId;
+        const cartIdsInput = document.getElementById("cartIds");
+        if (cartIdsInput) cartIdsInput.value = selectedCartIds.join(",");
 
-        // Chỉ lấy voucher nếu có sản phẩm được chọn
-        if (listCartId.length > 0) {
-            getVoucher({id: customerId, tongTien: totalPrice});
+        if (selectedCartIds.length > 0) {
+            safeSetText("totalPrices", convertToVND(tongTien));
+            safeSetDisplay("btnThanToan", "block");
+            getVoucher({customerId, tongTien});
         } else {
-            document.getElementById("showDanhSachVouCher").innerText = "Vui Lòng Chọn Sản phẩm";
+            safeSetText("totalPrices", convertToVND(0));
         }
-
-        totalPrices.innerText = totalPrice.toLocaleString('vi-VN', {style: 'currency', currency: 'VND'});
-        tongTien = totalPrice;
-
-        document.getElementById("btnThanToan").style.display = listCartId.length > 0 ? "block" : "none";
     }
 
-    chonAll.addEventListener("change", () => {
-        chon.forEach(item => item.checked = chonAll.checked);
-        updateTotalPrice();
-    });
+    function getVoucher(data) {
+        fetch("/api/cart/get-voucher", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(data)
+        })
+            .then(response => response.json())
+            .then(arrVoucher => {
+                if (!arrVoucher.length) {
+                    if (showVoucher) showVoucher.innerText = "Không có voucher nào khả dụng!";
+                    return;
+                }
+
+                let bestVoucher = arrVoucher.reduce((max, v) =>
+                        parseFloat(v.giamToiDa) > parseFloat(max.giamToiDa) ? v : max,
+                    arrVoucher[0]
+                );
+
+                if (showVoucher) {
+                    showVoucher.innerHTML = arrVoucher.map(v => `
+                        <tr>
+                            <td>${v.ten}</td>
+                            <td>${convertToVND(v.giamToiDa)}</td>
+                            <td>
+                                <input type="radio" name="chonvoucher" class="voucher-radio"
+                                    value="${v.id}" data-value="${v.giamToiDa}"
+                                    ${v.id === bestVoucher.id ? "checked" : ""}>
+                            </td>
+                        </tr>
+                    `).join("");
+                }
+
+                selectedVoucherId = bestVoucher.id;
+                selectedDiscountValue = bestVoucher.giamToiDa;
+
+                setupVoucherListeners();
+                updateDiscount(selectedDiscountValue);
+
+                const voucherInput = document.getElementById("voucherId");
+                if (voucherInput) voucherInput.value = selectedVoucherId;
+            })
+            .catch(err => console.error("Lỗi gọi voucher:", err));
+    }
+
+    function setupVoucherListeners() {
+        document.querySelectorAll(".voucher-radio").forEach(radio => {
+            radio.addEventListener("change", function () {
+                selectedVoucherId = this.value;
+                selectedDiscountValue = this.getAttribute("data-value");
+            });
+        });
+
+        if (confirmVoucherBtn) {
+            confirmVoucherBtn.addEventListener("click", function () {
+                if (selectedVoucherId) {
+                    const voucherInput = document.getElementById("voucherId");
+                    if (voucherInput) voucherInput.value = selectedVoucherId;
+                    updateDiscount(selectedDiscountValue);
+                } else {
+                    console.log("Vui lòng chọn voucher!");
+                }
+            });
+        }
+    }
+
+    function updateDiscount(discountValue) {
+        let discount = parseFloat(discountValue) || 0;
+        let tongTienSauGiam = tongTien - discount;
+        if (tongTienSauGiam < 0) tongTienSauGiam = 0;
+
+        safeSetText("soTienGiam", convertToVND(discount));
+        safeSetText("showTongTien", convertToVND(tongTienSauGiam));
+        safeSetText("totalPriceAfterDiscounts", convertToVND(totalPriceAfterDiscount));
+    }
+
+    function convertToVND(amount) {
+        if (isNaN(amount)) return "0 VND";
+        return parseFloat(amount).toLocaleString('vi-VN') + " VNĐ";
+    }
+
+    if (chonAll) {
+        chonAll.addEventListener("change", () => {
+            chon.forEach(item => item.checked = chonAll.checked);
+            updateTotalPrice();
+        });
+    }
 
     chon.forEach(item => {
+        item.checked = false;
         item.addEventListener("change", () => {
-            chonAll.checked = [...chon].every(cb => cb.checked);
+            if (chonAll) chonAll.checked = [...chon].every(cb => cb.checked);
             updateTotalPrice();
         });
     });
 
     document.querySelectorAll(".inputSoLuong").forEach(item => {
         item.addEventListener("blur", function () {
+            // lấy thẻ cha
+            console.log("item : ",item)
+            console.log("id product update : ",item.id)
             let value = Number(item.value);
             if (isNaN(value) || value < 1) {
-                this.value = 1; // Nếu nhập sai, tự động sửa thành 1
+                this.value = 1;
             }
-            let data = {id: cartId.value, quantity: this.value};
-            sendServer(data);
-        });
-    });
-});
-
-let showVoucher = document.getElementById("showDanhSachVouCher");
-
-function getVoucher(data) {
-    fetch("/api/cart/get-voucher", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(data)
-    })
-        .then(response => response.json())
-        .then(arrVoucher => {
-            console.log("Response from server:", arrVoucher);
-
-            if (arrVoucher.length === 0) {
-                showVoucher.innerText = "Không có voucher nào khả dụng!";
-                return;
-            }
-
-            showVoucher.innerText = '';
-
-            let bestVoucher = arrVoucher.reduce((max, voucher) =>
-                parseFloat(voucher.giamToiDa) > parseFloat(max.giamToiDa) ? voucher : max, arrVoucher[0]);
-
-            showVoucher.innerHTML = arrVoucher.map(item => `
-            <tr>
-                <td>${item.ten}</td>
-                <td>${item.giamToiDa} VND</td>
-                <td>
-                    <input type="radio" name="chonvoucher" class="voucher-radio"
-                        value="${item.id}" data-value="${item.giamToiDa}"
-                        ${item.id === bestVoucher.id ? "checked" : ""}>
-                </td>
-            </tr>
-        `).join("");
-
-            handlerVoucher(bestVoucher.id, bestVoucher.giamToiDa);
-        })
-        .catch(error => console.error("Lỗi:", error));
-}
-
-function handlerVoucher(defaultVoucherId = null, defaultDiscountValue = null) {
-    let selectedVoucherId = defaultVoucherId;
-    let selectedDiscountValue = defaultDiscountValue;
-
-    document.querySelectorAll(".voucher-radio").forEach(radio => {
-        radio.addEventListener("change", function () {
-            selectedVoucherId = this.value;
-            selectedDiscountValue = this.getAttribute("data-value");
-            console.log(`Voucher được chọn: ID = ${selectedVoucherId}, Giá trị giảm = ${selectedDiscountValue} VND`);
+            console.log("quanity update : ", this.value)
+            sendServer({id: item.id, quantity: this.value});
         });
     });
 
-    document.getElementById("confirmVoucher").addEventListener("click", function () {
-        if (selectedVoucherId) {
-            document.getElementById("voucherId").value = selectedVoucherId;
-            updateDiscount(selectedDiscountValue);
-        } else {
-            console.log("Vui lòng chọn một voucher!");
-        }
-    });
-
-    if (defaultVoucherId && document.querySelectorAll(".chon:checked").length > 0) {
-        setTimeout(() => {
-            let bestVoucherInput = document.querySelector(`input[value="${defaultVoucherId}"]`);
-            if (bestVoucherInput) {
-                bestVoucherInput.click();
-                updateDiscount(defaultDiscountValue);
-                document.getElementById("voucherId").value = bestVoucherInput.value
-            } else {
-                console.error("Không tìm thấy voucher tốt nhất!");
-            }
-        }, 100);
-    }
-}
-
-// Cập nhật tổng tiền sau khi áp dụng voucher
-function updateDiscount(discountValue) {
-    let discount = parseFloat(discountValue) || 0;
-    let tongTienNew = tongTien - discount;
-    document.getElementById("soTienGiam").innerText = convertToVND(discount)
-    document.getElementById("showTongTien").innerText = convertToVND(tongTienNew)
-    console.log("tong tiền trước khi giảm : ", totalPriceAfterDiscount)
-    document.getElementById("totalPriceAfterDiscounts").innerText = convertToVND(totalPriceAfterDiscount)
-}
-
-function convertToVND(amount) {
-    if (isNaN(amount)) return "0 VND"; // Kiểm tra nếu không phải số
-    return amount.toLocaleString('vi-VN') + " VNĐ";
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-    let message = document.getElementById("messageRP")?.innerText;
-    let success = document.getElementById("successRP")?.innerText;
-
+    const message = document.getElementById("messageRP")?.innerText;
+    const success = document.getElementById("successRP")?.innerText;
     if (message && success) {
-        console.log("message : ", message)
         Swal.fire({
             position: "top-end",
             icon: success.trim() === "true" ? "success" : "error",
@@ -190,8 +205,8 @@ document.addEventListener("DOMContentLoaded", function () {
             showConfirmButton: false,
             timer: 2000,
             customClass: {
-                title: 'small-title', // Áp dụng CSS để giảm kích thước chữ
-                popup: 'small-popup' // Áp dụng CSS để điều chỉnh padding
+                title: 'small-title',
+                popup: 'small-popup'
             }
         });
     }
