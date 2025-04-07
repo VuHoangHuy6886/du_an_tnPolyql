@@ -629,8 +629,8 @@ recalcHoaDonTotal(order);
         }
         String logMsg = "Khôi phục đơn hàng có id: "+order.getId();
         addHistoryLog(orderId, "Khôi phục đơn hàng", logMsg,  authService.getCurrentUserDetails().get().getKhachHang().getTaiKhoan().getId());
-        hoaDonRepository.save(order);
-        entityManager.refresh(order);
+//        hoaDonRepository.save(order);
+//        entityManager.refresh(order);
         // Tính lại tổng tiền, bao gồm cả phí giảm giá và phí vận chuyển
         recalcHoaDonTotal(order);
         hoaDonRepository.save(order);

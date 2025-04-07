@@ -20,6 +20,7 @@ public class TrangThaiUtils {
         trangThaiMap.put("THANH_CONG", "Thành công");
         trangThaiMap.put("DA_HUY", "Đã hủy");
         trangThaiMap.put("THAT_LAC", "Thất lạc");
+        trangThaiMap.put("HOAN_HANG_THANH_CONG", "Hoàn hàng thành công");
     }
 
     public static String convertTrangThai(String trangThaiKey) {

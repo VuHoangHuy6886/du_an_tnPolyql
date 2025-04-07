@@ -217,7 +217,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Nếu đang DANG_GIAO => sẽ xử lý popup chọn (trong setupUpdateStatusModal), nên return null
         if (current === "DANG_GIAO") return null;
+        if (current === "GIAO_HANG_THANH_CONG") return "THANH_CONG";
 
+        // Nếu đơn hàng đã ở trạng thái "HOAN_HANG_THANH_CONG" hoặc "THANH_CONG", không chuyển tiếp nữa
+        if (current === "HOAN_HANG_THANH_CONG" || current === "THANH_CONG") return null;
         // Đơn hàng bình thường: lấy trạng thái kế tiếp trong mảng
         let idx = statuses.indexOf(current);
         if (idx === -1) return null;
@@ -1143,30 +1146,42 @@ document.addEventListener("DOMContentLoaded", function () {
 // Sự kiện nút hoàn tác
     document.getElementById('undoBtn').addEventListener('click', function () {
         if (pendingDeletion) {
-            clearInterval(deletionTimer);
-            fetch('/api/orders/' + orderId + '/details/' + pendingDeletion + '/undo', {
-                method: 'POST'
-            })
-                .then(response => {
-                    if (!response.ok) throw new Error('Lỗi hoàn tác xóa sản phẩm');
-                    return response.json();
-                })
-                .then(() => {
-                    Swal.fire('Thành công', 'Hoàn tác xóa sản phẩm thành công!', 'success');
-                    pendingDeletion = null;
-                    fetchAndPopulateProductList(orderId)
-                    // Ẩn thông báo hoàn tác
-                    document.getElementById('undoNotification').classList.add('hidden');
-                    // Cập nhật lại thông tin đơn hàng
-                    fetchOrderDetails();
-
-                })
-                .catch(error => {
-                    console.error("Error undoing deletion:", error);
-                    Swal.fire('Lỗi', error.message, 'error');
-                });
+            Swal.fire({
+                title: "Xác nhận hoàn tác?",
+                text: "Bạn có chắc chắn muốn hoàn tác việc xóa sản phẩm này?",
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonText: "Đồng ý",
+                cancelButtonText: "Hủy"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    clearInterval(deletionTimer);
+                    fetch('/api/orders/' + orderId + '/details/' + pendingDeletion + '/undo', {
+                        method: 'POST'
+                    })
+                        .then(response => {
+                            if (!response.ok) throw new Error('Lỗi hoàn tác xóa sản phẩm');
+                            return response.json();
+                        })
+                        .then(() => {
+                            Swal.fire('Thành công', 'Hoàn tác xóa sản phẩm thành công!', 'success');
+                            pendingDeletion = null;
+                            // Reload lại danh sách sản phẩm trong đơn hàng
+                            fetchAndPopulateProductList(orderId);
+                            // Ẩn thông báo hoàn tác
+                            document.getElementById('undoNotification').classList.add('hidden');
+                            // Cập nhật lại thông tin đơn hàng
+                            fetchOrderDetails();
+                        })
+                        .catch(error => {
+                            console.error("Error undoing deletion:", error);
+                            Swal.fire('Lỗi', error.message, 'error');
+                        });
+                }
+            });
         }
     });
+
 
     // Hàm ghi log lịch sử qua API
     function addHistoryLog(tieuDe, moTa) {
