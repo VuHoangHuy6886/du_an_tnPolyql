@@ -127,4 +127,35 @@ public class HoaDonService {
     public Page<HoaDon> getOrdersByMultipleStatusesPaged(List<String> statuses, Pageable pageable) {
         return hoaDonRepository.findAllByTrangThaiInPaged(statuses, pageable);
     }
+    public boolean cancelOrder(Integer hoaDonId, String lyDoHuy) {
+        Optional<HoaDon> hoaDonOpt = hoaDonRepository.findActiveById(hoaDonId);
+
+        if (hoaDonOpt.isEmpty()) {
+            return false;
+        }
+
+        HoaDon hoaDon = hoaDonOpt.get();
+
+
+        if (!hoaDon.getTrangThai().equals(HoaDonRepository.CHO_XAC_NHAN)) {
+            return false;
+        }
+
+
+        hoaDon.setTrangThai(HoaDonRepository.DA_HUY);
+        hoaDon.setGhiChu(lyDoHuy);
+
+        LichSuHoaDon lichSuHoaDon = LichSuHoaDon.builder()
+                .hoaDon(hoaDon)
+                .tieuDe("Hủy đơn hàng")
+                .moTa("Đơn hàng đã bị hủy. Lý do: " + lyDoHuy)
+                .thoiGian(LocalDateTime.now())
+                .isDeleted(false)
+                .build();
+
+        hoaDonRepository.save(hoaDon);
+        lichSuHoaDonRepository.save(lichSuHoaDon);
+
+        return true;
+    }
 }

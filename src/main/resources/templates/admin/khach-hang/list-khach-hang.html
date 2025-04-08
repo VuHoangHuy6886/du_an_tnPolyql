@@ -157,7 +157,6 @@
 </head>
 <body layout:fragment="content">
 <div class="row">
-    <!-- Table -->
     <div class="card shadow m-2 w-100">
         <div class="card-header py-3">
             <div class="row align-items-center">
@@ -165,27 +164,32 @@
                     <h1 class="h3 text-gray-800">Quản lý khách hàng</h1>
                 </div>
                 <div class="col-md-4">
-                    <div class="search-container">
-                        <input type="text" class="form-control" id="searchInput" placeholder="Tìm kiếm theo mã ,  email hoặc số điện thoại..." />
-                    </div>
+                    <form th:action="@{/admin/khach-hang/list-khach-hang}" method="get" class="search-container">
+                        <input type="text" class="form-control" id="searchInput" name="keyword" th:value="${keyword}" placeholder="Tìm kiếm theo email hoặc số điện thoại..." />
+                        <input type="hidden" name="gioiTinh" th:value="${gioiTinh}" />
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+                    </form>
                 </div>
                 <div class="col-md-8 d-flex justify-content-between align-items-center">
-                    <div class="filter-container">
+                    <form th:action="@{/admin/khach-hang/list-khach-hang}" method="get" class="filter-container">
                         <label for="genderFilter">Giới tính:</label>
-                        <select id="genderFilter" class="form-control" style="width: 150px;">
-                            <option value="">Tất cả</option>
-                            <option value="Nam">Nam</option>
-                            <option value="Nữ">Nữ</option>
+                        <select id="genderFilter" name="gioiTinh" class="form-control" style="width: 150px;" onchange="this.form.submit()">
+                            <option value="" th:selected="${gioiTinh == null}">Tất cả</option>
+                            <option value="Nam" th:selected="${gioiTinh == 'Nam'}">Nam</option>
+                            <option value="Nữ" th:selected="${gioiTinh == 'Nữ'}">Nữ</option>
                         </select>
+                        <input type="hidden" name="keyword" th:value="${keyword}" />
+                    </form>
+                    <div class="filter-container">
                         <label for="statusFilter">Trạng thái:</label>
                         <select id="statusFilter" class="form-control" style="width: 150px;">
-                            <option value="Hoạt động">Hoạt động</option>
-                            <option value="Đã xóa">Đã xóa</option>
+                            <option value="active" selected>Hoạt động</option>
+                            <option value="deleted">Đã xóa</option>
                         </select>
-                    </div>
 
+                    </div>
                     <div class="control-buttons">
-                        <a id="btn-reload" href="#" class="btn btn-primary">
+                        <a id="btn-reload" href="/admin/khach-hang/list-khach-hang" class="btn btn-primary">
                             <i class="fas fa-rotate-right"></i> Làm mới
                         </a>
                         <a href="/admin/khach-hang/add-khach-hang" class="btn btn-success">
@@ -196,64 +200,48 @@
             </div>
         </div>
         <div class="card-body">
-            <div class="">
-                <table class="border">
-                    <thead>
-                    <tr>
-                        <th>Mã</th>
-                        <th>Ảnh</th>
-                        <th>Tên</th>
-                        <th>Ngày sinh</th>
-                        <th>Giới tính</th>
-                        <th>Email</th>
-                        <th>Số điện thoại</th>
-                        <th>Trạng thái</th>
-                        <th>Chức năng</th>
-                    </tr>
-                    </thead>
-                    <tbody id="customerTableBody">
-                    <tr th:each="khachHang : ${khachHangs}">
-                        <td th:text="${khachHang.id}"></td>
-                        <td>
-                            <img th:src="${khachHang.taiKhoan.anhUrl}" alt="Ảnh khách hàng" width="100">
-                        </td>
-                        <td th:text="${khachHang.ten}"></td>
-                        <td th:text="${khachHang.ngaySinh}"></td>
-                        <td th:text="${khachHang.gioiTinh}"></td>
-                        <td th:text="${khachHang.taiKhoan.email}"></td>
-                        <td th:text="${khachHang.taiKhoan.soDienThoai}"></td>
-                        <td th:text="${khachHang.isDeleted ? 'Đã xóa ' : 'Hoạt động'}"></td>
-                        <td>
-                            <a th:href="@{/admin/khach-hang/xem-chi-tiet/{id}(id=${khachHang.id})}" >
-                                <i class="bi bi-eye"></i>
-                            </a>
-                            <a th:href="@{/admin/khach-hang/update-khach-hang/{id}(id=${khachHang.id})}" >
-                                <i style="margin-left: 10px" class="bi bi-pencil-square"></i>
-                            </a>
-                            <a href="#" class="delete-customer" th:data-url="@{/admin/khach-hang/delete-khach-hang/{id}(id=${khachHang.id})}">
-                                <i style="margin-left: 10px" class="bi bi-trash"></i>
-                            </a>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
+            <table class="border">
+                <thead>
+                <tr>
+                    <th>Mã</th>
+                    <th>Ảnh</th>
+                    <th>Tên</th>
+                    <th>Ngày sinh</th>
+                    <th>Giới tính</th>
+                    <th>Email</th>
+                    <th>Số điện thoại</th>
+                    <th>Trạng thái</th>
+                    <th>Chức năng</th>
+                </tr>
+                </thead>
+                <tbody id="customerTableBody">
+                <tr th:each="khachHang : ${khachHangs}">
+                    <td th:text="${khachHang.id}"></td>
+                    <td><img th:src="${khachHang.taiKhoan.anhUrl}" alt="Ảnh khách hàng" width="100"></td>
+                    <td th:text="${khachHang.ten}"></td>
+                    <td th:text="${khachHang.ngaySinh}"></td>
+                    <td th:text="${khachHang.gioiTinh}"></td>
+                    <td th:text="${khachHang.taiKhoan.email}"></td>
+                    <td th:text="${khachHang.taiKhoan.soDienThoai}"></td>
+                    <td th:text="${khachHang.isDeleted ? 'Đã xóa' : 'Hoạt động'}"></td>
+                    <td>
+                        <a th:href="@{/admin/khach-hang/xem-chi-tiet/{id}(id=${khachHang.id})}"><i class="bi bi-eye"></i></a>
+                        <a th:href="@{/admin/khach-hang/update-khach-hang/{id}(id=${khachHang.id})}"><i style="margin-left: 10px" class="bi bi-pencil-square"></i></a>
+                        <a href="#" class="delete-customer" th:data-url="@{/admin/khach-hang/delete-khach-hang/{id}(id=${khachHang.id})}"><i style="margin-left: 10px" class="bi bi-trash"></i></a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
             <div class="pagination">
                 <ul class="pagination justify-content-center">
-                    <!-- Nút "Trước" -->
                     <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                        <a class="page-link" th:href="@{/admin/khach-hang/list-khach-hang(page=${currentPage - 1})}" tabindex="-1">Trước</a>
+                        <a class="page-link" th:href="@{/admin/khach-hang/list-khach-hang(page=${currentPage - 1}, keyword=${keyword}, gioiTinh=${gioiTinh})}" tabindex="-1">Trước</a>
                     </li>
-
-                    <!-- Các trang -->
-                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                        th:classappend="${currentPage == i} ? 'active'">
-                        <a class="page-link" th:href="@{/admin/khach-hang/list-khach-hang(page=${i})}"
-                           th:text="${i + 1}">1</a>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${currentPage == i} ? 'active'">
+                        <a class="page-link" th:href="@{/admin/khach-hang/list-khach-hang(page=${i}, keyword=${keyword}, gioiTinh=${gioiTinh})}" th:text="${i + 1}">1</a>
                     </li>
-                    <!-- Nút "Sau" -->
                     <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
-                        <a class="page-link" th:href="@{/admin/khach-hang/list-khach-hang(page=${currentPage + 1})}">Sau</a>
+                        <a class="page-link" th:href="@{/admin/khach-hang/list-khach-hang(page=${currentPage + 1}, keyword=${keyword}, gioiTinh=${gioiTinh})}">Sau</a>
                     </li>
                 </ul>
             </div>
@@ -262,42 +250,6 @@
 </div>
 <th:block layout:fragment="bottom_link">
     <script >
-        // Hàm tìm kiếm theo input
-        document.getElementById('searchInput').addEventListener('input', function () {
-            var keyword = this.value.toLowerCase();
-            var rows = document.querySelectorAll('#customerTableBody tr');
-            rows.forEach(function(row) {
-                var cells = row.querySelectorAll('td');
-                var match = false;
-                cells.forEach(function(cell) {
-                    if (cell.textContent.toLowerCase().includes(keyword)) {
-                        match = true;
-                    }
-                });
-                if (match) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        });
-        document.getElementById('genderFilter').addEventListener('change', function () {
-            var selectedGender = this.value.toLowerCase();
-            var rows = document.querySelectorAll('#customerTableBody tr');
-
-            rows.forEach(function (row) {
-                var genderCell = row.cells[4]; // Cột thứ 5 chứa giới tính
-                if (!genderCell) return;
-
-                var genderText = genderCell.textContent.trim().toLowerCase();
-
-                if (selectedGender === "" || genderText === selectedGender) {
-                    row.style.display = "";
-                } else {
-                    row.style.display = "none";
-                }
-            });
-        });
         document.getElementById('statusFilter').addEventListener('change', function () {
             let selectedValue = this.value;
             if (selectedValue === 'active') {
@@ -407,7 +359,6 @@
                 });
             }
         });
-
         // Thêm xử lý cho nút làm mới
         document.getElementById('btn-reload').addEventListener('click', function(e) {
             e.preventDefault();
