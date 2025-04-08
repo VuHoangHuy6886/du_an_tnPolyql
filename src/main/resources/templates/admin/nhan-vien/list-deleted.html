@@ -1,50 +1,19 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="/admin/layout-dashboard/layout.html">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="/admin/layout-dashboard/layout.html">
 <head>
   <th:block layout:fragment="head_link">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-      .btn-back {
-        float: right;
-      }
-
-      .search-input {
-        margin-bottom: 20px;
-      }
-
-      .card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      .card-header h1 {
-        margin-bottom: 0;
-      }
-
-      .card-body {
-        padding-top: 10px;
-      }
-
-      .table th, .table td {
-        vertical-align: middle;
-      }
-
-      .table img {
-        border-radius: 5px;
-      }
-
-      .table thead {
-        background-color: #007bff;
-        color: white;
-      }
-
-      .table thead th {
-        text-align: center;
-      }
+      .btn-back { float: right; }
+      .search-input { margin-bottom: 20px; max-width: 400px; }
+      .card-header { display: flex; justify-content: space-between; align-items: center; }
+      .card-header h1 { margin-bottom: 0; }
+      .card-body { padding-top: 10px; }
+      .table th, .table td { vertical-align: middle; }
+      .table img { border-radius: 5px; }
+      .table thead { background-color: #007bff; color: white; }
+      .table thead th { text-align: center; }
     </style>
   </th:block>
 </head>
@@ -58,7 +27,10 @@
       </a>
     </div>
     <div class="card-body">
-      <input type="text" class="form-control search-input" id="searchInput" placeholder="Tìm kiếm theo mã , email hoặc số điện thoại...">
+      <form th:action="@{/admin/nhan-vien/list-deleted}" method="get" class="search-input d-flex align-items-center gap-2">
+        <input type="text" class="form-control" id="searchInput" name="keyword" th:value="${keyword}" placeholder="Tìm kiếm theo email hoặc số điện thoại...">
+        <button type="submit" style="margin-left: 15px" class="btn btn-primary"><i class="fas fa-search"></i></button>
+      </form>
       <table class="table table-bordered">
         <thead>
         <tr>
@@ -80,7 +52,7 @@
           <td th:text="${nhanVien.taiKhoan.email}"></td>
           <td th:text="${nhanVien.taiKhoan.soDienThoai}"></td>
           <td th:text="${nhanVien.taiKhoan.role}"></td>
-          <td th:text="${nhanVien.isDeleted ? 'Đã xóa ' : 'Hoạt động'}"></td>
+          <td th:text="${nhanVien.isDeleted ? 'Đã xóa' : 'Hoạt động'}"></td>
           <td>
             <button class="btn btn-warning" onclick="confirmRestore(this)" th:data-id="${nhanVien.id}">
               <i class="bi bi-arrow-clockwise"></i> Khôi phục
@@ -89,28 +61,20 @@
         </tr>
         </tbody>
       </table>
-
-      <!-- Phân trang -->
       <div class="d-flex justify-content-center mt-3">
         <nav aria-label="Page navigation">
           <ul class="pagination" th:if="${totalPages > 0}">
-            <!-- Previous button -->
             <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
-              <a class="page-link" th:href="@{/admin/nhan-vien/list-deleted(page=${currentPage - 1})}" aria-label="Previous">
-                <span aria-hidden="true">&laquo;</span>
+              <a class="page-link" th:href="@{/admin/nhan-vien/list-deleted(page=${currentPage - 1}, keyword=${keyword})}" aria-label="Previous">
+                <span aria-hidden="true">«</span>
               </a>
             </li>
-
-            <!-- Page numbers -->
-            <li class="page-item" th:each="i: ${#numbers.sequence(0, totalPages - 1)}"
-                th:classappend="${currentPage == i ? 'active' : ''}">
-              <a class="page-link" th:href="@{/admin/nhan-vien/list-deleted(page=${i})}" th:text="${i + 1}"></a>
+            <li class="page-item" th:each="i: ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${currentPage == i ? 'active' : ''}">
+              <a class="page-link" th:href="@{/admin/nhan-vien/list-deleted(page=${i}, keyword=${keyword})}" th:text="${i + 1}"></a>
             </li>
-
-            <!-- Next button -->
             <li class="page-item" th:classappend="${currentPage == totalPages - 1 ? 'disabled' : ''}">
-              <a class="page-link" th:href="@{/admin/nhan-vien/list-deleted(page=${currentPage + 1})}" aria-label="Next">
-                <span aria-hidden="true">&raquo;</span>
+              <a class="page-link" th:href="@{/admin/nhan-vien/list-deleted(page=${currentPage + 1}, keyword=${keyword})}" aria-label="Next">
+                <span aria-hidden="true">»</span>
               </a>
             </li>
           </ul>
@@ -121,20 +85,6 @@
 </div>
 <th:block layout:fragment="bottom_link">
   <script>
-    document.getElementById('searchInput').addEventListener('input', function () {
-      var keyword = this.value.toLowerCase();
-      var rows = document.querySelectorAll('#employeeTableBody tr');
-      rows.forEach(function(row) {
-        var cells = row.querySelectorAll('td');
-        var match = false;
-        cells.forEach(function(cell) {
-          if (cell.textContent.toLowerCase().includes(keyword)) {
-            match = true;
-          }
-        });
-        row.style.display = match ? '' : 'none';
-      });
-    });
     function confirmRestore(button) {
       var id = button.getAttribute("data-id");
       Swal.fire({
@@ -153,31 +103,30 @@
       });
     }
 
-    // Kiểm tra nếu có thông báo từ server
-    window.onload = function () {
-      let successMessage = `[[${successMessage}]]`;
-      let errorMessage = `[[${errorMessage}]]`;
+    document.addEventListener("DOMContentLoaded", function () {
+      const successMessage = `[[${successMessage}]]`;
+      const errorMessage = `[[${errorMessage}]]`;
 
-      if (successMessage) {
+      if (successMessage && successMessage !== "null") {
         Swal.fire({
           icon: "success",
           title: "Khôi phục thành công!",
+          text: successMessage,
           showConfirmButton: false,
           timer: 3000
-        }).then(() => {
-          window.location.href = "/admin/nhan-vien/list-deleted";
         });
       }
 
-      if (errorMessage) {
+      if (errorMessage && errorMessage !== "null") {
         Swal.fire({
           icon: "error",
           title: "Không thể khôi phục!",
+          text: errorMessage,
           showConfirmButton: false,
           timer: 5000
         });
       }
-    };
+    });
   </script>
 </th:block>
 </body>

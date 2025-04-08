@@ -35,19 +35,20 @@ public class NhanVienController {
     private BlobStoreService blobStoreService;
     private PasswordEncoder passwordEncoder;
 
-    // Hiển thị danh sách nhân viên
     @GetMapping("/list")
     public String listNhanVien(Model model,
                                @RequestParam(defaultValue = "0") int page,
-                               @RequestParam(defaultValue = "5") int size) {
+                               @RequestParam(defaultValue = "5") int size,
+                               @RequestParam(required = false) String keyword) {
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<NhanVien> pageNhanVien = nhanVienService.getAllNhanVienNotDeleted(pageable);  // Truy vấn phân trang
+        Page<NhanVien> pageNhanVien = nhanVienService.searchNhanVien(keyword, pageable);
 
         model.addAttribute("nhanViens", pageNhanVien.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", pageNhanVien.getTotalPages());
         model.addAttribute("totalItems", pageNhanVien.getTotalElements());
+        model.addAttribute("keyword", keyword); // Giữ keyword để hiển thị lại
 
         return "admin/nhan-vien/list";
     }
@@ -135,18 +136,20 @@ public class NhanVienController {
         }
         return "redirect:/admin/nhan-vien/list";
     }
-    // Danh sách nhân viên bị xóa
+// Danh sách nhân viên đã xóa
     @GetMapping("/list-deleted")
     public String listDeletedNhanVien(Model model,
                                       @RequestParam(defaultValue = "0") int page,
-                                      @RequestParam(defaultValue = "5") int size) {
+                                      @RequestParam(defaultValue = "5") int size,
+                                      @RequestParam(required = false) String keyword) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<NhanVien> pageNhanVien = nhanVienService.getAllNhanVienDeleted(pageable);
+        Page<NhanVien> pageNhanVien = nhanVienService.searchDeletedNhanVien(keyword, pageable);
 
         model.addAttribute("nhanViens", pageNhanVien.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", pageNhanVien.getTotalPages());
         model.addAttribute("totalItems", pageNhanVien.getTotalElements());
+        model.addAttribute("keyword", keyword);
 
         return "admin/nhan-vien/list-deleted";
     }

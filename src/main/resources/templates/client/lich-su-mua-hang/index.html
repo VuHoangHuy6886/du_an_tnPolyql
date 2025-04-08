@@ -206,6 +206,8 @@
                                 <p><strong>Tổng tiền:</strong> <span th:text="${#numbers.formatDecimal(hoaDon.tongTien, 0, 'COMMA', 0, 'POINT')} + ' VND'"></span></p>
                                 <p><strong>Phương thức:</strong> <span th:text="${hoaDon.phuongThucThanhToan}"></span></p>
                                 <button class="btn btn-primary btn-view-details" th:data-id="${hoaDon.id}">Xem chi tiết</button>
+                                <!-- Thêm nút hủy đơn cho trạng thái CHO_XAC_NHAN -->
+                                <button th:if="${hoaDon.trangThai == 'CHO_XAC_NHAN'}" class="btn btn-danger ms-2 btn-cancel-order" th:data-id="${hoaDon.id}">Hủy đơn</button>
                             </div>
                         </div>
                     </div>
@@ -259,9 +261,71 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-labelledby="cancelOrderModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cancelOrderModalLabel">Hủy đơn hàng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Vui lòng chọn lý do hủy đơn hàng:</p>
+                    <form id="cancelOrderForm">
+                        <input type="hidden" id="cancelOrderId" name="orderId">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="lyDoHuy" id="reason1" value="Tôi muốn cập nhật địa chỉ/sdt nhận hàng" checked>
+                            <label class="form-check-label" for="reason1">
+                                Tôi muốn cập nhật địa chỉ/sdt nhận hàng
+                            </label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="lyDoHuy" id="reason2" value="Tôi muốn thêm/thay đổi Mã giảm giá">
+                            <label class="form-check-label" for="reason2">
+                                Tôi muốn thêm/thay đổi Mã giảm giá
+                            </label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="lyDoHuy" id="reason3" value="Tôi muốn thay đổi sản phẩm (kích thước, màu sắc, số lượng..)">
+                            <label class="form-check-label" for="reason3">
+                                Tôi muốn thay đổi sản phẩm (kích thước, màu sắc, số lượng..)
+                            </label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="lyDoHuy" id="reason4" value="Tìm thấy sản phẩm giá tốt hơn">
+                            <label class="form-check-label" for="reason4">
+                                Tôi tìm thấy chỗ mua khác tốt hơn (Rẻ hơn, uy tín hơn, giao nhanh hơn..)
+                            </label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="lyDoHuy" id="reason5" value="Đổi ý, không muốn mua nữa">
+                            <label class="form-check-label" for="reason5">
+                                Tôi không có nhu cầu mua nữa
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="lyDoHuy" id="reasonOther" value="other">
+                            <label class="form-check-label" for="reasonOther">
+                                Lý do khác
+                            </label>
+                        </div>
+                        <div class="mb-3" id="otherReasonContainer" style="display: none;">
+                            <label for="otherReason" class="form-label">Nhập lý do khác:</label>
+                            <textarea class="form-control" id="otherReason" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-danger" id="confirmCancelOrder">Xác nhận hủy</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+<!-- Modal Hủy đơn hàng -->
 </body>
 <th:block layout:fragment="bottom_link">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="/js/client/cart.js"></script>
     <script src="/js/client/iphone.js"></script>
@@ -283,23 +347,87 @@
                 }
             });
         });
-        // // Hàm hủy đơn hàng
-        // function cancelOrder(orderId) {
-        //     if (confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')) {
-        //         $.ajax({
-        //             url: '/lichsumuahang/huy/' + orderId,
-        //             type: 'POST',
-        //             success: function(response) {
-        //                 alert('Đơn hàng đã được hủy thành công!');
-        //                 // Reload trang sau khi hủy đơn hàng thành công
-        //                 location.reload();
-        //             },
-        //             error: function(error) {
-        //                 alert('Có lỗi xảy ra khi hủy đơn hàng. Vui lòng thử lại sau.');
-        //             }
-        //         });
-        //     }
-        // }
+        // Xử lý khi nhấn nút hủy đơn
+        $(document).on('click', '.btn-cancel-order', function() {
+            var orderId = $(this).data('id');
+            $('#cancelOrderId').val(orderId);
+            $('#cancelOrderModal').modal('show');
+        });
+
+        // Hiển thị/ẩn trường nhập lý do khác
+        $(document).on('change', 'input[name="lyDoHuy"]', function() {
+            if ($(this).val() === 'other') {
+                $('#otherReasonContainer').show();
+            } else {
+                $('#otherReasonContainer').hide();
+            }
+        });
+
+        // Xử lý khi xác nhận hủy đơn
+        $(document).on('click', '#confirmCancelOrder', function() {
+            var orderId = $('#cancelOrderId').val();
+            var selectedReason = $('input[name="lyDoHuy"]:checked').val();
+            var lyDoHuy;
+
+            if (selectedReason === 'other') {
+                lyDoHuy = $('#otherReason').val().trim();
+                if (!lyDoHuy) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi',
+                        text: 'Vui lòng nhập lý do hủy đơn hàng!'
+                    });
+                    return;
+                }
+            } else {
+                lyDoHuy = selectedReason;
+            }
+
+            // Hiển thị loading
+            Swal.fire({
+                title: 'Đang xử lý...',
+                text: 'Vui lòng chờ trong giây lát',
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                allowEnterKey: false,
+                showConfirmButton: false
+            });
+
+            // Gửi yêu cầu hủy đơn
+            $.ajax({
+                url: '/lichsumuahang/huy/' + orderId,
+                type: 'POST',
+                data: { lyDoHuy: lyDoHuy },
+                success: function(response) {
+                    $('#cancelOrderModal').modal('hide');
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Thành công!',
+                        text: 'Đơn hàng đã được hủy thành công!',
+                        confirmButtonText: 'OK'
+                    }).then((result) => {
+                        // Reload trang sau khi hủy đơn hàng thành công
+                        location.reload();
+                    });
+                },
+                error: function(xhr) {
+                    let errorMessage = 'Có lỗi xảy ra khi hủy đơn hàng. Vui lòng thử lại sau.';
+                    if (xhr.responseText) {
+                        errorMessage = xhr.responseText;
+                    }
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi',
+                        text: errorMessage
+                    });
+                }
+            });
+        });
     </script>
 </th:block>
 </html>

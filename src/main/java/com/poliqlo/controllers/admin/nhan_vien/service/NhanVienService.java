@@ -92,5 +92,11 @@ public class NhanVienService {
         nhanVien.setTen(updatedNhanVien.getTen());
         nhanVienRepository.save(nhanVien);
     }
+    public Page<NhanVien> searchNhanVien(String keyword, Pageable pageable) {
+        return nhanVienRepository.findBySearch(keyword, pageable);
+    }
+    public Page<NhanVien> searchDeletedNhanVien(String keyword, Pageable pageable) {
+        return nhanVienRepository.findDeletedBySearch(keyword, pageable);
+    }
 
 }

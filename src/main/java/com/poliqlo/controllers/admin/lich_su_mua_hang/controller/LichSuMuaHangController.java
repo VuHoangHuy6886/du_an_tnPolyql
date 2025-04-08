@@ -4,6 +4,7 @@ import com.poliqlo.controllers.admin.lich_su_mua_hang.service.HoaDonService;
 import com.poliqlo.models.HoaDon;
 import com.poliqlo.models.HoaDonChiTiet;
 import com.poliqlo.models.LichSuHoaDon;
+import com.poliqlo.repositories.HoaDonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +20,7 @@ import java.util.*;
 @RequestMapping("/lichsumuahang")
 public class LichSuMuaHangController {
     private final HoaDonService hoaDonService;
+    private HoaDonRepository hoaDonRepository;
     private static final int PAGE_SIZE = 2; // Số đơn hàng trên 1 trang
 
     @Autowired
@@ -123,18 +125,27 @@ public class LichSuMuaHangController {
         model.addAttribute("pageSize", PAGE_SIZE);
     }
 
-//    @PostMapping("/huy/{hoaDonId}")
-//    @ResponseBody
-//    public ResponseEntity<?> cancelOrder(@PathVariable Integer hoaDonId) {
-//        try {
-//            boolean success = hoaDonService.cancelOrder(hoaDonId);
-//            if (success) {
-//                return ResponseEntity.ok().build();
-//            } else {
-//                return ResponseEntity.badRequest().body("Không thể hủy đơn hàng này");
-//            }
-//        } catch (Exception e) {
-//            return ResponseEntity.badRequest().body("Lỗi khi hủy đơn hàng: " + e.getMessage());
-//        }
-//    }
+    @PostMapping("/huy/{hoaDonId}")
+    @ResponseBody
+    public ResponseEntity<?> cancelOrder(@PathVariable Integer hoaDonId, @RequestParam String lyDoHuy) {
+        try {
+            Optional<HoaDon> hoaDonOpt = hoaDonService.getOrderById(hoaDonId);
+            if (hoaDonOpt.isEmpty()) {
+                return ResponseEntity.badRequest().body("Đơn hàng không tồn tại hoặc đã bị xóa.");
+            }
+            HoaDon hoaDon = hoaDonOpt.get();
+            if (!hoaDon.getTrangThai().equals(HoaDonRepository.CHO_XAC_NHAN)) {
+                return ResponseEntity.badRequest().body("Chỉ có thể hủy đơn hàng ở trạng thái 'Chờ xác nhận'. Trạng thái hiện tại: " + hoaDon.getTrangThai());
+            }
+
+            boolean success = hoaDonService.cancelOrder(hoaDonId, lyDoHuy);
+            if (success) {
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.badRequest().body("Không thể hủy đơn hàng này.");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi khi hủy đơn hàng: " + e.getMessage());
+        }
+    }
 }

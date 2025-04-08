@@ -5,145 +5,34 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     </th:block>
     <style>
-        .search-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            width: 100%;
-            flex-grow: 1;
-        }
-        .search-container input {
-            width: 100%;
-            max-width: 600px;
-            height: 40px;
-            padding: 8px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .control-buttons {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .filter-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            font-size: 14px;
-            text-align: left;
-        }
-
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            vertical-align: middle;
-        }
-
-        th {
-            background-color: #007bff;
-            color: white;
-            text-align: center;
-        }
-
-        td img {
-            display: block;
-            margin: 0 auto;
-            border-radius: 5px;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-
-        tr:hover {
-            background-color: #ddd;
-        }
-
-        .table-container {
-            overflow-x: auto;
-        }
-
-        td a {
-            color: #007bff;
-            text-decoration: none;
-            font-size: 16px;
-        }
-
-        td a:hover {
-            color: #0056b3;
-        }
-
-        .table thead tr {
-            border-bottom: 2px solid #007bff;
-        }
-        .pagination {
-            display: flex;
-            justify-content: flex-end;  /* Di chuyển phân trang ra bên phải */
-            align-items: center;
-            margin-top: 10px;
-        }
-
-        .pagination .page-item {
-            margin: 0 3px;  /* Giảm khoảng cách giữa các nút */
-        }
-
-        .pagination .page-link {
-            display: inline-block;
-            padding: 6px 10px;  /* Giảm kích thước padding để nút nhỏ lại */
-            font-size: 14px;  /* Giảm kích thước chữ */
-            font-weight: 600;
-            color: #007bff;
-            background-color: white;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-        }
-
-        .pagination .page-link:hover {
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-        }
-
-        .pagination .page-item.disabled .page-link {
-            color: #ddd;
-            background-color: #f8f9fa;
-            cursor: not-allowed;
-        }
-
-        .pagination .page-item.active .page-link {
-            background-color: #007bff;
-            color: white;
-            border-color: #007bff;
-        }
-
-        .pagination .page-link:focus {
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.5);
-        }
-
-        .pagination .page-item a {
-            text-decoration: none;
-        }
-
+        .search-container { display: flex; align-items: center; gap: 10px; width: 100%; flex-grow: 1; }
+        .search-container input { width: 100%; max-width: 600px; height: 40px; padding: 8px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); }
+        .control-buttons { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+        .filter-container { display: flex; align-items: center; gap: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; text-align: left; }
+        th, td { border: 1px solid #ddd; padding: 12px; vertical-align: middle; }
+        th { background-color: #007bff; color: white; text-align: center; }
+        td img { display: block; margin: 0 auto; border-radius: 5px; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        tr:hover { background-color: #ddd; }
+        .table-container { overflow-x: auto; }
+        td a { color: #007bff; text-decoration: none; font-size: 16px; }
+        td a:hover { color: #0056b3; }
+        .table thead tr { border-bottom: 2px solid #007bff; }
+        .pagination { display: flex; justify-content: flex-end; align-items: center; margin-top: 10px; }
+        .pagination .page-item { margin: 0 3px; }
+        .pagination .page-link { padding: 6px 10px; font-size: 14px; font-weight: 600; color: #007bff; background-color: white; border: 1px solid #ddd; border-radius: 4px; transition: all 0.3s ease; }
+        .pagination .page-link:hover { background-color: #007bff; color: white; cursor: pointer; }
+        .pagination .page-item.disabled .page-link { color: #ddd; background-color: #f8f9fa; cursor: not-allowed; }
+        .pagination .page-item.active .page-link { background-color: #007bff; color: white; border-color: #007bff; }
+        .pagination .page-link:focus { outline: none; box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.5); }
+        .pagination .page-item a { text-decoration: none; }
     </style>
 </head>
 <body layout:fragment="content">
 <p id="successMessage" th:if="${successMessage}" th:text="${successMessage}" hidden></p>
 
 <div class="row">
-    <!-- Table -->
     <div class="card shadow m-2 w-100">
         <div class="card-header py-3">
             <div class="row align-items-center">
@@ -151,23 +40,21 @@
                     <h1 class="h3 text-gray-800">Quản lý nhân viên</h1>
                 </div>
                 <div class="col-md-4">
-                    <div class="search-container">
-                        <input type="text" class="form-control" id="searchInput" placeholder="Tìm kiếm theo mã ,  email hoặc số điện thoại..." />
-                    </div>
+                    <form th:action="@{/admin/nhan-vien/list}" method="get" class="search-container">
+                        <input type="text" class="form-control" id="searchInput" name="keyword" th:value="${keyword}" placeholder="Tìm kiếm theo email hoặc số điện thoại..." />
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+                    </form>
                 </div>
-
                 <div class="col-md-8 d-flex justify-content-between align-items-center">
-                    <!-- Filter and Action buttons -->
                     <div class="filter-container">
                         <label for="statusFilter">Trạng thái:</label>
                         <select id="statusFilter" class="form-control" style="width: 150px;">
                             <option value="active" selected>Hoạt động</option>
                             <option value="deleted">Đã xóa</option>
                         </select>
-
                     </div>
                     <div class="control-buttons">
-                        <a id="btn-reload" href="#" class="btn btn-primary">
+                        <a id="btn-reload" href="/admin/nhan-vien/list" class="btn btn-primary">
                             <i class="fas fa-rotate-right"></i> Làm mới
                         </a>
                         <a href="/admin/nhan-vien/add-nhan-vien" class="btn btn-success">
@@ -195,24 +82,16 @@
                     <tbody id="employeeTableBody">
                     <tr th:each="nhanVien : ${nhanViens}">
                         <td th:text="${nhanVien.id}"></td>
-                        <td>
-                            <img th:src="${nhanVien.taiKhoan.anhUrl}" alt="Ảnh nhân viên" width="100">
-                        </td>
+                        <td><img th:src="${nhanVien.taiKhoan.anhUrl}" alt="Ảnh nhân viên" width="100"></td>
                         <td th:text="${nhanVien.ten}"></td>
                         <td th:text="${nhanVien.taiKhoan.email}"></td>
                         <td th:text="${nhanVien.taiKhoan.soDienThoai}"></td>
                         <td th:text="${nhanVien.taiKhoan.role}"></td>
-                        <td th:text="${nhanVien.isDeleted ? 'Đã xóa ' : 'Hoạt động'}"></td>
+                        <td th:text="${nhanVien.isDeleted ? 'Đã xóa' : 'Hoạt động'}"></td>
                         <td>
-                            <a th:href="@{/admin/nhan-vien/xem-chi-tiet/{id}(id=${nhanVien.id})}" >
-                                <i class="bi bi-eye"></i>
-                            </a>
-                            <a th:href="@{/admin/nhan-vien/update-nhan-vien/{id}(id=${nhanVien.id})}" >
-                                <i style="margin-left: 10px" class="bi bi-pencil-square"></i>
-                            </a>
-                            <a href="#" class="delete-employee" th:data-url="@{/admin/nhan-vien/delete-nhan-vien/{id}(id=${nhanVien.id})}">
-                                <i style="margin-left: 10px" class="bi bi-trash"></i>
-                            </a>
+                            <a th:href="@{/admin/nhan-vien/xem-chi-tiet/{id}(id=${nhanVien.id})}"><i class="bi bi-eye"></i></a>
+                            <a th:href="@{/admin/nhan-vien/update-nhan-vien/{id}(id=${nhanVien.id})}"><i style="margin-left: 10px" class="bi bi-pencil-square"></i></a>
+                            <a href="#" class="delete-employee" th:data-url="@{/admin/nhan-vien/delete-nhan-vien/{id}(id=${nhanVien.id})}"><i style="margin-left: 10px" class="bi bi-trash"></i></a>
                         </td>
                     </tr>
                     </tbody>
@@ -220,27 +99,19 @@
             </div>
             <div class="pagination">
                 <ul class="pagination justify-content-center">
-                    <!-- Nút "Trước" -->
                     <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                        <a class="page-link" th:href="@{/admin/nhan-vien/list(page=${currentPage - 1})}" tabindex="-1">Trước</a>
+                        <a class="page-link" th:href="@{/admin/nhan-vien/list(page=${currentPage - 1}, keyword=${keyword})}" tabindex="-1">Trước</a>
                     </li>
-
-                    <!-- Các trang -->
-                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                        th:classappend="${currentPage == i} ? 'active'">
-                        <a class="page-link" th:href="@{/admin/nhan-vien/list(page=${i})}"
-                           th:text="${i + 1}">1</a>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${currentPage == i} ? 'active'">
+                        <a class="page-link" th:href="@{/admin/nhan-vien/list(page=${i}, keyword=${keyword})}" th:text="${i + 1}">1</a>
                     </li>
-
-                    <!-- Nút "Sau" -->
                     <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
-                        <a class="page-link" th:href="@{/admin/nhan-vien/list(page=${currentPage + 1})}">Sau</a>
+                        <a class="page-link" th:href="@{/admin/nhan-vien/list(page=${currentPage + 1}, keyword=${keyword})}">Sau</a>
                     </li>
                 </ul>
             </div>
         </div>
     </div>
-</div>
 </div>
 
 <th:block layout:fragment="bottom_link">
@@ -254,25 +125,6 @@
             }
         });
 
-        // Hàm tìm kiếm theo input
-        document.getElementById('searchInput').addEventListener('input', function () {
-            var keyword = this.value.toLowerCase();
-            var rows = document.querySelectorAll('#employeeTableBody tr');
-            rows.forEach(function(row) {
-                var cells = row.querySelectorAll('td');
-                var match = false;
-                cells.forEach(function(cell) {
-                    if (cell.textContent.toLowerCase().includes(keyword)) {
-                        match = true;
-                    }
-                });
-                if (match) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        });
         document.addEventListener("DOMContentLoaded", function () {
             const successMessage = document.getElementById("successMessage");
             if (successMessage) {
@@ -285,6 +137,7 @@
                 });
             }
         });
+
         document.querySelectorAll(".delete-employee").forEach(item => {
             item.addEventListener("click", function (event) {
                 event.preventDefault();
@@ -300,16 +153,12 @@
                     cancelButtonText: "Hủy"
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Sử dụng fetch để gọi API xóa thay vì chuyển hướng trang
                         fetch(deleteUrl, {
                             method: 'GET',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            }
+                            headers: { 'Content-Type': 'application/json' }
                         })
                             .then(response => {
                                 if (response.ok) {
-                                    // Hiển thị thông báo xóa thành công
                                     Swal.fire({
                                         icon: 'success',
                                         title: 'Thành công!',
@@ -317,11 +166,9 @@
                                         timer: 2500,
                                         showConfirmButton: false
                                     }).then(() => {
-                                        // Sau khi hiển thị thông báo, tải lại trang để cập nhật danh sách
                                         location.reload();
                                     });
                                 } else {
-                                    // Xử lý lỗi nếu có
                                     Swal.fire({
                                         icon: 'error',
                                         title: 'Lỗi!',

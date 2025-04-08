@@ -87,4 +87,11 @@ public class KhachHangService {
             taiKhoanRepository.save(taiKhoan);
         }
     }
+    public Page<KhachHang> searchAndFilterKhachHang(String keyword, String gioiTinh, Pageable pageable) {
+        return khachHangRepository.findBySearchAndFilter(keyword, gioiTinh, pageable);
+    }
+    // Thêm phương thức cho khách hàng đã xóa
+    public Page<KhachHang> searchAndFilterDeletedKhachHang(String keyword, String gioiTinh, Pageable pageable) {
+        return khachHangRepository.findDeletedBySearchAndFilter(keyword, gioiTinh, pageable);
+    }
 }

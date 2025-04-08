@@ -33,16 +33,20 @@ public class KhachHangController {
 
     @GetMapping("/list-khach-hang")
     public String listKhachHang(Model model,
-                               @RequestParam(defaultValue = "0") int page,
-                               @RequestParam(defaultValue = "5") int size) {
+                                @RequestParam(defaultValue = "0") int page,
+                                @RequestParam(defaultValue = "5") int size,
+                                @RequestParam(required = false) String keyword,
+                                @RequestParam(required = false) String gioiTinh) {
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<KhachHang> pageKhachHang = khachHangService.getAllKhachHangNotDeleted(pageable);  // Truy vấn phân trang
+        Page<KhachHang> pageKhachHang = khachHangService.searchAndFilterKhachHang(keyword, gioiTinh, pageable);
 
         model.addAttribute("khachHangs", pageKhachHang.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", pageKhachHang.getTotalPages());
         model.addAttribute("totalItems", pageKhachHang.getTotalElements());
+        model.addAttribute("keyword", keyword); // Giữ keyword để hiển thị lại trên giao diện
+        model.addAttribute("gioiTinh", gioiTinh); // Giữ bộ lọc giới tính
 
         return "admin/khach-hang/list-khach-hang";
     }
@@ -136,18 +140,22 @@ public class KhachHangController {
         }
         return "redirect:/admin/khach-hang/list-khach-hang";
     }
-    // Danh sách khach hang bị xóa
     @GetMapping("/list-customer-deleted")
-    public String listDeletedKhachHang(Model model ,
+    public String listDeletedKhachHang(Model model,
                                        @RequestParam(defaultValue = "0") int page,
-                                       @RequestParam(defaultValue = "5") int size) {
+                                       @RequestParam(defaultValue = "5") int size,
+                                       @RequestParam(required = false) String keyword,
+                                       @RequestParam(required = false) String gioiTinh) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<KhachHang> danhSachKhachHangDaXoa = khachHangService.getAllKhachHangDeleted(pageable);
-//        model.addAttribute("khachHangs", danhSachKhachHangDaXoa);
+        Page<KhachHang> danhSachKhachHangDaXoa = khachHangService.searchAndFilterDeletedKhachHang(keyword, gioiTinh, pageable);
+
         model.addAttribute("khachHangs", danhSachKhachHangDaXoa.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", danhSachKhachHangDaXoa.getTotalPages());
         model.addAttribute("totalItems", danhSachKhachHangDaXoa.getTotalElements());
+        model.addAttribute("keyword", keyword); // Giữ keyword
+        model.addAttribute("gioiTinh", gioiTinh); // Giữ bộ lọc giới tính
+
         return "admin/khach-hang/list-customer-deleted";
     }
     @GetMapping("/restore/{id}")
