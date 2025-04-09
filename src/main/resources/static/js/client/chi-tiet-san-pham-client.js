@@ -9,6 +9,19 @@ function formatCurrencyVND(value) {
     return rounded.toLocaleString("vi-VN") + " VNĐ";
 }
 
+// Hàm lấy giá hiệu quả của biến thể (dùng chung cho hiển thị giá chính và tính tổng)
+function getEffectivePrice(variant) {
+    let effectivePrice = variant.giaBan;
+    if (variant.isPromotionProduct && variant.dotGiamGia) {
+        if (variant.dotGiamGia.loaiChietKhau === 'PHAN_TRAM') {
+            effectivePrice = variant.giaChietKhau;
+        } else {
+            effectivePrice = variant.giaBan - variant.dotGiamGia.giaTriGiam;
+        }
+    }
+    return effectivePrice;
+}
+
 // Hàm kiểm tra đợt giảm giá có hoạt động (giả sử đối tượng dotGiamGia có isActive, startDate, endDate)
 function isDiscountActive(variant) {
     if (variant.dotGiamGia && variant.dotGiamGia.isActive) {
@@ -130,6 +143,7 @@ function renderProductDetail(prod) {
             updateDependentOptions();
             updateImages();
             updateMainPrice();
+            updateTotalPrice();
         });
         colorOptions.appendChild(swatch);
     });
@@ -159,6 +173,7 @@ function renderProductDetail(prod) {
             }
             updateDependentOptions();
             updateMainPrice();
+            updateTotalPrice();
         });
         sizeOptions.appendChild(swatch);
     });
@@ -170,12 +185,6 @@ function renderProductDetail(prod) {
     const minusBtn = document.createElement("button");
     minusBtn.type = "button";
     minusBtn.textContent = "-";
-    minusBtn.addEventListener("click", () => {
-        let currentVal = parseInt(quantityInput.value);
-        if (currentVal > 1) {
-            quantityInput.value = currentVal - 1;
-        }
-    });
     const quantityInput = document.createElement("input");
     quantityInput.type = "number";
     quantityInput.value = "1";
@@ -183,14 +192,62 @@ function renderProductDetail(prod) {
     const plusBtn = document.createElement("button");
     plusBtn.type = "button";
     plusBtn.textContent = "+";
-    plusBtn.addEventListener("click", () => {
-        let currentVal = parseInt(quantityInput.value);
-        quantityInput.value = currentVal + 1;
-    });
     quantityWrapper.appendChild(minusBtn);
     quantityWrapper.appendChild(quantityInput);
     quantityWrapper.appendChild(plusBtn);
     rightCol.appendChild(quantityWrapper);
+
+    // Phần hiển thị tổng giá và cảnh báo (được chèn ngay dưới quantity-wrapper)
+    const totalPriceMsgEl = document.createElement("div");
+    totalPriceMsgEl.id = "total-price-message";
+    totalPriceMsgEl.style.marginTop = "10px";
+    rightCol.appendChild(totalPriceMsgEl);
+
+    // Sự kiện cập nhật số lượng (cả qua button và thay đổi trực tiếp)
+    minusBtn.addEventListener("click", () => {
+        let currentVal = parseInt(quantityInput.value);
+        if (currentVal > 1) {
+            quantityInput.value = currentVal - 1;
+            updateTotalPrice();
+        }
+    });
+    plusBtn.addEventListener("click", () => {
+        let currentVal = parseInt(quantityInput.value);
+        quantityInput.value = currentVal + 1;
+        updateTotalPrice();
+    });
+    quantityInput.addEventListener("change", updateTotalPrice);
+
+    // Hàm cập nhật hiển thị tổng tiền dựa trên số lượng và biến thể đã chọn
+    function updateTotalPrice() {
+        if (!selectedColor || !selectedSize) {
+            totalPriceMsgEl.innerHTML = "";
+            return;
+        }
+        const variant = prod.sanPhamChiTiets.find(
+            v => v.mauSac.ten === selectedColor && v.kichThuoc.ten === selectedSize
+        );
+        if (!variant) {
+            totalPriceMsgEl.innerHTML = "";
+            return;
+        }
+        const effectivePrice = getEffectivePrice(variant);
+        let quantity = parseInt(quantityInput.value);
+
+        // Kiểm tra nếu số lượng <= 0 thì hiển thị thông báo lỗi
+        if (quantity <= 0) {
+            totalPriceMsgEl.innerHTML = `<div class="text-danger">Số lượng không hợp lệ</div>`;
+            return;
+        }
+
+        const total = effectivePrice * quantity;
+        let html = `<div><strong>Tổng:</strong> ${formatCurrencyVND(total)}</div>`;
+        if (total > 5000000) {
+            html += `<div class="text-danger">Số tiền tối đa là 5 triệu, vui lòng đặt hàng lại hoặc liên hệ với chúng tôi!</div>`;
+        }
+        totalPriceMsgEl.innerHTML = html;
+    }
+
 
     // Action Buttons
     const actionButtons = document.createElement("div");
@@ -219,21 +276,24 @@ function renderProductDetail(prod) {
             });
             return;
         }
-        // Tính giá hiệu quả: nếu có giảm giá và đợt giảm giá đang hoạt động thì dùng giá giảm, ngược lại dùng giá gốc.
-        let effectivePrice = variant.giaBan;
-        if (variant.isPromotionProduct) {
-            if (variant.dotGiamGia.loaiChietKhau === 'PHAN_TRAM') {
-                effectivePrice = variant.giaChietKhau;
-            } else {
-                effectivePrice = variant.giaBan - variant.dotGiamGia.giaTriGiam;
-            }
+        // Kiểm tra nếu số lượng đặt hàng vượt quá số lượng có sẵn
+        if (quantity > variant.soLuong) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Số lượng không đủ',
+                text: `Số lượng có sẵn chỉ còn ${variant.soLuong.toLocaleString()} sản phẩm.`
+            });
+            return;
         }
+
+        // Tính giá hiệu quả: nếu có giảm giá và đợt giảm giá đang hoạt động thì dùng giá giảm, ngược lại dùng giá gốc.
+        let effectivePrice = getEffectivePrice(variant);
         const total = effectivePrice * quantity;
         if (total > 5000000) {
             Swal.fire({
                 icon: 'error',
-                title: 'Đơn hàng vượt quá giới hạn',
-                text: 'Hãy liên hệ với chúng tôi để mua số lượng lớn với giá tốt nhất.'
+                title: 'Vui lòng đặt đơn hàng dưới 5 triệu',
+                text: `Số tiền hiện tại của bạn là: ${total.toLocaleString('vi-VN')} VND. Hãy liên hệ với chúng tôi để mua số lượng lớn với giá tốt nhất.`
             });
             return;
         }
@@ -254,8 +314,12 @@ function renderProductDetail(prod) {
             })
             .then(data => {
                 console.log("Phản hồi từ API:", data);
-                // Kiểm tra nếu API trả về một đối tượng có ID (hoặc dữ liệu hợp lệ khác)
                 if (data.id) {
+                    // Giảm số lượng sản phẩm hiển thị trên giao diện:
+                    // Sau khi thêm vào giỏ hàng thành công, trừ số lượng có sẵn của biến thể.
+                    variant.soLuong = variant.soLuong - quantity;
+                    updateMainPrice();
+
                     Swal.fire({
                         icon: "success",
                         title: "Thành công!",
@@ -280,8 +344,8 @@ function renderProductDetail(prod) {
                     text: "Vui lòng thử lại sau.",
                 });
             });
-
     });
+
     const buyBtn = document.createElement("button");
     buyBtn.className = "btn-buy";
     buyBtn.textContent = "Mua ngay";
@@ -352,6 +416,7 @@ function renderProductDetail(prod) {
 
     updateImages();
     updateMainPrice();
+    updateTotalPrice();
     updateDependentOptions();
 }
 
@@ -406,24 +471,16 @@ function buildCarouselHtml(images) {
               </div>`;
 }
 
-// Cập nhật hiển thị giá
+// Cập nhật hiển thị giá chính và thông tin biến thể
 function updateMainPrice() {
     const priceSection = document.getElementById("price-section");
     const variantInfoDiv = document.getElementById("variant-info");
-
     // Khi chưa chọn biến thể, hiển thị khoảng giá dựa trên giá hiệu quả của từng sản phẩm chi tiết
     if (!selectedColor || !selectedSize) {
         let minPrice = Infinity;
         let maxPrice = 0;
         product.sanPhamChiTiets.forEach(v => {
-            let effectivePrice = v.giaBan;
-            if (v.isPromotionProduct && v.dotGiamGia) {
-                if (v.dotGiamGia.loaiChietKhau === 'PHAN_TRAM') {
-                    effectivePrice = v.giaChietKhau;
-                } else {
-                    effectivePrice = v.giaBan - v.dotGiamGia.giaTriGiam;
-                }
-            }
+            let effectivePrice = getEffectivePrice(v);
             if (effectivePrice < minPrice) minPrice = effectivePrice;
             if (effectivePrice > maxPrice) maxPrice = effectivePrice;
         });
@@ -441,26 +498,19 @@ function updateMainPrice() {
         variantInfoDiv.innerHTML = "";
         return;
     }
-
-    const basePrice = variant.giaBan;
-    let effectivePrice = basePrice;
-    let discountPercent = 0;
-
-    // Nếu sản phẩm có khuyến mại và giảm giá, tính giá hiệu quả và phần trăm giảm
-    if (variant.isPromotionProduct && variant.dotGiamGia) {
-        if (variant.dotGiamGia.loaiChietKhau === 'PHAN_TRAM') {
-            effectivePrice = variant.giaChietKhau;
-            discountPercent = Math.round(((basePrice - effectivePrice) / basePrice) * 100);
-        } else {
-            effectivePrice = basePrice - variant.dotGiamGia.giaTriGiam;
-            discountPercent = Math.round((variant.dotGiamGia.giaTriGiam / basePrice) * 100);
-        }
+    if (variant.soLuong <= 0) {
+        priceSection.innerHTML = `<p class="text-danger">Sa phẩm hết hàng</p>`;
+        variantInfoDiv.innerHTML = "";
+        return;
     }
 
-    // Nếu có giảm giá, hiển thị giá gốc, giá khuyến mại, phần trăm giảm và thông tin tiết kiệm
+    const basePrice = variant.giaBan;
+    let effectivePrice = getEffectivePrice(variant);
+    let discountPercent = 0;
+
     if (effectivePrice < basePrice) {
+        discountPercent = Math.round(((basePrice - effectivePrice) / basePrice) * 100);
         priceSection.innerHTML = `
-          
           <span class="main-price">Giá: ${formatCurrencyVND(effectivePrice)}</span>
           <span class="old-price">Giá cũ: ${formatCurrencyVND(basePrice)}</span>
           <span class="discount-tag">- ${discountPercent}%</span>
@@ -475,52 +525,6 @@ function updateMainPrice() {
         </div>
       `;
 }
-
-// function updateMainPrice() {
-//     const priceSection = document.getElementById("price-section");
-//     const variantInfoDiv = document.getElementById("variant-info");
-//
-//     if (!selectedColor || !selectedSize) {
-//         let minPrice = Infinity;
-//         let maxPrice = 0;
-//         product.sanPhamChiTiets.forEach(v => {
-//             const base = (v.giaChietKhau && v.giaChietKhau < v.giaBan) ? v.giaChietKhau : v.giaBan;
-//             if (base < minPrice) minPrice = base;
-//             if (base > maxPrice) maxPrice = base;
-//         });
-//         priceSection.innerHTML = `Giá: ${formatCurrencyVND(minPrice)} - ${formatCurrencyVND(maxPrice)}`;
-//         variantInfoDiv.innerHTML = "";
-//         return;
-//     }
-//
-//     const variant = product.sanPhamChiTiets.find(
-//         v => v.mauSac.ten === selectedColor && v.kichThuoc.ten === selectedSize
-//     );
-//     if (!variant) {
-//         priceSection.innerHTML = `<p class="text-danger">Biến thể không tồn tại</p>`;
-//         variantInfoDiv.innerHTML = "";
-//         return;
-//     }
-//
-//     const basePrice = variant.giaBan;
-//     const discountPrice = variant.giaChietKhau;
-//     if (discountPrice && discountPrice < basePrice && isDiscountActive(variant)) {
-//         const discountPercent = Math.round(((basePrice - discountPrice) / basePrice) * 100);
-//         priceSection.innerHTML = `
-//           <span class="old-price">Giá cũ: ${formatCurrencyVND(basePrice)}</span>
-//           <span class="main-price">Giá: ${formatCurrencyVND(discountPrice)}</span>
-//           <span class="discount-tag">- ${discountPercent}%</span>
-//           <div class="discount-info">Tiết kiệm: ${formatCurrencyVND(basePrice - discountPrice)}</div>
-//         `;
-//     } else {
-//         priceSection.innerHTML = `Giá: ${formatCurrencyVND(basePrice)}`;
-//     }
-//     variantInfoDiv.innerHTML = `
-//         <div class="variant-info mt-2">
-//           <p><strong>Số lượng có sẵn:</strong> ${variant.soLuong.toLocaleString()}</p>
-//         </div>
-//       `;
-// }
 
 // Cập nhật các tùy chọn phụ thuộc giữa màu và kích thước
 function updateDependentOptions() {
