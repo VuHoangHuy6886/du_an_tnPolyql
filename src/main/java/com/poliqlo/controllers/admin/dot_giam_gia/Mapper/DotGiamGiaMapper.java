@@ -2,7 +2,9 @@ package com.poliqlo.controllers.admin.dot_giam_gia.Mapper;
 
 import com.poliqlo.controllers.admin.dot_giam_gia.model.request.AddDotGiamGiaRequest;
 import com.poliqlo.controllers.admin.dot_giam_gia.model.request.EditDotGiamGiaRequest;
+import com.poliqlo.controllers.admin.dot_giam_gia.model.response.ProductDetailResponseDGG;
 import com.poliqlo.models.DotGiamGia;
+import com.poliqlo.models.SanPhamChiTiet;
 import com.poliqlo.utils.DiscountStatusUtil;
 import org.springframework.stereotype.Component;
 
@@ -86,5 +88,19 @@ public class DotGiamGiaMapper {
                 .build();
 
         return request;
+    }
+
+    // map sản phẩm chi tiết sang productdetail view
+    public static ProductDetailResponseDGG sanPhamChiTietToResponseDGG(SanPhamChiTiet sanPhamChiTiet) {
+        ProductDetailResponseDGG productDetailResponseDGG = ProductDetailResponseDGG.builder()
+                .id(sanPhamChiTiet.getId())
+                .tenSanPham(sanPhamChiTiet.getSanPham().getTen())
+                .barcode(sanPhamChiTiet.getBarcode())
+                .maSanPham(sanPhamChiTiet.getSanPham().getMaSanPham())
+                .mauSac(sanPhamChiTiet.getMauSac().getTen())
+                .kichThuoc(sanPhamChiTiet.getKichThuoc().getTen())
+                .giaBan(sanPhamChiTiet.getGiaBan())
+                .build();
+        return productDetailResponseDGG;
     }
 }
