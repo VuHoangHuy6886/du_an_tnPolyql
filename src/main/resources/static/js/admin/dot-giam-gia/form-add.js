@@ -20,9 +20,46 @@ function handlerClick(checkbox) {
     } else {
         listIdProducts = listIdProducts.filter((item) => item !== checkbox.value);
     }
+
     console.log("Danh sách sản phẩm:", listIdProducts);
     sendListIdProducts(listIdProducts);
+
+    // Cập nhật lại tất cả các link phân trang
+    document.querySelectorAll(".page-link").forEach(item => {
+        let url = new URL(item.href); // Dễ thao tác hơn với URL object
+
+        // Xóa tham số cũ
+        url.searchParams.delete("ids");
+
+        // Lấy text từ input
+        let text = document.getElementById("idsDC").value.trim();
+        console.log("text : ", text);
+
+        // Nếu text không rỗng thì xử lý thêm vào listIdProducts
+        if (text !== "") {
+            let mang = text.split(',').map(id => id.trim()).filter(id => id !== "");
+            console.log("mảng tách từ text:", mang);
+
+            // Gộp vào listIdProducts, đảm bảo không trùng lặp
+            mang.forEach(id => {
+                if (!listIdProducts.includes(id)) {
+                    listIdProducts.push(id);
+                }
+            });
+        }
+
+        console.log("Danh sách listIdProducts cuối cùng:", listIdProducts);
+
+        // Set lại tham số ids
+        url.searchParams.set("ids", listIdProducts.join(","));
+
+        // Gán lại href mới
+        item.href = url.toString();
+        sendListIdProducts(listIdProducts)
+    });
+
 }
+
 
 // Hàm gửi danh sách sản phẩm đã chọn
 function sendListIdProducts(listIdProducts) {
@@ -30,7 +67,7 @@ function sendListIdProducts(listIdProducts) {
 
     fetch("/admin/dot-giam-gia/listIdProducts", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {"Content-Type": "application/json"},
         body: JSON.stringify(listIdProducts),
     })
         .then(response => {
@@ -42,13 +79,15 @@ function sendListIdProducts(listIdProducts) {
 
             if (data.length > 0) {
                 console.log("Dữ liệu trả về:", data);
-
                 // Render bảng danh sách sản phẩm chi tiết
+                console.log("data : ", data)
                 data.forEach(item => {
                     let row = `<tr scope="row">
                     <td><input type="checkbox" class="productDetailCheck" value="${item.id}" onclick="handlerGetIdProductDetail(this)"></td>
-                    <td>${item.kichThuoc.ten}</td>
-                    <td>${item.mauSac.ten}</td>
+                    <td>${item.maSanPham}</td>
+                    <td>${item.tenSanPham}</td>
+                    <td>${item.kichThuoc}</td>
+                    <td>${item.mauSac}</td>
                     <td>${item.giaBan}</td></tr>`;
                     tablebodys.innerHTML += row;
                 });
@@ -94,12 +133,12 @@ function updateProductDetailInput() {
     console.log("Danh sách sản phẩm chi tiết cập nhật:", inputListIds.value);
 }
 
-
 // handler gia tri giam and giam toi da
 document.addEventListener("DOMContentLoaded", function () {
     const radioButtons = document.querySelectorAll('input[name="loaiChietKhau"]');
     const ipValues = document.getElementById("ipValues");
     const giamToiDa = document.getElementById("giamToiDa");
+    console.log("id product đã chọn được : ",document.getElementById("idsDC").value)
 
     // Xử lý thay đổi radio
     function handleRadioChange() {
@@ -132,11 +171,11 @@ document.addEventListener("DOMContentLoaded", function () {
         ipValues.value = value;
 
         // Cập nhật giá trị giảm tối đa dựa trên phần trăm đã nhập
-        if (value !== "") {
-            giamToiDa.value = value; // Giả sử giới hạn tối đa = % giảm, có thể sửa nếu có dữ liệu từ backend
-        } else {
-            giamToiDa.value = "";
-        }
+        // if (value !== "") {
+        //     giamToiDa.value = value; // Giả sử giới hạn tối đa = % giảm, có thể sửa nếu có dữ liệu từ backend
+        // } else {
+        //     giamToiDa.value = "";
+        // }
     }
 
     // Validate $: chỉ cho phép nhập số

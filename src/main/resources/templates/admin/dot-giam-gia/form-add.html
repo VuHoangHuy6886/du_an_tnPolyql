@@ -7,10 +7,16 @@
     <!-- Custom link -->
     <th:block layout:fragment="head_link">
         <!-- Các link CSS nếu cần -->
+        <style>
+            .sulycontainer{
+                max-height: 100vh;
+                overflow-y: auto;
+            }
+        </style>
     </th:block>
 </head>
 <body layout:fragment="content">
-<div class="row">
+<div class="row sulycontainer">
     <div class="card shadow m-2 w-100">
         <div class="card-header py-3">
             <div class="row d-flex justify-content-between align-items-center">
@@ -98,6 +104,7 @@
                         <div class="w-50">
                             <input type="text" class="form-control" name="name" th:value="${name}"
                                    placeholder="Nhập tên">
+                            <input type="hidden" th:value="${ids}" id="idsDC">
                         </div>
                         <div class="w-25 d-flex justify-content-center align-items-center">
                             <button class="btn btn-primary">Search</button>
@@ -149,6 +156,7 @@
                             <li class="page-item" th:each="pageNum : ${#numbers.sequence(0, products.totalPages - 1)}"
                                 th:classappend="${pageNum == products.number} ? 'active'">
                                 <a class="page-link"
+                                   id="pageNumber"
                                    th:href="@{/admin/dot-giam-gia/form-add(page=${pageNum}, name=${name})}"
                                    th:text="${pageNum + 1}"></a>
                             </li>
@@ -174,6 +182,8 @@
                     <input id="checkedAllProductDetail" type="checkbox">
                     all
                 </th>
+                <th>Mã</th>
+                <th>Tên</th>
                 <th>Kích Thước</th>
                 <th>Màu Sắc</th>
                 <th>Giá Bán</th>

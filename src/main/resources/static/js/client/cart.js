@@ -197,18 +197,29 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const message = document.getElementById("messageRP")?.innerText;
     const success = document.getElementById("successRP")?.innerText;
+
     if (message && success) {
-        Swal.fire({
-            position: "top-end",
-            icon: success.trim() === "true" ? "success" : "error",
-            width: '400px',
-            title: message,
-            showConfirmButton: false,
-            timer: 2000,
-            customClass: {
-                title: 'small-title',
-                popup: 'small-popup'
-            }
-        });
+        const lastMessage = sessionStorage.getItem("lastMessageRP");
+        const lastSuccess = sessionStorage.getItem("lastSuccessRP");
+
+        // Nếu message hoặc success thay đổi => hiển thị thông báo
+        if (message !== lastMessage || success !== lastSuccess) {
+            Swal.fire({
+                position: "top-end",
+                icon: success.trim() === "true" ? "success" : "error",
+                width: '400px',
+                title: message,
+                showConfirmButton: false,
+                timer: 2000,
+                customClass: {
+                    title: 'small-title',
+                    popup: 'small-popup'
+                }
+            });
+
+            // Lưu lại message và success vào sessionStorage
+            sessionStorage.setItem("lastMessageRP", message);
+            sessionStorage.setItem("lastSuccessRP", success);
+        }
     }
 });

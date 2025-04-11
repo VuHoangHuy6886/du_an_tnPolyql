@@ -1,7 +1,9 @@
 package com.poliqlo.controllers.admin.dot_giam_gia.controller;
 
+import com.poliqlo.controllers.admin.dot_giam_gia.Mapper.DotGiamGiaMapper;
 import com.poliqlo.controllers.admin.dot_giam_gia.model.request.AddDotGiamGiaRequest;
 import com.poliqlo.controllers.admin.dot_giam_gia.model.request.EditDotGiamGiaRequest;
+import com.poliqlo.controllers.admin.dot_giam_gia.model.response.ProductDetailResponseDGG;
 import com.poliqlo.controllers.admin.dot_giam_gia.service.DotGiamGiaService;
 import com.poliqlo.models.DotGiamGia;
 import com.poliqlo.models.SanPhamChiTiet;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -103,6 +106,7 @@ public class DotGiamGiaController {
             @RequestParam(value = "page", defaultValue = "0", required = false) String pageStr,
             @RequestParam(value = "size", defaultValue = "5", required = false) String sizeStr,
             @RequestParam(value = "name", defaultValue = "", required = false) String name,
+            @RequestParam(value = "ids", defaultValue = "", required = false) String ids,
             Model model) {
         int page, size;
         try {
@@ -114,11 +118,13 @@ public class DotGiamGiaController {
         }
         if (name.equals("")) {
             name = null;
-        }else {
+        } else {
             name = name.trim();
         }
+        System.out.println("list products da chon : "+ids);
         model.addAttribute("DotGiamGiaNew", new AddDotGiamGiaRequest());
         model.addAttribute("products", service.findAllProduct(page, size, name));
+        model.addAttribute("ids", ids);
         return "admin/dot-giam-gia/form-add";
     }
 
@@ -193,14 +199,19 @@ public class DotGiamGiaController {
 
     @PostMapping("/admin/dot-giam-gia/listIdProducts")
     @ResponseBody
-    public ResponseEntity<List<SanPhamChiTiet>> getProductDetailList(@RequestBody List<String> listIdProducts) {
+    public ResponseEntity<List<ProductDetailResponseDGG>> getProductDetailList(@RequestBody List<String> listIdProducts) {
         System.out.println("List Id Products: " + listIdProducts);
         try {
             List<Integer> listIdProductsInteger = listIdProducts.stream()
                     .map(Integer::parseInt)
                     .collect(Collectors.toList());
             List<SanPhamChiTiet> sanPhamChiTiets = service.getProductDetailLists(listIdProductsInteger);
-            return ResponseEntity.ok(sanPhamChiTiets);
+            List<ProductDetailResponseDGG> list = new ArrayList<>();
+            for (SanPhamChiTiet sp : sanPhamChiTiets) {
+                ProductDetailResponseDGG response = DotGiamGiaMapper.sanPhamChiTietToResponseDGG(sp);
+                list.add(response);
+            }
+            return ResponseEntity.ok(list);
         } catch (NumberFormatException e) {
             System.err.println("Lỗi chuyển đổi dữ liệu: " + e.getMessage());
             return ResponseEntity.badRequest().build();
