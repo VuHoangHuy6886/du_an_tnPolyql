@@ -1,7 +1,9 @@
 package com.poliqlo.controllers.admin.san_pham.model.reponse;
 
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -28,4 +30,8 @@ public class AddProductDetailRequest {
     @NotNull(message = "Giá bán không được để trống")
     @Min(value = 0, message = "Giá bán không được nhỏ hơn 0")
     private BigDecimal giaBan;
+
+    @Size(max = 100)
+    private String barcode;
+
 }

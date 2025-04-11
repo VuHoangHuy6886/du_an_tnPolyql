@@ -183,6 +183,7 @@ public class SanPhamController {
         newDetail.setMauSac(mauSac);
         newDetail.setSoLuong(request.getSoLuong());
         newDetail.setGiaBan(request.getGiaBan()); // Gán giá bán từ payload
+        newDetail.setBarcode(request.getBarcode()); // Gán giá bán từ payload
 
         // Nếu có các thuộc tính khác như barcode, có thể thêm tương ứng
 

@@ -378,7 +378,7 @@
                     <div class="form-row">
                         <div class="form-group col-md-6">
                             <label for="edit-detail-kich-thuoc">
-                                <i class="fas fa-arrows-alt"></i> Kích thước
+                                <i class="fas fa-arrows-alt"></i> Kích thước *
                             </label>
                             <select class="form-control" id="edit-detail-kich-thuoc" required>
                                 <option value="">Chọn kích thước</option>
@@ -392,7 +392,7 @@
                         </div>
                         <div class="form-group col-md-6">
                             <label for="edit-detail-mau-sac">
-                                <i class="fas fa-palette"></i> Màu sắc
+                                <i class="fas fa-palette"></i> Màu sắc *
                             </label>
                             <select class="form-control" id="edit-detail-mau-sac" required>
                                 <option value="">Chọn màu sắc</option>
@@ -407,7 +407,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="add-detail-price" class="form-label">Giá bán</label>
+                        <label for="add-detail-price" class="form-label">Giá bán *</label>
                         <input type="number" id="add-detail-price" class="form-control" required min="1000">
                         <div class="invalid-feedback">
                             Vui lòng nhập giá bán (lớn hơn 1000 ).
@@ -415,7 +415,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="add-detail-quantity" class="form-label">Số lượng</label>
+                        <label for="add-detail-quantity" class="form-label">Số lượng *</label>
                         <input type="number" id="add-detail-quantity" class="form-control" required min="1">
                         <div class="invalid-feedback">
                             Số lượng phải lớn hơn hoặc bằng 1.
@@ -424,7 +424,10 @@
 
                     <div class="mb-3">
                         <label for="barcode" class="form-label">Barcode</label>
-                        <input type="text" id="barcode" class="form-control" readonly>
+                        <input type="text" id="barcode" class="form-control">
+                        <div class="invalid-feedback">
+                            Vui lòng nhập barcode
+                        </div>
                     </div>
                 </form>
             </div>

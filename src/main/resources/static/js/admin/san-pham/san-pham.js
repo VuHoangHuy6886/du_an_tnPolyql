@@ -337,6 +337,7 @@ $("#btnAddProductDetail").on("click", function (e) {
         let mauSacId = $("#edit-detail-mau-sac").val();
         let giaBan = parseFloat($("#add-detail-price").val());
         let soLuong = parseInt($("#add-detail-quantity").val());
+        let barcode = $("#barcode").val();
 
         // Tạo payload
         let payload = {
@@ -344,7 +345,8 @@ $("#btnAddProductDetail").on("click", function (e) {
             kichThuocId: parseInt(kichThuocId),
             mauSacId: parseInt(mauSacId),
             giaBan: giaBan,
-            soLuong: soLuong
+            soLuong: soLuong,
+            barcode: barcode,
         };
 
         // Gửi AJAX
