@@ -275,7 +275,7 @@ public class CartDetailService {
         LichSuHoaDon lichSuHoaDon = new LichSuHoaDon();
         lichSuHoaDon.setHoaDon(hoaDon);
         lichSuHoaDon.setTaiKhoan(authService.getCurrentUserDetails().get());
-        lichSuHoaDon.setTieuDe(HoaDonRepository.CHO_XAC_NHAN);
+        lichSuHoaDon.setTieuDe("Chờ xác nhận");
         lichSuHoaDon.setMoTa("Đơn hàng vừa được tạo ra, chờ xác nhận từ người bán");
         lichSuHoaDon.setThoiGian(LocalDateTime.now());
         lichSuHoaDon.setIsDeleted(false);

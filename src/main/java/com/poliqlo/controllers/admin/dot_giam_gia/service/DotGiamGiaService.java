@@ -169,9 +169,11 @@ public class DotGiamGiaService {
         if (dotGiamGia.getTrangThai().equals(DiscountStatusUtil.DA_KET_THUC)) {
             dotGiamGia.setTrangThai(DiscountStatusUtil.DANG_DIEN_RA);
             dotGiamGiaRepository.save(dotGiamGia);
-        } else {
+        } else if (dotGiamGia.getTrangThai().equals(DiscountStatusUtil.DANG_DIEN_RA)) {
             dotGiamGia.setTrangThai(DiscountStatusUtil.DA_KET_THUC);
             dotGiamGiaRepository.save(dotGiamGia);
+        }else {
+            System.out.println("không thay đổi gì");
         }
     }
 
