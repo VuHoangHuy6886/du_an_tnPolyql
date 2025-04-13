@@ -118,7 +118,7 @@
                             <th style="width: 10%;">STT</th>
                             <th style="width: 20%;">Mã</th>
                             <th style="width: 20%;">Tên</th>
-                            <th style="width: 20%;">Trạng Thái</th>
+<!--                            <th style="width: 20%;">Trạng Thái</th>-->
                             <th style="width: 10%;">
                                 <label class="mr-2">All</label>
                                 <input type="checkbox" id="checkAll">
@@ -130,7 +130,7 @@
                             <td th:text="${i.index + 1}"></td>
                             <td th:text="${product.maSanPham}"></td>
                             <td th:text="${product.ten}"></td>
-                            <td th:text="${product.trangThai == 'IN_STOCK' ? 'Còn hàng':'Hết hàng'}"></td>
+<!--                            <td th:text="${product.trangThai == 'CON_HANG' ? 'Còn hàng':'Hết hàng'}"></td>-->
                             <td>
                                 <input type="checkbox" name="selectedProducts" th:value="${product.id}"
                                        th:id="${product.id}" onclick="handlerClick(this)">
