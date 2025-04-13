@@ -81,7 +81,7 @@
                     </thead>
                     <tbody id="employeeTableBody">
                     <tr th:each="nhanVien : ${nhanViens}">
-                        <td th:text="${nhanVien.id}"></td>
+                        <td th:text="${nhanVien.maNhanVien}"></td>
                         <td><img th:src="${nhanVien.taiKhoan.anhUrl}" alt="Ảnh nhân viên" width="100"></td>
                         <td th:text="${nhanVien.ten}"></td>
                         <td th:text="${nhanVien.taiKhoan.email}"></td>

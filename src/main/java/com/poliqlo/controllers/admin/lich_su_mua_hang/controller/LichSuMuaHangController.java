@@ -21,7 +21,7 @@ import java.util.*;
 public class LichSuMuaHangController {
     private final HoaDonService hoaDonService;
     private HoaDonRepository hoaDonRepository;
-    private static final int PAGE_SIZE = 2; // Số đơn hàng trên 1 trang
+    private static final int PAGE_SIZE = 3; // Số đơn hàng trên 1 trang
 
     @Autowired
     public LichSuMuaHangController(HoaDonService hoaDonService) {

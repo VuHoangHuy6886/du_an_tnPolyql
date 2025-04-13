@@ -33,5 +33,8 @@ public class NhanVien {
     @ColumnDefault("b'0'")
     @Column(name = "IS_DELETED", nullable = false)
     private Boolean isDeleted = false;
+    public String getMaNhanVien() {
+        return "NV" + (id == null ? "" : id.toString());
+    }
 
 }

@@ -52,6 +52,8 @@
         private Boolean isDeleted = false;
         @OneToMany(mappedBy = "khachHang", cascade = CascadeType.ALL, orphanRemoval = true)
         private List<DiaChi> danhSachDiaChi = new ArrayList<>();
-
+        public String getMaKhachHang() {
+            return "KH" + (id == null ? "" : id.toString());
+        }
 
     }
