@@ -216,7 +216,7 @@
                 </thead>
                 <tbody id="customerTableBody">
                 <tr th:each="khachHang : ${khachHangs}">
-                    <td th:text="${khachHang.id}"></td>
+                    <td th:text="${khachHang.maKhachHang}"></td>
                     <td><img th:src="${khachHang.taiKhoan.anhUrl}" alt="Ảnh khách hàng" width="100"></td>
                     <td th:text="${khachHang.ten}"></td>
                     <td th:text="${khachHang.ngaySinh}"></td>

@@ -109,4 +109,7 @@ public class HoaDon {
         ngayTao=LocalDateTime.now();
         isDeleted = false;
     }
+    public String getMaHoaDon() {
+        return "HD" + (id == null ? "" : id.toString());
+    }
 }

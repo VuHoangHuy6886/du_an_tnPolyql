@@ -19,26 +19,31 @@
                 font-size: 0.85rem;
                 font-weight: 500;
             }
+            /* Các trạng thái cụ thể với màu sắc phù hợp */
             .status-waiting {
-                background-color: #ffe6cc;
-                color: #cc7a00;
+                background-color: #FFA500; /* Màu cam - Chờ xác nhận */
             }
+
             .status-confirmed {
-                background-color: #d1e7ff;
-                color: #0066cc;
+                background-color: #3498DB; /* Màu xanh dương - Đang chuẩn bị/Chờ giao */
             }
+
+            .status-pending-pickup {
+                background-color: #1ABC9C; /* Màu xanh ngọc - Chờ lấy hàng */
+            }
+
             .status-delivering {
-                background-color: #d1ecf1;
-                color: #0c5460;
+                background-color: #9B59B6; /* Màu tím - Đang giao hàng */
             }
+
             .status-completed {
-                background-color: #d4edda;
-                color: #155724;
+                background-color: #2ECC71; /* Màu xanh lá - Hoàn tất */
             }
+
             .status-cancelled {
-                background-color: #f8d7da;
-                color: #721c24;
+                background-color: #E74C3C; /* Màu đỏ - Đã hủy */
             }
+
             .order-card {
                 margin-bottom: 15px;
                 box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -133,6 +138,150 @@
                 color: #0d6efd;
                 opacity: 0.8;
             }
+            css
+
+            Thu gọn
+
+            Bọc lại
+
+            Sao chép
+                /* Style cho modal hủy đơn hàng */
+            #cancelOrderModal .modal-content {
+                border-radius: 10px; /* Bo góc modal */
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15); /* Thêm bóng để modal nổi bật */
+            }
+
+            /* Style cho tiêu đề modal */
+            #cancelOrderModal .modal-header {
+                background-color: #f8f9fa; /* Nền nhẹ cho header */
+                border-bottom: 1px solid #e9ecef;
+            }
+
+            #cancelOrderModal .modal-title {
+                font-size: 1.25rem;
+                font-weight: 600;
+                color: #3a86ff; /* Màu xanh đồng bộ với tiêu đề "Lịch sử mua hàng" */
+            }
+
+            /* Style cho body của modal */
+            #cancelOrderModal .modal-body {
+                padding: 20px;
+            }
+
+            /* Style cho đoạn text "Vui lòng chọn lý do hủy đơn hàng" */
+            #cancelOrderModal .modal-body p {
+                font-size: 1rem;
+                font-weight: 500;
+                color: #495057;
+                margin-bottom: 15px;
+            }
+
+            /* Style cho radio button */
+            #cancelOrderModal .form-check {
+                margin-bottom: 12px; /* Khoảng cách giữa các radio button */
+                padding-left: 2rem; /* Tạo khoảng cách cho radio button */
+                transition: all 0.2s ease; /* Hiệu ứng mượt mà */
+            }
+
+            #cancelOrderModal .form-check-input {
+                width: 1.2rem;
+                height: 1.2rem;
+                margin-top: 0.15rem; /* Căn chỉnh với label */
+                cursor: pointer;
+            }
+
+            #cancelOrderModal .form-check-label {
+                font-size: 0.95rem;
+                color: #495057;
+                cursor: pointer;
+                padding-left: 5px; /* Khoảng cách giữa radio và label */
+            }
+
+            /* Hiệu ứng hover cho radio button */
+            #cancelOrderModal .form-check:hover {
+                background-color: #f1f5f9; /* Nền nhẹ khi hover */
+                border-radius: 5px;
+            }
+
+            /* Style khi radio button được chọn */
+            #cancelOrderModal .form-check-input:checked {
+                background-color: #3a86ff; /* Màu xanh khi được chọn */
+                border-color: #3a86ff;
+            }
+
+            /* Style cho textarea "Lý do khác" */
+            #cancelOrderModal #otherReasonContainer {
+                margin-top: 15px;
+            }
+
+            #cancelOrderModal #otherReasonContainer .form-label {
+                font-size: 0.95rem;
+                font-weight: 500;
+                color: #495057;
+            }
+
+            #cancelOrderModal #otherReason {
+                border: 1px solid #ced4da;
+                border-radius: 5px;
+                padding: 8px;
+                font-size: 0.95rem;
+                transition: border-color 0.2s ease;
+            }
+
+            #cancelOrderModal #otherReason:focus {
+                border-color: #3a86ff;
+                box-shadow: 0 0 5px rgba(58, 134, 255, 0.3);
+                outline: none;
+            }
+
+            /* Style cho footer của modal */
+            #cancelOrderModal .modal-footer {
+                border-top: 1px solid #e9ecef;
+                padding: 15px;
+            }
+
+            /* Style cho button "Đóng" và "Xác nhận hủy" */
+            #cancelOrderModal .btn {
+                border-radius: 5px;
+                padding: 8px 20px;
+                font-size: 0.95rem;
+                font-weight: 500;
+                transition: all 0.3s ease;
+            }
+
+            /* Button "Đóng" */
+            #cancelOrderModal .btn-secondary {
+                background-color: #6c757d; /* Màu xám */
+                border: none;
+                color: white;
+            }
+
+            #cancelOrderModal .btn-secondary:hover {
+                background-color: #5a6268; /* Màu xám đậm hơn khi hover */
+                transform: translateY(-1px); /* Hiệu ứng nâng nhẹ */
+            }
+
+            #cancelOrderModal .btn-secondary:active {
+                background-color: #495057; /* Màu xám đậm hơn nữa khi nhấn */
+                transform: translateY(0);
+            }
+
+            /* Button "Xác nhận hủy" */
+            #cancelOrderModal .btn-danger {
+                background-color: #e74c3c; /* Màu đỏ */
+                border: none;
+                color: white;
+            }
+
+            #cancelOrderModal .btn-danger:hover {
+                background-color: #c0392b; /* Màu đỏ đậm hơn khi hover */
+                transform: translateY(-1px); /* Hiệu ứng nâng nhẹ */
+            }
+
+            #cancelOrderModal .btn-danger:active {
+                background-color: #a93226; /* Màu đỏ đậm hơn nữa khi nhấn */
+                transform: translateY(0);
+            }
         </style>
 
     </th:block>
@@ -181,18 +330,19 @@
                 <div class="card order-card mb-3">
                     <div class="order-header d-flex justify-content-between align-items-center p-3 bg-light">
                         <div>
-                            <h5 class="mb-0">Đơn hàng #<span th:text="${hoaDon.id}"></span></h5>
-                            <span class="text-muted" th:text="${#temporals.format(hoaDon.getNgayDatFromLichSu(), 'dd/MM/yyyy')}"></span>
+                            <h5 class="mb-0">Đơn hàng #<span th:text="${hoaDon.maHoaDon}"></span></h5>
+                            <span class="text-muted" th:text="${#temporals.format(hoaDon.ngayTao, 'dd/MM/yyyy')}"></span>
                         </div>
                         <div>
-                         <span class="status-badge"  th:classappend="${
-                                  hoaDon.trangThai == 'Chờ xác nhận' ? 'status-waiting' : (
-                                  hoaDon.trangThai == 'Chờ đóng gói' || hoaDon.trangThai == 'Chờ giao hàng' ? 'status-confirmed' : (
-                                  hoaDon.trangThai == 'Đang giao hàng' ? 'status-delivering' : (
-                                  hoaDon.trangThai == 'Đã nhận hàng' || hoaDon.trangThai == 'Hoàn tất' ? 'status-completed' :
-                                  'status-cancelled')))}"
-                               th:text="${hoaDon.trangThai}">
-                         </span>
+                           <span class="status-badge" th:classappend="${
+                            hoaDon.trangThai == 'CHO_XAC_NHAN' ? 'status-waiting' : (
+                            hoaDon.trangThai == 'XAC_NHAN' || hoaDon.trangThai == 'DANG_CHUAN_BI_HANG' ? 'status-confirmed' : (
+                            hoaDon.trangThai == 'CHO_LAY_HANG' ? 'status-pending-pickup' : (
+                            hoaDon.trangThai == 'LAY_HANG_THANH_CONG' || hoaDon.trangThai == 'DANG_VAN_CHUYEN' || hoaDon.trangThai == 'DANG_GIAO' ? 'status-delivering' : (
+                            hoaDon.trangThai == 'GIAO_HANG_THANH_CONG' || hoaDon.trangThai == 'THANH_CONG' ? 'status-completed' :
+                            'status-cancelled'))))}"
+                                 th:text="${hoaDon.trangThai}">
+                        </span>
                         </div>
                     </div>
                     <div class="order-body p-3">
@@ -427,6 +577,7 @@
                     });
                 }
             });
+
         });
     </script>
 </th:block>

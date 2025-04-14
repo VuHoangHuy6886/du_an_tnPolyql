@@ -175,26 +175,39 @@
                 font-weight: 500;
                 color: white;
                 display: inline-block;
+                text-align: center;
+                min-width: 100px;
+                transition: all 0.2s; /* Thêm hiệu ứng mượt mà */
             }
 
+            /* Các trạng thái cụ thể với màu sắc phù hợp */
             .status-waiting {
-                background-color: #FFA500;
+                background-color: #FFA500; /* Màu cam - Chờ xác nhận */
             }
 
             .status-confirmed {
-                background-color: #3498db;
+                background-color: #3498DB; /* Màu xanh dương - Đang chuẩn bị/Chờ giao */
+            }
+
+            .status-pending-pickup {
+                background-color: #1ABC9C; /* Màu xanh ngọc - Chờ lấy hàng */
             }
 
             .status-delivering {
-                background-color: #9B59B6;
+                background-color: #9B59B6; /* Màu tím - Đang giao hàng */
             }
 
             .status-completed {
-                background-color: #2ECC71;
+                background-color: #2ECC71; /* Màu xanh lá - Hoàn tất */
             }
 
             .status-cancelled {
-                background-color: #E74C3C;
+                background-color: #E74C3C; /* Màu đỏ - Đã hủy */
+            }
+
+            /* Class để làm nổi bật trạng thái */
+            .status-active {
+                font-weight: 700; /* Chữ đậm */
             }
 
             /* Style cho pagination */
@@ -244,6 +257,7 @@
                 margin-bottom: 0;
                 margin-right: 20px;
             }
+
             .order-type-select {
                 width: 100px; /* Giảm chiều rộng của select */
             }
@@ -251,6 +265,7 @@
             .search-group .filter-input {
                 min-width: 180px; /* Điều chỉnh chiều rộng của input tìm kiếm */
             }
+
             .filter-group.search-group .filter-input {
                 min-width: 180px; /* Thu ngắn input tìm kiếm */
                 width: 180px;
@@ -283,16 +298,15 @@
 
         <!-- Bộ lọc trạng thái dạng button -->
         <div class="filter-buttons">
-            <a href="/admin/hoa-don/index" class="filter-button">Tất cả</a>
-            <a href="/admin/hoa-don/trangthai/CHO_XAC_NHAN" class="filter-button">Chờ xác nhận</a>
-            <a href="/admin/hoa-don/trangthai/XAC_NHAN,DANG_CHUAN_BI_HANG" class="filter-button">Đang chuẩn bị hàng</a>
-            <a href="/admin/hoa-don/trangthai/CHO_LAY_HANG" class="filter-button">Chờ giao hàng</a>
-            <a href="/admin/hoa-don/trangthai/LAY_HANG_THANH_CONG,DANG_VAN_CHUYEN,DANG_GIAO" class="filter-button">Đang giao hàng</a>
-            <a href="/admin/hoa-don/trangthai/GIAO_HANG_THANH_CONG,THANH_CONG" class="filter-button">Hoàn tất</a>
-            <a href="/admin/hoa-don/trangthai/DA_HUY" class="filter-button">Đã hủy</a>
+            <a href="/admin/hoa-don/index" class="filter-button" data-status="ALL">Tất cả</a>
+            <a href="/admin/hoa-don/trangthai/CHO_XAC_NHAN" class="filter-button" data-status="CHO_XAC_NHAN">Chờ xác nhận</a>
+            <a href="/admin/hoa-don/trangthai/XAC_NHAN,DANG_CHUAN_BI_HANG" class="filter-button" data-status="XAC_NHAN,DANG_CHUAN_BI_HANG">Đang chuẩn bị hàng</a>
+            <a href="/admin/hoa-don/trangthai/CHO_LAY_HANG" class="filter-button" data-status="CHO_LAY_HANG">Chờ giao hàng</a>
+            <a href="/admin/hoa-don/trangthai/LAY_HANG_THANH_CONG,DANG_VAN_CHUYEN,DANG_GIAO" class="filter-button" data-status="LAY_HANG_THANH_CONG,DANG_VAN_CHUYEN,DANG_GIAO">Đang giao hàng</a>
+            <a href="/admin/hoa-don/trangthai/GIAO_HANG_THANH_CONG,THANH_CONG" class="filter-button" data-status="GIAO_HANG_THANH_CONG,THANH_CONG">Hoàn tất</a>
+            <a href="/admin/hoa-don/trangthai/DA_HUY" class="filter-button" data-status="DA_HUY">Đã hủy</a>
         </div>
 
-        <!-- Bộ lọc chi tiết -->
         <!-- Bộ lọc chi tiết -->
         <form th:action="@{/admin/hoa-don/search}" method="get" class="filter-container">
             <!-- Hàng 1: Tìm kiếm, Từ - Đến, Sau - Trước -->
@@ -323,15 +337,6 @@
                         <option value="TAI_QUAY" th:selected="${loaiHoaDon == 'TAI_QUAY'}">Tại quầy</option>
                     </select>
                 </div>
-<!--                <div class="filter-group">-->
-<!--                    <div class="filter-label">Hiển thị:</div>-->
-<!--                    <select class="filter-input display-select" name="displayDays">-->
-<!--                        <option value="0" th:selected="${displayDays == null || displayDays == 0}">Tất cả</option>-->
-<!--                        <option value="7" th:selected="${displayDays == 7}">7 ngày</option>-->
-<!--                        <option value="30" th:selected="${displayDays == 30}">30 ngày</option>-->
-<!--                        <option value="60" th:selected="${displayDays == 60}">60 ngày</option>-->
-<!--                    </select>-->
-<!--                </div>-->
                 <div class="filter-group button-group">
                     <button type="submit" class="search-button">Tìm kiếm</button>
                     <a th:href="@{/admin/hoa-don/index}" class="reset-button" style="text-decoration: none;">Reset</a>
@@ -362,8 +367,8 @@
                 </thead>
                 <tbody>
                 <tr th:each="hoaDon : ${hoaDons}">
-                    <td>#<span th:text="${hoaDon.id}"></span></td>
-                    <td th:text="${#temporals.format(hoaDon.getNgayDatFromLichSu(), 'dd/MM/yyyy')}"></td>
+                    <td>#<span th:text="${hoaDon.maHoaDon}"></span></td>
+                    <td th:text="${#temporals.format(hoaDon.ngayTao, 'dd/MM/yyyy')}"></td>
                     <td th:text="${hoaDon.tenNguoiNhan}"></td>
                     <td th:text="${hoaDon.soDienThoai}"></td>
                     <td th:text="${hoaDon.diaChi}"></td>
@@ -372,11 +377,12 @@
                     <td th:text="${hoaDon.loaiHoaDon}"></td>
                     <td>
                         <span class="status-badge" th:classappend="${
-                            hoaDon.trangThai == 'Chờ xác nhận' ? 'status-waiting' : (
-                            hoaDon.trangThai == 'Chờ đóng gói' || hoaDon.trangThai == 'Chờ giao hàng' ? 'status-confirmed' : (
-                            hoaDon.trangThai == 'Đang giao hàng' ? 'status-delivering' : (
-                            hoaDon.trangThai == 'Đã nhận hàng' || hoaDon.trangThai == 'Hoàn tất' ? 'status-completed' :
-                            'status-cancelled')))}"
+                            hoaDon.trangThai == 'CHO_XAC_NHAN' ? 'status-waiting' : (
+                            hoaDon.trangThai == 'XAC_NHAN' || hoaDon.trangThai == 'DANG_CHUAN_BI_HANG' ? 'status-confirmed' : (
+                            hoaDon.trangThai == 'CHO_LAY_HANG' ? 'status-pending-pickup' : (
+                            hoaDon.trangThai == 'LAY_HANG_THANH_CONG' || hoaDon.trangThai == 'DANG_VAN_CHUYEN' || hoaDon.trangThai == 'DANG_GIAO' ? 'status-delivering' : (
+                            hoaDon.trangThai == 'GIAO_HANG_THANH_CONG' || hoaDon.trangThai == 'THANH_CONG' ? 'status-completed' :
+                            'status-cancelled'))))}"
                               th:text="${hoaDon.trangThai}">
                         </span>
                     </td>
@@ -393,110 +399,115 @@
             </table>
         </div>
 
-        <!-- Phân trang - đã làm đẹp hơn -->
-        <!-- Fix 1: Remove the duplicated pagination section and keep only one -->
+        <!-- Phân trang -->
         <div th:if="${totalPages > 1}" class="pagination-container">
             <nav aria-label="Phân trang">
                 <ul class="pagination">
-                    <!-- Nút Previous -->
                     <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
                         <a class="page-link" th:if="${trangThai == null && khachHangId == null}"
                            th:href="@{/admin/hoa-don/index(
-                        page=${currentPage - 1},
-                        orderId=${orderId},
-                        minAmount=${minAmount},
-                        maxAmount=${maxAmount},
-                        fromDate=${fromDate},
-                        toDate=${toDate},
-                        displayDays=${displayDays})}">&laquo;</a>
+                            page=${currentPage - 1},
+                            orderId=${orderId},
+                            minAmount=${minAmount},
+                            maxAmount=${maxAmount},
+                            fromDate=${fromDate},
+                            toDate=${toDate},
+                            loaiHoaDon=${loaiHoaDon},
+                            displayDays=${displayDays})}">«</a>
                         <a class="page-link" th:if="${trangThai != null}"
                            th:href="@{'/admin/hoa-don/trangthai/' + ${trangThai}(
-                        page=${currentPage - 1},
-                        orderId=${orderId},
-                        minAmount=${minAmount},
-                        maxAmount=${maxAmount},
-                        fromDate=${fromDate},
-                        toDate=${toDate},
-                        displayDays=${displayDays})}">&laquo;</a>
+                            page=${currentPage - 1},
+                            orderId=${orderId},
+                            minAmount=${minAmount},
+                            maxAmount=${maxAmount},
+                            fromDate=${fromDate},
+                            toDate=${toDate},
+                            loaiHoaDon=${loaiHoaDon},
+                            displayDays=${displayDays})}">«</a>
                         <a class="page-link" th:if="${khachHangId != null}"
                            th:href="@{'/admin/hoa-don/khachhang/' + ${khachHangId}(
-                        page=${currentPage - 1},
-                        orderId=${orderId},
-                        minAmount=${minAmount},
-                        maxAmount=${maxAmount},
-                        fromDate=${fromDate},
-                        toDate=${toDate},
-                        displayDays=${displayDays})}">&laquo;</a>
+                            page=${currentPage - 1},
+                            orderId=${orderId},
+                            minAmount=${minAmount},
+                            maxAmount=${maxAmount},
+                            fromDate=${fromDate},
+                            toDate=${toDate},
+                            loaiHoaDon=${loaiHoaDon},
+                            displayDays=${displayDays})}">«</a>
                     </li>
 
-                    <!-- Các nút số trang -->
                     <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
                         th:classappend="${currentPage == i} ? 'active'">
                         <a class="page-link" th:if="${trangThai == null && khachHangId == null}"
                            th:href="@{/admin/hoa-don/index(
-                        page=${i},
-                        orderId=${orderId},
-                        minAmount=${minAmount},
-                        maxAmount=${maxAmount},
-                        fromDate=${fromDate},
-                        toDate=${toDate},
-                        displayDays=${displayDays})}" th:text="${i + 1}"></a>
+                            page=${i},
+                            orderId=${orderId},
+                            minAmount=${minAmount},
+                            maxAmount=${maxAmount},
+                            fromDate=${fromDate},
+                            toDate=${toDate},
+                            loaiHoaDon=${loaiHoaDon},
+                            displayDays=${displayDays})}" th:text="${i + 1}"></a>
                         <a class="page-link" th:if="${trangThai != null}"
                            th:href="@{'/admin/hoa-don/trangthai/' + ${trangThai}(
-                        page=${i},
-                        orderId=${orderId},
-                        minAmount=${minAmount},
-                        maxAmount=${maxAmount},
-                        fromDate=${fromDate},
-                        toDate=${toDate},
-                        displayDays=${displayDays})}" th:text="${i + 1}"></a>
+                            page=${i},
+                            orderId=${orderId},
+                            minAmount=${minAmount},
+                            maxAmount=${maxAmount},
+                            fromDate=${fromDate},
+                            toDate=${toDate},
+                            loaiHoaDon=${loaiHoaDon},
+                            displayDays=${displayDays})}" th:text="${i + 1}"></a>
                         <a class="page-link" th:if="${khachHangId != null}"
                            th:href="@{'/admin/hoa-don/khachhang/' + ${khachHangId}(
-                        page=${i},
-                        orderId=${orderId},
-                        minAmount=${minAmount},
-                        maxAmount=${maxAmount},
-                        fromDate=${fromDate},
-                        toDate=${toDate},
-                        displayDays=${displayDays})}" th:text="${i + 1}"></a>
+                            page=${i},
+                            orderId=${orderId},
+                            minAmount=${minAmount},
+                            maxAmount=${maxAmount},
+                            fromDate=${fromDate},
+                            toDate=${toDate},
+                            loaiHoaDon=${loaiHoaDon},
+                            displayDays=${displayDays})}" th:text="${i + 1}"></a>
                     </li>
 
-                    <!-- Nút Next -->
                     <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
                         <a class="page-link" th:if="${trangThai == null && khachHangId == null}"
                            th:href="@{/admin/hoa-don/index(
-                        page=${currentPage + 1},
-                        orderId=${orderId},
-                        minAmount=${minAmount},
-                        maxAmount=${maxAmount},
-                        fromDate=${fromDate},
-                        toDate=${toDate},
-                        displayDays=${displayDays})}">&raquo;</a>
+                            page=${currentPage + 1},
+                            orderId=${orderId},
+                            minAmount=${minAmount},
+                            maxAmount=${maxAmount},
+                            fromDate=${fromDate},
+                            toDate=${toDate},
+                            loaiHoaDon=${loaiHoaDon},
+                            displayDays=${displayDays})}">»</a>
                         <a class="page-link" th:if="${trangThai != null}"
                            th:href="@{'/admin/hoa-don/trangthai/' + ${trangThai}(
-                        page=${currentPage + 1},
-                        orderId=${orderId},
-                        minAmount=${minAmount},
-                        maxAmount=${maxAmount},
-                        fromDate=${fromDate},
-                        toDate=${toDate},
-                        displayDays=${displayDays})}">&raquo;</a>
+                            page=${currentPage + 1},
+                            orderId=${orderId},
+                            minAmount=${minAmount},
+                            maxAmount=${maxAmount},
+                            fromDate=${fromDate},
+                            toDate=${toDate},
+                            loaiHoaDon=${loaiHoaDon},
+                            displayDays=${displayDays})}">»</a>
                         <a class="page-link" th:if="${khachHangId != null}"
                            th:href="@{'/admin/hoa-don/khachhang/' + ${khachHangId}(
-                        page=${currentPage + 1},
-                        orderId=${orderId},
-                        minAmount=${minAmount},
-                        maxAmount=${maxAmount},
-                        fromDate=${fromDate},
-                        toDate=${toDate},
-                        displayDays=${displayDays})}">&raquo;</a>
+                            page=${currentPage + 1},
+                            orderId=${orderId},
+                            minAmount=${minAmount},
+                            maxAmount=${maxAmount},
+                            fromDate=${fromDate},
+                            toDate=${toDate},
+                            loaiHoaDon=${loaiHoaDon},
+                            displayDays=${displayDays})}">»</a>
                     </li>
                 </ul>
             </nav>
         </div>
     </div>
 
-    <!-- Modal Chi tiết đơn hàng - giữ nguyên -->
+    <!-- Modal Chi tiết đơn hàng -->
     <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content" id="modalContent">
@@ -505,71 +516,114 @@
         </div>
     </div>
 </div>
-</body>
+
 <th:block layout:fragment="bottom_link">
     <script>
         $(document).ready(function() {
-            // Xử lý khi nhấn nút xem chi tiết
             $(document).on('click', '.btn-view-details', function() {
                 var orderId = $(this).data('id');
-
-                // Load nội dung modal bằng AJAX
-                $('#modalContent').load('/admin/hoa-don/modal/' + orderId, function() {
+                // Add error handling for AJAX request
+                $('#modalContent').load('/admin/hoa-don/modal/' + orderId, function(response, status, xhr) {
+                    if (status == "error") {
+                        $('#modalContent').html("<div class='alert alert-danger'>Không thể tải chi tiết đơn hàng. Lỗi: " + xhr.status + " " + xhr.statusText + "</div>");
+                    }
                     $('#orderDetailsModal').modal('show');
                 });
             });
 
-            // Xử lý khi nhấn nút lọc
-            $('.filter-button').on('click', function() {
+            // Xử lý khi nhấn nút lọc trạng thái
+            $('.filter-button').on('click', function(e) {
+                e.preventDefault(); // Ngăn chuyển hướng ngay lập tức để xử lý logic trước
+
+                // Xóa class active từ tất cả nút
                 $('.filter-button').removeClass('active');
+                // Thêm class active cho nút được nhấn
                 $(this).addClass('active');
 
-                var status = $(this).text().trim();
-                if (status === 'Tất cả') {
+                // Lấy giá trị data-status từ nút được nhấn
+                var selectedStatus = $(this).data('status');
+
+                // Xóa class status-active từ tất cả trạng thái trong bảng
+                $('.status-badge').removeClass('status-active');
+
+                // Nếu chọn "Tất cả", không làm nổi bật trạng thái nào
+                if (selectedStatus === 'ALL') {
                     window.location.href = '/admin/hoa-don/index';
-                } else {
-                    window.location.href = '/admin/hoa-don/trangthai/' + status;
+                    return;
+                }
+
+                // Danh sách trạng thái tương ứng với từng nút lọc
+                var statusMap = {
+                    'CHO_XAC_NHAN': ['CHO_XAC_NHAN'],
+                    'XAC_NHAN,DANG_CHUAN_BI_HANG': ['XAC_NHAN', 'DANG_CHUAN_BI_HANG'],
+                    'CHO_LAY_HANG': ['CHO_LAY_HANG'],
+                    'LAY_HANG_THANH_CONG,DANG_VAN_CHUYEN,DANG_GIAO': ['LAY_HANG_THANH_CONG', 'DANG_VAN_CHUYEN', 'DANG_GIAO'],
+                    'GIAO_HANG_THANH_CONG,THANH_CONG': ['GIAO_HANG_THANH_CONG', 'THANH_CONG'],
+                    'DA_HUY': ['DA_HUY']
+                };
+
+                // Làm nổi bật các trạng thái tương ứng trong bảng
+                var statusesToHighlight = statusMap[selectedStatus] || [];
+                $('.status-badge').each(function() {
+                    var badgeText = $(this).text().trim();
+                    if (statusesToHighlight.includes(badgeText)) {
+                        $(this).addClass('status-active');
+                    }
+                });
+
+                // Chuyển hướng sau khi làm nổi bật
+                window.location.href = $(this).attr('href');
+            });
+
+            // Hiển thị trạng thái active cho nút lọc hiện tại khi tải trang
+            var currentPath = window.location.pathname;
+            $('.filter-button').each(function() {
+                var buttonHref = $(this).attr('href');
+                if (currentPath === buttonHref || (currentPath === '/admin/hoa-don/index' && $(this).data('status') === 'ALL')) {
+                    $(this).addClass('active');
+
+                    // Làm nổi bật trạng thái trong bảng khi tải trang
+                    var selectedStatus = $(this).data('status');
+                    var statusMap = {
+                        'CHO_XAC_NHAN': ['CHO_XAC_NHAN'],
+                        'XAC_NHAN,DANG_CHUAN_BI_HANG': ['XAC_NHAN', 'DANG_CHUAN_BI_HANG'],
+                        'CHO_LAY_HANG': ['CHO_LAY_HANG'],
+                        'LAY_HANG_THANH_CONG,DANG_VAN_CHUYEN,DANG_GIAO': ['LAY_HANG_THANH_CONG', 'DANG_VAN_CHUYEN', 'DANG_GIAO'],
+                        'GIAO_HANG_THANH_CONG,THANH_CONG': ['GIAO_HANG_THANH_CONG', 'THANH_CONG'],
+                        'DA_HUY': ['DA_HUY']
+                    };
+                    var statusesToHighlight = statusMap[selectedStatus] || [];
+                    $('.status-badge').each(function() {
+                        var badgeText = $(this).text().trim();
+                        if (statusesToHighlight.includes(badgeText)) {
+                            $(this).addClass('status-active');
+                        }
+                    });
                 }
             });
-            // Xử lý nút phân trang
+
+            // Các xử lý khác giữ nguyên
             $('.pagination .page-link').on('click', function() {
                 if ($(this).parent().hasClass('disabled')) {
                     return false;
                 }
             });
 
-            // Hiển thị trạng thái active cho nút lọc hiện tại
-            var currentStatus = window.location.pathname.split('/').pop();
-            $('.filter-button').each(function() {
-                var buttonText = $(this).text().trim();
-                if ((currentStatus === 'index' && buttonText === 'Tất cả') ||
-                    buttonText === decodeURIComponent(currentStatus)) {
-                    $(this).addClass('active');
-                }
-            });
-
-            // Xử lý hiển thị lọc ngày
             $('select[name="displayDays"]').on('change', function() {
                 if ($(this).val() !== "") {
-                    // Reset các trường tìm kiếm khác
                     $('input[name="orderId"]').val('');
                     $('input[name="minAmount"]').val('');
                     $('input[name="maxAmount"]').val('');
                     $('input[name="fromDate"]').val('');
                     $('input[name="toDate"]').val('');
-
-                    // Submit form
                     $(this).closest('form').submit();
                 }
             });
 
-// Format tiền tệ cho input
             $('input[name="minAmount"], input[name="maxAmount"]').on('input', function() {
-                // Chỉ cho phép nhập số
                 this.value = this.value.replace(/[^0-9]/g, '');
             });
 
-// Kiểm tra form trước khi submit
             $('.filter-container').on('submit', function(e) {
                 var minAmount = $('input[name="minAmount"]').val();
                 var maxAmount = $('input[name="maxAmount"]').val();

@@ -88,16 +88,31 @@
       font-size: 0.875rem;
       letter-spacing: 0.5px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      color: white; /* Đảm bảo chữ trắng cho tất cả trạng thái */
     }
 
     .status-waiting {
-      background-color: var(--warning-color);
-      color: #212529;
+      background-color: #FFA500; /* Cam - Chờ xác nhận */
+    }
+
+    .status-confirmed {
+      background-color: #3498DB; /* Xanh dương - Xác nhận/Đang chuẩn bị */
+    }
+
+    .status-pending-pickup {
+      background-color: #1ABC9C; /* Xanh ngọc - Chờ lấy hàng */
+    }
+
+    .status-delivering {
+      background-color: #9B59B6; /* Tím - Đang giao hàng */
     }
 
     .status-delivered {
-      background-color: var(--success-color);
-      color: white;
+      background-color: #2ECC71; /* Xanh lá - Hoàn tất */
+    }
+
+    .status-cancelled {
+      background-color: #E74C3C; /* Đỏ - Đã hủy */
     }
 
     .section-container {
@@ -377,7 +392,6 @@
       color: var(--danger-color);
       font-weight: 600;
     }
-
     .payment-method {
       display: inline-block;
       padding: 0.35rem 0.75rem;
@@ -525,14 +539,20 @@
 <body>
 <div th:fragment="modalContent" class="modal-content">
   <div class="modal-header">
-    <h5 class="modal-title" id="orderDetailsModalLabel">Chi tiết đơn hàng #<span th:text="${hoaDon.id}"></span></h5>
-    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng">&times;</button>
+    <h5 class="modal-title" id="orderDetailsModalLabel">Chi tiết hóa đơn #<span th:text="${hoaDon.maHoaDon}"></span></h5>
+    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Đóng">×</button>
   </div>
   <div class="modal-body">
     <!-- Trạng thái đơn hàng -->
     <div class="section-container">
       <h6 class="section-title">Trạng thái đơn hàng</h6>
-      <div class="status-badge" th:classappend="${hoaDon.trangThai == 'Đã giao hàng' ? 'status-delivered' : 'status-waiting'}">
+      <div class="status-badge" th:classappend="${
+                hoaDon.trangThai == 'CHO_XAC_NHAN' ? 'status-waiting' : (
+                hoaDon.trangThai == 'XAC_NHAN' || hoaDon.trangThai == 'DANG_CHUAN_BI_HANG' ? 'status-confirmed' : (
+                hoaDon.trangThai == 'CHO_LAY_HANG' ? 'status-pending-pickup' : (
+                hoaDon.trangThai == 'LAY_HANG_THANH_CONG' || hoaDon.trangThai == 'DANG_VAN_CHUYEN' || hoaDon.trangThai == 'DANG_GIAO' ? 'status-delivering' : (
+                hoaDon.trangThai == 'GIAO_HANG_THANH_CONG' || hoaDon.trangThai == 'THANH_CONG' ? 'status-delivered' :
+                'status-cancelled'))))}">
         <span th:text="${hoaDon.trangThai}"></span>
       </div>
     </div>
@@ -605,7 +625,6 @@
         </div>
       </div>
     </div>
-
     <!-- Tổng -->
     <div class="section-container">
       <h6 class="section-title">Thông tin thanh toán</h6>
@@ -637,8 +656,8 @@
   </div>
 
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-    <button type="button" class="btn btn-danger" th:if="${hoaDon.trangThai == 'Chờ xác nhận'}" th:onclick="'cancelOrder(' + ${hoaDon.id} + ')'">Hủy đơn hàng</button>
+    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+<!--    <button type="button" class="btn btn-danger" th:if="${hoaDon.trangThai == 'CHO_XAC_NHAN'}" th:onclick="'cancelOrder(' + ${hoaDon.id} + ')'">Hủy đơn hàng</button>-->
   </div>
 </div>
 </body>

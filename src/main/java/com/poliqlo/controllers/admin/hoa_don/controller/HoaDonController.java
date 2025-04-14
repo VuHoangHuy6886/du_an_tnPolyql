@@ -33,7 +33,7 @@ public class HoaDonController {
     @GetMapping("/index")
     public String showOrderHistory(
             @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "orderId", required = false) Integer orderId,
+            @RequestParam(value = "orderId", required = false) String orderId,
             @RequestParam(value = "minAmount", required = false) BigDecimal minAmount,
             @RequestParam(value = "maxAmount", required = false) BigDecimal maxAmount,
             @RequestParam(value = "fromDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd[ HH:mm:ss]") LocalDateTime fromDate,
@@ -182,7 +182,7 @@ public class HoaDonController {
 
     @GetMapping("/search")
     public String searchOrders(
-            @RequestParam(value = "orderId", required = false) Integer orderId,
+            @RequestParam(value = "orderId", required = false) String orderId,
             @RequestParam(value = "trangThai", required = false) String trangThai,
             @RequestParam(value = "minAmount", required = false) BigDecimal minAmount,
             @RequestParam(value = "maxAmount", required = false) BigDecimal maxAmount,
@@ -235,13 +235,33 @@ public class HoaDonController {
     public String showOrderHistoryByLoaiHoaDon(
             @PathVariable String loaiHoaDon,
             @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "orderId", required = false) String orderId,
+            @RequestParam(value = "minAmount", required = false) BigDecimal minAmount,
+            @RequestParam(value = "maxAmount", required = false) BigDecimal maxAmount,
+            @RequestParam(value = "fromDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd[ HH:mm:ss]") LocalDateTime fromDate,
+            @RequestParam(value = "toDate", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd[ HH:mm:ss]") LocalDateTime toDate,
+            @RequestParam(value = "displayDays", required = false) Integer displayDays,
             Model model) {
 
         Pageable pageable = PageRequest.of(page, PAGE_SIZE);
-        Page<HoaDon> hoaDonPage = hoaDonService.getOrdersByLoaiHoaDonPaged(loaiHoaDon, pageable);
+        Page<HoaDon> hoaDonPage;
 
+        if (displayDays != null && displayDays > 0) {
+            LocalDateTime fromDateFilter = LocalDate.now().minusDays(displayDays).atStartOfDay();
+            hoaDonPage = hoaDonService.searchOrders(null, null, loaiHoaDon, null, null, fromDateFilter, null, pageable);
+        } else {
+            hoaDonPage = hoaDonService.searchOrders(orderId, null, loaiHoaDon, minAmount, maxAmount, fromDate, toDate, pageable);
+        }
+
+        model.addAttribute("orderId", orderId);
+        model.addAttribute("minAmount", minAmount);
+        model.addAttribute("maxAmount", maxAmount);
+        model.addAttribute("fromDate", fromDate);
+        model.addAttribute("toDate", toDate);
+        model.addAttribute("displayDays", displayDays);
         model.addAttribute("loaiHoaDon", loaiHoaDon);
         addPaginationAttributes(model, hoaDonPage);
+
         return "/admin/hoa-don/index";
     }
 
