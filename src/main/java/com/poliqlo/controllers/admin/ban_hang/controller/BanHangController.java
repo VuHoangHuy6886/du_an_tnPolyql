@@ -10,10 +10,8 @@ import com.poliqlo.controllers.common.api.service.SanPhamAPIService;
 import com.poliqlo.controllers.common.auth.service.AuthService;
 import com.poliqlo.models.KhachHang;
 import com.poliqlo.models.LichSuHoaDon;
-import com.poliqlo.repositories.HoaDonRepository;
-import com.poliqlo.repositories.KhachHangRepository;
-import com.poliqlo.repositories.PhieuGiamGiaRepository;
-import com.poliqlo.repositories.SanPhamChiTietRepository;
+import com.poliqlo.models.ProductTemp;
+import com.poliqlo.repositories.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -45,23 +43,31 @@ public class BanHangController {
     private final SanPhamChiTietService sanPhamChiTietService;
     private final SanPhamAPIService sanPhamAPIService;
     private final AuthService authService;
-//    private final MaGiamGiaRepository maGiamGiaRepository;
-//    private final ImeiRepository imeiRepository;
-//    private final SanPhamChiTietRepository sanPhamChiTietRepository;
-//    private final KhachHangRepository khachHangRepository;
-//    private final SanPhamRepositoryImpl sanPhamRepositoryImpl;
-//    private final IBanHangService banHangService;
-//
-//    private static final Logger log = LoggerFactory.getLogger(SanPhamController.class);
-//    private final ModelMapper modelMapper;
-//    private final SanPhamRepository sanPhamRepository;
-//    private final ImageService imageService;
-//    private final AnhRepository anhRepository;
+    private final ProductTempRepository productTempRepository;
+
+    public static class ProductSyncRequest {
+        private Integer id;
+        private Integer qty;
+    }
 
     @GetMapping("/admin/sale")
     public String sale(Model model) {
         model.addAttribute("username", SecurityContextHolder.getContext().getAuthentication().getName());
         return "admin/ban-hang/ban-hang";
+    }
+    @PostMapping("/admin/sale/sync-product")
+    @ResponseBody
+    @Transactional
+    public ResponseEntity<?> sync(@RequestBody List<ProductTemp> request) {
+        try {
+            productTempRepository.clear();
+            productTempRepository.saveAll(request);
+
+
+            return ResponseEntity.ok("Sync product successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 
     @GetMapping("/admin/api/v1/sale/khach-hang")
@@ -131,12 +137,13 @@ public class BanHangController {
             newPggg.setSoLuong(newPggg.getSoLuong() - 1);
             phieuGiamGiaRepository.save(newPggg);
         }
+
         newHoaDon.setNgayNhanHang(LocalDateTime.now());
         var lshd = new LichSuHoaDon();
         lshd.setMoTa("Hóa đơn mua hàng tại quầy được xử lý bởi " + authService.getCurrentUsername().orElse("hệ thống"));
         lshd.setTieuDe("Hóa đơn mua hàng tại quầy");
         lshd.setThoiGian(LocalDateTime.now());
-
+        productTempRepository.deleteAllByIdInBatch(newHoaDon.getHoaDonChiTiets().stream().mapToInt(hdct->hdct.getSanPhamChiTiet().getId()).boxed().toList());
         newHoaDon.setLichSuHoaDons(List.of(lshd));
         newHoaDon.getHoaDonChiTiets().forEach((element) -> {
             var newSPCT = sanPhamChiTietRepository.findById(element.getSanPhamChiTiet().getId()).get();

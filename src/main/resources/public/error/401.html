@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{errorPage/error-layout}">
+<head>
+    <title>401 - Unauthorized</title>
+</head>
+<body>
+    <div layout:fragment="error-content">
+        <div class="error-code">401</div>
+        <h1 class="error-message">Unauthorized</h1>
+        <p class="error-description">
+            You need to be authenticated to access this resource.
+            Please log in to continue.
+        </p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="/login" class="back-button btn btn-primary">Login</a>
+            <a href="/" class="back-button btn btn-outline-primary">Back to Home</a>
+        </div>
+    </div>
+</body>
+</html> 

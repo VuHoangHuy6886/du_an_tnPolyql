@@ -30,7 +30,7 @@ public class SanPhamSearchRequest {
     private BigDecimal minPrice;
     private BigDecimal maxPrice;
     private Integer page=0;
-    private Integer pageSize;
+    private Integer pageSize=1000;
     private String orderBy = "id";
     private String sortDirection = "asc";
 }

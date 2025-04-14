@@ -25,6 +25,13 @@ public class AuthService {
         }
         return Optional.empty();
     }
+    public Optional<String> getCurrentRole() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
+            return ((TaiKhoan) authentication.getPrincipal()).getRole().describeConstable();
+        }
+        return Optional.empty();
+    }
 
     public Optional<TaiKhoan> getCurrentUserDetails() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

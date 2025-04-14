@@ -136,6 +136,8 @@ public class SanPhamAPIService {
                             .where(cb.equal(subRoot.get("sanPham"), root));
                     predicate = cb.and(predicate, cb.lessThanOrEqualTo(subquery, request.getMaxPrice()));
                 }
+                predicate = cb.and(predicate, cb.equal(root.get("trangThai"), "IN_STOCK"));
+                predicate = cb.and(predicate, cb.equal(root.get("isDeleted"), false));
 
                 return predicate;
             }

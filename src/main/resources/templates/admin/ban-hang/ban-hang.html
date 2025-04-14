@@ -391,6 +391,8 @@
                                    role="tab" aria-controls="httt-tien-mat" aria-selected="true">Tiền mặt</a>
                                 <a class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" href="#httt-chuyen-khoan"
                                    role="tab" aria-controls="httt-chuyen-khoan" aria-selected="false">Chuyển Khoản</a>
+                                <button class="nav-link" id="nav-vnpay" data-bs-toggle="tab" href="#httt-vnpay"
+                                   role="tab" form="vnpayForm" aria-controls="httt-vnpay" aria-selected="false">VN PAY</button>
                             </div>
                         </nav>
                         <div class="tab-content" id="hinhThucTTContent">
@@ -404,6 +406,20 @@
                             <div class="tab-pane qrcode-container fade" id="httt-chuyen-khoan" role="tabpanel"
                                  aria-labelledby="httt-chuyen-khoan-tab">
                                 <img class="qrcode" alt="">
+                            </div>
+                            <div class="tab-pane  fade" id="httt-vnpay"  role="tabpanel"
+                                 aria-labelledby="httt-vnpay">
+                                <div style="display: flex;flex-direction: column;align-items: center; padding: 10px">
+                                    <div id="vnpay_message" class="">Thanh toán thất bại</div>
+                                    <button  style="width: 250px" class="btn btn-primary show_tt" type="button" disabled>
+                                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                        Đang đợi thanh toán...
+                                    </button><br>
+                                    <button  style="width: 250px"  class="btn btn-primary" form="vnpayForm" type="submit">
+                                        Tới trang thanh toán
+                                    </button>
+
+                                </div>
                             </div>
 
                         </div>
@@ -424,6 +440,17 @@
                         tabindex="3071">Hoàn tất
                 </button>
             </div>
+        </form>
+        <form class="d-none" th:action="@{/submitOrder}" target="_blank" id="vnpayForm" method="post">
+            <div class="form-group">
+                <label for="amount">Số tiền:</label>
+                <input type="number" class="form-control" id="amount" name="amount" required>
+            </div>
+            <div class="form-group">
+                <label for="orderId">Thông tin đơn hàng:</label>
+                <input type="text" class="form-control" id="orderId" name="orderInfo" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Thanh toán</button>
         </form>
 
 

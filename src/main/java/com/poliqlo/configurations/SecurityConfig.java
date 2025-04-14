@@ -45,13 +45,13 @@ public class SecurityConfig {
     private static final String[] unAuthURL = { "/sign-in/**", "/sign-in", "/sign-up", "/error", "/logout", "/vendor/**","/...", "/js/**", "/css/**", "/fonts/**", "/iphone/**", "/img/**", "/api/v1/admin/data-list-add-san-pham/**", "/api/v2/san-pham/**", "/api/v2/**", "/iphone/**", "/client/**", "/img/**", "/api/v2/san-pham/**", "/unauth-home", "/verify-account", "/reset-otp"
     };
     private static final String[] customerURLs = {
-            "/cart/**"
+            "/cart/**", "/order/**", "/customer/**", "/unauth-home", "/verify-account", "/reset-otp"
     };
     private static final String[] employeeURLs = {
             "/admin/**"
     };
     private static final String[] adminOnlyUrls = {
-            "/admin/nhan-vien/**"
+            "/admin/nhan-vien/**","/admin"
     };
 
     private final TaiKhoanRepository taiKhoanRepository;
@@ -96,11 +96,13 @@ public class SecurityConfig {
                         .authenticationEntryPoint(authenticationEntryPoint())
                 )
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(unAuthURL).permitAll()
-                        .requestMatchers(customerURLs).hasRole("USER")
-                        .requestMatchers(employeeURLs).hasAnyRole("STAFF", "ADMIN")
+
                         .requestMatchers(adminOnlyUrls).hasRole("ADMIN")
+                        .requestMatchers(employeeURLs).hasAnyRole("EMPLOYEE", "ADMIN")
+                        .requestMatchers(customerURLs).hasRole("USER")
+                        .requestMatchers(unAuthURL).permitAll()
                         .anyRequest().authenticated()
+
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler((request, response, authentication) -> {

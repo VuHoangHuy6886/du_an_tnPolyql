@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title th:text="${title}">Error Page</title>
+    <style>
+        .error-container {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+        }
+        .error-content {
+            max-width: 600px;
+        }
+        .error-code {
+            font-size: 6rem;
+            font-weight: bold;
+            color: #dc3545;
+            margin-bottom: 1rem;
+        }
+        .error-message {
+            font-size: 1.5rem;
+            color: #6c757d;
+            margin-bottom: 2rem;
+        }
+        .error-description {
+            color: #6c757d;
+            margin-bottom: 2rem;
+        }
+        .back-button {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 0.25rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .back-button:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="error-container">
+            <div class="error-content">
+                <div layout:fragment="error-content">
+                    <!-- Error content will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

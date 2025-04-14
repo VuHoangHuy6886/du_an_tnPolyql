@@ -1,0 +1,21 @@
+<!DOCTYPE html >
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+</head>
+<body>
+
+</body>
+<script th:inline="javascript">
+    let payment = {orderId:[[${orderId}]],
+    totalPrice : [[${totalPrice}]],
+    paymentTime : [[${paymentTime}]],
+    transactionId : [[${transactionId}]],
+    paymentStatus : [[${paymentStatus}]]}
+
+    localStorage.setItem('payment_handler', JSON.stringify(payment));
+    window.close()
+    console.log(payment);
+</script>
+</html>

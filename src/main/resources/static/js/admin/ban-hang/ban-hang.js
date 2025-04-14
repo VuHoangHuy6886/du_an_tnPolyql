@@ -264,7 +264,6 @@ $(document).ready(()=>{
     $.get('/api/san-pham')
         .done((data) => {
             fillDataToTableSanPham(data)
-
         })
 
 
@@ -1628,7 +1627,7 @@ function loadToOffcanvas(idSp) {
         currentProduct=sanPham
         sanPham.sanPhamChiTiets.forEach(spct=>{
             updateDSSPDC();
-            spct.soLuong=spct.soLuong-(danhSachSanPhamDaThem.get(spct.id+"")||0)
+            spct.soLuong=spct.soLuong
             _mapProductDetail.set(spct.id+"",spct)
         })
         $('#sp-add-to-cartLabel').text(sanPham.ten)
@@ -1769,6 +1768,8 @@ function loadInvoice() {
         let soLuong = parseInt($(this).closest('tr').find(':nth-child(4)').text());
         danhSachSanPhamDaThem.set(spctId, danhSachSanPhamDaThem.get(spctId) - soLuong)
         this.closest('tr').remove();
+        syncProduct()
+
     })
 
 }
@@ -1786,6 +1787,8 @@ function updateDSSPDC() {
             danhSachSanPhamDaThem.set(detail.sanPhamChiTietId, detail.soLuong);
         })
     })
+    syncProduct()
+
 }
 
 function removeFromCart(spctId, soLuongThem, tenSanPham) {
@@ -1794,6 +1797,7 @@ function removeFromCart(spctId, soLuongThem, tenSanPham) {
     if (danhSachSanPhamDaThem.get(spctId)) {
         danhSachSanPhamDaThem.set(spctId, (danhSachSanPhamDaThem.get(spctId) + soLuongThem));
     }
+    syncProduct()
 
     _mapProductDetail.get(spctId).soLuong -= soLuongThem;
 
@@ -1831,6 +1835,7 @@ function addToCart(spctId, soLuongThem, tenSanPham) {
     } else {
         danhSachSanPhamDaThem.set(spctId, soLuongThem);
     }
+    syncProduct()
 
     _mapProductDetail.get(spctId).soLuong -= soLuongThem;
 
@@ -2132,14 +2137,42 @@ function addToCartByBarCode(barcode){
     document.getElementById('barcodeInput').value="";
 }
 
+var orderId;
+window.addEventListener('storage', (event) => {
+    if (event.key === 'payment_handler') {
+        let paymentResult=JSON.parse(localStorage.getItem("payment_handler"));
+        console.log(paymentResult);
+        if(paymentResult.orderId==orderId){
+            if(paymentResult.paymentStatus==1){
+                $('#invalidCheck').prop('checked', true);
+                $('#form-check-out-step-2').trigger("submit");
+            }else{
+                $('#invalidCheck').prop('checked', false);
+                $('#vnpay_message').html('Thanh toán thất bại')
+                $('.show_tt').addClass('d-none');
 
+            }
+
+        }
+    }
+});
+$(document).ready(() => {
+    $('#vnpayForm').on('submit', function (e) {
+        $('.show_tt').removeClass('d-none');
+    })
+})
 function updateBillStep2(soTienThanhToan,soTienGiam){
+    $('.show_tt').addClass('d-none');
     totalPrice=soTienThanhToan;
     maGiamGiaGiam=soTienGiam?soTienGiam:0;
     const stk="XUNGCONGQUY";
     const tenTaiKhoan="NGUYEN%20BA%20CHUC";
     const noiDung="ABCXYZ";
     let imgSrc;
+    $('#amount').val(totalPrice)
+    orderId=new Date().getTime()
+    $('#orderId').val(orderId)
+
     if(soTienGiam){
        imgSrc=`https://img.vietqr.io/image/tpbank-${stk}-compact2.jpg?amount=${soTienThanhToan-soTienGiam}&addInfo=${noiDung}&accountName=${tenTaiKhoan}`;
         $('#httt-tien-mat > span > span:nth-child(1)').text("Tổng hóa đơn: "+toCurrency(soTienThanhToan))
@@ -2154,6 +2187,9 @@ function updateBillStep2(soTienThanhToan,soTienGiam){
 
     }
     $('.qrcode').attr('src',imgSrc)
+    $('#vnpay_message').html('')
+    $('#invalidCheck').prop('checked', false);
+    $('#nav-home-tab').trigger('click')
 }
 
 function checkDuplicate(form,selector){
@@ -2178,6 +2214,7 @@ $(document).ready(()=>{
 
     $('#form-check-out').off();
     $('#form-check-out').on('submit', function (event) {
+
         event.preventDefault();
         let form=$(this);
         if (!form[0].checkValidity()) {
@@ -2358,5 +2395,24 @@ function removeVietnameseAccents(str) {
     return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
         .replace(/đ/g, "d").replace(/Đ/g, "D");
 }
+let timeout;
+const syncProduct=()=>{
+    console.log(danhSachSanPhamDaThem)
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+        $.ajax({
+            url: '/admin/sale/sync-product',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(Array.from(danhSachSanPhamDaThem, ([key, value]) => ({ id: key, quantity: value }))||[]),
+            success: function(response) {
+                console.log(response);
+            },
+            error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+            }
+        });
+    }, 1000)
 
-
+ };
+syncProduct();

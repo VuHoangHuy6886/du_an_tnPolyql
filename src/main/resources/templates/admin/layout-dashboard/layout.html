@@ -50,7 +50,7 @@
         <hr class="sidebar-divider my-0">
 
         <!-- Nav Item - Dashboard -->
-        <li class="nav-item active">
+        <li class="nav-item active" th:if="${@authService.getCurrentRole().orElse('ROLE_USER').equals('ROLE_ADMIN')}">
             <a class="nav-link" href="/admin">
                 <i class="fas fa-fw fa-tachometer-alt"></i>
                 <span>Thống kê</span></a>
@@ -124,7 +124,7 @@
         </div>
 
         <!-- Nav Item - Pages Collapse Menu -->
-        <li class="nav-item">
+        <li class="nav-item" th:if="${@authService.getCurrentRole().orElse('ROLE_USER').equals('ROLE_ADMIN')} ">
             <a class="nav-link" href="/admin/nhan-vien/list">
                 <i class="fa-solid fa-user"></i>
                 <span>Nhân viên</span></a>
